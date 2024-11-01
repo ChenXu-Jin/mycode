@@ -20,7 +20,7 @@ def preprocess(db_id: str, args: argparse.Namespace):
                 verbose=args.verbose)
     logging.info(f"LSH for {db_id} created.")
 
-if __name__ == "__main___":
+if __name__ == "__main__":
     args_parser = argparse.ArgumentParser()
     args_parser.add_argument('--db_root_directory', type=str, required=True, help="Root directory of the databases")
     args_parser.add_argument('--signature_size', type=int, default=20, help="Size of the MinHash signature")
