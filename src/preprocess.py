@@ -3,6 +3,7 @@ import logging
 import argparse
 import multiprocessing
 from dotenv import load_dotenv
+from database_utils.preprocess import make_db_lsh
 
 load_dotenv(override=True)
 PROCESS_WORKERS = 1
@@ -10,7 +11,14 @@ PROCESS_WORKERS = 1
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def preprocess(db_id: str, args: argparse.Namespace):
-    pass
+    db_directory_path = f"{args.db_root_directory}/{db_id}"
+    logging.info(f"Creating LSH for {db_id}")
+    make_db_lsh(db_directory_path, 
+                signature_size=args.signature_size, 
+                n_gram=args.n_gram, 
+                threshold=args.threshold,
+                verbose=args.verbose)
+    logging.info(f"LSH for {db_id} created.")
 
 if __name__ == "__main___":
     args_parser = argparse.ArgumentParser()
