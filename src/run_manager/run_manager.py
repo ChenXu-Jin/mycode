@@ -4,3 +4,4 @@ from pathlib import Path
 from multiprocessing import Pool
 from run_manager.logger import Logger
 from run_manager.task import Task
+from run_manager.statistics_manager import StatisticsManager
