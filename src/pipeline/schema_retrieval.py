@@ -1,6 +1,7 @@
 import logging
 import difflib
 import numpy as np
+import concurrent.futures
 from llm.llm_models import async_llm_chain_call
 from pipeline.utils import node_decorator
 from pipeline.pipeline_manager import PipelineManager
@@ -41,10 +42,19 @@ def get_keywords_from_question(question: str, hint: str):
 def entity_retrieval(keywords: List[str], question: str, hint: str) -> Dict:
     logging.info("Starting entity retrieval")
     result = {}
-    
+    similar_columns = get_similar_columns(keywords=keywords, question=question, hint=hint)
+    result["similar_columns"] = similar_columns
+
+    return result
 
 def get_similar_columns(keywords: List[str], question: str, hint: str) -> Dict[str, List[str]]:
-    pass
+    logging.info("Retrieving similar columns")
+    selected_columns = {}
+    for keyword in keywords:
+        similar_columns = get_similar_column_names(keyword=keyword, question=question, hint=hint)
+        for table_name, column_name in similar_columns:
+            selected_columns.setdefault(table_name, []).append(column_name)
+    return selected_columns
 
 def get_similar_column_names(keyword: str, question: str, hint: str) -> List[Tuple[str, str]]:
     keyword = keyword.strip()
@@ -103,3 +113,82 @@ def get_semantic_similarity_with_openai(target_string: str, list_of_similar_word
     all_embeddings = EMBEDDING_FUNCTION.embed_documents(list_of_similar_words)
     similarities = [np.dot(target_string_embedding, embedding) for embedding in all_embeddings]
     return similarities
+
+def get_similar_entities(keywords: List[str]) -> Dict[str, Dict[str, List[str]]]:
+    logging.info("Retrieving similar entities")
+    selected_values = {}
+
+    def get_similar_values_target_string(target_string: str):
+        unique_similar_values = DatabaseManager().query_lsh(keyword=target_string, signature_size=100, top_n=10)
+        return target_string, get_similar_entities_to_keyword(target_string, unique_similar_values)
+
+    for keyword in keywords:
+        keyword = keyword.strip()
+        to_search_values = [keyword]
+        if (" " in keyword) and ("=" not in keyword):
+            for i in range(len(keyword)):
+                if keyword[i] == " ":
+                    first_part = keyword[:i]
+                    second_part = keyword[i+1:]
+                    if first_part not in to_search_values:
+                        to_search_values.append(first_part)
+                    if second_part not in to_search_values:
+                        to_search_values.append(second_part)
+        
+        to_search_values.sort(key=len, reverse=True)
+        hint_column, hint_value = divided_by_equal_sign(keyword)
+        if hint_value:
+            to_search_values = [hint_value, *to_search_values]
+        
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = {executor.submit(get_similar_values_target_string, ts): ts for ts in to_search_values}
+            for future in concurrent.futures.as_completed(futures):
+                target_string, similar_values = future.result()
+                print(similar_values)
+                for table_name, column_values in similar_values.items():
+                    for column_name, entities in column_values.items():
+                        if entities:
+                            selected_values.setdefault(table_name, {}).setdefault(column_name, []).extend(
+                                [(ts, value, edit_distance, embedding) for ts, value, edit_distance, embedding in entities]
+                            )
+
+    for table_name, column_values in selected_values.items():
+        for column_name, values in column_values.items():
+            max_edit_distance = max(values, key=lambda x: x[2])[2]
+            selected_values[table_name][column_name] = list(set(
+                value for _, value, edit_distance, _ in values if edit_distance == max_edit_distance
+            ))
+    return selected_values
+
+def get_similar_entities_to_keyword(keyword: str, unique_values: Dict[str, Dict[str, List[str]]]) -> Dict[str, Dict[str, List[Tuple[str, str, float, float]]]]:
+    return {
+        table_name: {
+            column_name: get_similar_values(keyword, values)
+            for column_name, values in column_values.items()
+        }
+        for table_name, column_values in unique_values.items()
+    }
+
+def get_similar_values(target_string: str, values: List[str]) -> List[Tuple[str, str, float, float]]:
+    edit_distance_threshold = 0.3
+    top_k_edit_distance = 5
+    embedding_similarity_threshold = 0.6
+    top_k_embedding = 1
+
+    edit_distance_similar_values = [
+        (value, difflib.SequenceMatcher(None, value.lower(), target_string.lower()).ratio())
+        for value in values
+        if difflib.SequenceMatcher(None, value.lower(), target_string.lower()).ratio() >= edit_distance_threshold
+    ]
+    edit_distance_similar_values.sort(key=lambda x: x[1], reverse=True)
+    edit_distance_similar_values = edit_distance_similar_values[:top_k_edit_distance]
+
+    similarities = get_semantic_similarity_with_openai(target_string, [value for value, _ in edit_distance_similar_values])
+    embedding_similar_values = [
+        (target_string, edit_distance_similar_values[i][0], edit_distance_similar_values[i][1], similarities[i])
+        for i in range(len(edit_distance_similar_values))
+        if similarities[i] >= embedding_similarity_threshold
+    ]
+    embedding_similar_values.sort(key=lambda x: x[2], reverse=True)
+
+    return embedding_similar_values[:top_k_embedding]
