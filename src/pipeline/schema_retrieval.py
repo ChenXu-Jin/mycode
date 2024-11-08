@@ -39,14 +39,20 @@ def get_keywords_from_question(question: str, hint: str):
     
     return keywords
 
-def entity_retrieval(keywords: List[str], question: str, hint: str) -> Dict:
+def entity_retrieval(keywords: List[str], question: str, hint: str) -> Dict[str, Any]:
     logging.info("Starting entity retrieval")
     result = {}
     similar_columns = get_similar_columns(keywords=keywords, question=question, hint=hint)
-    result["similar_columns"] = similar_columns
+    similar_entities = get_similar_entities(keywords=keywords)
+    result = {
+        "similar_columns": similar_columns,
+        "similar_entities": similar_entities
+    }
 
     return result
-
+'''
+retrieving similar columns for keywords
+'''
 def get_similar_columns(keywords: List[str], question: str, hint: str) -> Dict[str, List[str]]:
     logging.info("Retrieving similar columns")
     selected_columns = {}
@@ -113,7 +119,9 @@ def get_semantic_similarity_with_openai(target_string: str, list_of_similar_word
     all_embeddings = EMBEDDING_FUNCTION.embed_documents(list_of_similar_words)
     similarities = [np.dot(target_string_embedding, embedding) for embedding in all_embeddings]
     return similarities
-
+'''
+retrieving similar entities for keywords
+'''
 def get_similar_entities(keywords: List[str]) -> Dict[str, Dict[str, List[str]]]:
     logging.info("Retrieving similar entities")
     selected_values = {}
