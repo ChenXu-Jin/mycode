@@ -1,6 +1,7 @@
 import json
 import argparse
 from datetime import datetime
+from run_manager.run_manager import RunManager
 from typing import Dict, List, Any
 
 def args_parse() -> argparse.Namespace:
@@ -23,6 +24,11 @@ def load_dataset(data_path: str) -> List[Dict[str, Any]]:
 def main():
     args = args_parse()
     dataset = load_dataset(args.data_path)
+    
+    runner = RunManager(args)
+    runner.initialize_tasks(dataset)
+    runner.run_tasks()
+    runner.generate_sql_files()
 
 if __name__ == '__main__':
     main()
