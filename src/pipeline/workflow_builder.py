@@ -2,6 +2,8 @@ import logging
 from langgraph.graph import END, StateGraph
 from typing import Dict, TypedDict, Callable
 
+from pipeline.keyword_extraction import keyword_extraction
+
 class GraphState(TypedDict):
     keys: Dict[str, any]
 

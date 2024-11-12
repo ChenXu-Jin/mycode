@@ -8,7 +8,7 @@ TEMPLATES_ROOT_PATH = "templates"
 
 def get_llm_prompt(template_name: str, schema_string: str=None) -> ChatPromptTemplate:
     template_configs = {
-        "get_keywords_from_question": {"input_variables": ["HINT", "QUESTION"]},
+        "keyword_extraction": {"input_variables": ["HINT", "QUESTION"]},
     }
 
     if template_name not in template_configs:
@@ -34,7 +34,7 @@ def get_llm_prompt(template_name: str, schema_string: str=None) -> ChatPromptTem
     return combined_prompt_template
 
 def load_template(template_name: str) -> str:
-    file_name = f"template_{template_name}.txt"
+    file_name = f"{template_name}.txt"
     template_path = os.path.join(TEMPLATES_ROOT_PATH, file_name)
     
     try:

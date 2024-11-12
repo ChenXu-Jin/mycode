@@ -1,6 +1,6 @@
 data_mode='dev'
 data_path='/root/data/dev/small_dev.json'
-pipeline_nodes='schema_retrieval'
+pipeline_nodes='keyword_extraction'
 
 ########## engines ##########
 engine1='gpt-3.5-turbo-0125'
@@ -9,7 +9,7 @@ entity_retrieval_mode='ask_model'
 
 ### pipeline nodes setup ###
 pipeline_setup='{
-    "schema_retrieval": {
+    "keyword_extraction": {
         "engine": "'${engine1}'",
         "temperature": 0.2,
         "base_uri": ""

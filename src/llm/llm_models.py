@@ -34,7 +34,7 @@ def async_llm_chain_call(engine, prompt, parser, request_list: List[Dict[str, An
     with ThreadPoolExecutor(max_workers=len(request_list)*sampling_count) as executor:
         for request_id, request_kwargs in enumerate(request_list):
             for _ in range(sampling_count):
-                executor.submit(threading_llm_call, request_id, prompt, engine, parser, request_kwargs, step, result_queue, log_file_lock)
+                executor.submit(threading_llm_call, request_id, engine, prompt, parser, request_kwargs, step, result_queue, log_file_lock)
                 time.sleep(0.2)
     
     results = []
@@ -53,7 +53,7 @@ def threading_llm_call(request_id: int, engine, prompt, parser, request_kwargs: 
         logging.error(f"Exception in thread with request: {request_kwargs}\n{e}")
         result_queue.put((request_id, None)) 
 
-def call_llm_chain(engine: Any, prompt: Any, parser: Any, request_kwargs: Dict[str, Any], step: int, log_file_lock: threading.Lock, max_attempts: int=12, backoff_base: int=2, jitter_max: int=60) -> Any:
+def call_llm_chain(engine: Any, prompt: Any, parser: Any, request_kwargs: Dict[str, Any], step: int, log_file_lock: threading.Lock, max_attempts: int=2, backoff_base: int=2, jitter_max: int=60) -> Any:
     logger = Logger()
     for attempt in range(max_attempts):
         try:

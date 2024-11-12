@@ -1,0 +1,7 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "status": "error",
+        "error": "<class 'TypeError'>: <argument of type 'NoneType' is not iterable>"
+    }
+]

@@ -8,7 +8,7 @@ class PythonListOutputParser(BaseOutputParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
     
-    def parser(self, output: str) -> Any:
+    def parse(self, output: str) -> Any:
         logging.debug(f"Parsing output with PythonListOutputParser: {output}")
         if "```python" in output:
             output = output.split("```python")[1].split("```")[0]
@@ -17,7 +17,7 @@ class PythonListOutputParser(BaseOutputParser):
 
 def get_llm_parser(parser_name: str):
     parser_configs = {
-        "get_keywords_from_question": PythonListOutputParser
+        "keyword_extraction": PythonListOutputParser
     }
 
     if parser_name not in parser_configs:
