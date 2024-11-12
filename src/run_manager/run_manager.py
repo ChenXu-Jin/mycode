@@ -61,7 +61,7 @@ class RunManager:
     def worker(self, task: Task) -> Tuple[Any, str, int]:
         database_manager = DatabaseManager(db_mode=self.args.data_mode, db_id=task.db_id)
         logger = Logger(db_id=task.db_id, question_id=task.question_id, result_directory=self.result_directory)
-        logger._set_log_level(self.args.log_level)
+        logger.set_log_level(self.args.log_level)
         logger.log(f"Processing task: {task.db_id} {task.question_id}", "info")
         pipeline_manager = PipelineManager(json.loads(self.args.pipeline_setup))
         try:
@@ -73,6 +73,7 @@ class RunManager:
                 continue
             return state['__end__'], task.db_id, task.question_id
         except Exception as e:
+            print("error")
             logger.log(f"Error processing task: {task.db_id} {task.question_id}\n{e}", "error")
             return None, task.db_id, task.question_id
     
@@ -113,3 +114,9 @@ class RunManager:
         for key, value in sqls.items():
             with open(os.path.join(self.result_directory, f"-{key}.json"), 'w') as f:
                 json.dump(value, f, indent=4)
+    
+    def load_checkpoint(self, db_id, question_id) -> Dict[str, List[str]]:
+        tentative_schema = DatabaseManager().get_db_schema()
+        execution_history = []
+
+        return tentative_schema, execution_history

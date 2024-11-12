@@ -24,7 +24,7 @@ def load_dataset(data_path: str) -> List[Dict[str, Any]]:
 def main():
     args = args_parse()
     dataset = load_dataset(args.data_path)
-    
+
     runner = RunManager(args)
     runner.initialize_tasks(dataset)
     runner.run_tasks()

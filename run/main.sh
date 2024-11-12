@@ -9,12 +9,10 @@ entity_retrieval_mode='ask_model'
 
 ### pipeline nodes setup ###
 pipeline_setup='{
-    "get_keywords_from_question": {
+    "schema_retrieval": {
         "engine": "'${engine1}'",
         "temperature": 0.2,
-    },
-    "entity_retrieval": {
-        "mode": "'${entity_retrieval_mode}'"
+        "base_uri": ""
     }
 }'
 

@@ -11,12 +11,14 @@ from typing import Dict, List, Any, Tuple, Optional
 
 EMBEDDING_FUNCTION = OpenAIEmbeddings(model="text-embedding-3-small")
 
-@node_decorator()
+@node_decorator(check_schema_status=False)
 def schema_retrieval(task: Any) -> Dict[str, List[str]]:
     question = task.question
     hint = task.evidence
     keywords = get_keywords_from_question(question=question, hint=hint)
-    entities = entity_retrieval(keywords=keywords, question=question, hint=hint)
+    print(keywords)
+    
+    return keywords
 
 def get_keywords_from_question(question: str, hint: str):
     request_kwargs = {

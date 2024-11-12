@@ -21,12 +21,12 @@ class PipelineManager:
     
     def _init(self, pipeline_setup: Dict[str, Any]):
         self.schema_retrieval = pipeline_setup.get("schema_retrieval", {})
-        self.sql_generation = pipeline_setup.get("sql_generation", {})
     
     def get_engine_prompt_parser(self, **kwargs: Any) -> Tuple[Any, Any, Any]:
         frame = inspect.currentframe()
         caller_frame = frame.f_back
         node_name = caller_frame.f_code.co_name
+        print(node_name)
         node_setup = self.pipeline_setup.get(node_name, {})
         try:
             engine_name = node_setup["engine"]
