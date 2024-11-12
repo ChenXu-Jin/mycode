@@ -73,7 +73,6 @@ class RunManager:
                 continue
             return state['__end__'], task.db_id, task.question_id
         except Exception as e:
-            print("error")
             logger.log(f"Error processing task: {task.db_id} {task.question_id}\n{e}", "error")
             return None, task.db_id, task.question_id
     

@@ -44,7 +44,7 @@ def _jaccard_similarity(x: MinHash, y: MinHash) -> float:
 def get_db_schema(db_path: str) -> Dict[str, List[str]]:
     try:
         table_names = get_tables_from_db(db_path)
-        return {table_name: get_columns_from_table(db_path, table_name) for table_name in table_names}
+        return {table_name: get_columns_from_table(table_name, db_path) for table_name in table_names}
     except Exception as e:
         logging.error(f"Error in get_db_schema: {e}")
         raise e
