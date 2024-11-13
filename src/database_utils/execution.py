@@ -7,10 +7,7 @@ def execute_sql(db_path: str, sql: str, fetch: Union[str, int] = "all") -> Any:
     try:
         with sqlite3.connect(db_path) as conn:
             cursor = conn.cursor()
-            if cursor:
-                print("cursor is ready")
             cursor.execute(sql)
-            print("execute is complete")
             if fetch == "all":
                 return cursor.fetchall()
             elif fetch == "one":
