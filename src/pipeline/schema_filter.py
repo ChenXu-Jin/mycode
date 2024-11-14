@@ -1,18 +1,41 @@
+import difflib
 from pipeline.utils import node_decorator, get_last_node_result
 from database_utils.database_manager import DatabaseManager
 from typing import Dict, List, Any
 
+FILTER_THRESHOLD = 0.5
+
 @node_decorator(check_schema_status=False)
 def schema_filter(task: Any, tentative_schema: Dict[str, Any], execution_history: Dict[str, Any]) -> Dict[str, Any]:
     keywords = get_last_node_result(execution_history, "keyword_extraction")
-    question = task.question
-    hint = task.evidence
     for keyword in keywords:
-        potential_column_names = keyword_decomposition(keyword, question, hint)
-    
-    all_schema = DatabaseManager().get_db_schema()
+        potential_column_names = keyword_decomposition(keyword, task.question, task.evidence)
+        all_schema = DatabaseManager().get_db_schema()
+        relevant_schema = irrelevant_schema_filter(all_schema, potential_column_names)
 
+    return
+
+def irrelevant_schema_filter(schema: Dict[str, List[str]], potential_column_names: List[str]) -> Dict[str, List[str]]:
     result = {}
+    for table_name, columns in schema.items():
+        relevant_columns = []
+        for column in columns:
+            save_column = False
+            for potential_column_name in potential_column_names:
+                potential_column_name = potential_column_name.replace(" ", "").replace("_", "").rstrip("s")
+                column = column.replace(" ", "").replace("_", "").rstrip("s")
+                match_result = difflib.SequenceMatcher(None, column, potential_column_name).ratio()
+                if match_result > FILTER_THRESHOLD:
+                    save_column = True
+            if save_column:
+                relevant_columns.append(column)
+        result[table_name] = relevant_columns
+    
+    return result
+
+def update_tentative_schema(tentative_schema: Dict[str, List[str]], relevant_schema: Dict[str, List[str]]) -> None:
+    for table_name, columns in relevant_schema.items():
+        
 
 def divied_by_equal_sign(keyword: str) -> str:
     if "=" in keyword:

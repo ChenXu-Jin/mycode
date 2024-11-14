@@ -1,6 +1,8 @@
 data_mode='dev'
 data_path='/root/data/dev/small_dev.json'
-pipeline_nodes='keyword_extraction'
+
+#all nodes: keyword_extraction schema_filter sql_generation
+pipeline_nodes='keyword_extraction+schema_filter'
 
 ########## engines ##########
 engine1='gpt-3.5-turbo-0125'
