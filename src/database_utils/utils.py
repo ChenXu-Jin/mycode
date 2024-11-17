@@ -1,10 +1,11 @@
 import logging
 import pickle
+import re
 from pathlib import Path
 from datasketch import MinHash, MinHashLSH
 from database_utils.preprocess import _create_minhash
 from database_utils.execution import execute_sql
-from typing import Dict, List, Tuple
+from typing import Dict, List, Any, Tuple
 
 #==================== Queries the LSH for similar values ====================#
 def query_lsh(lsh:MinHashLSH, minhashes:Dict[str, Tuple[MinHash, str, str, str]], keyword: str, signature_size:int=20, n_gram:int=3, top_n:int=10) -> Dict[str, Dict[str, List[str]]]:
@@ -40,7 +41,7 @@ def load_db_lsh(db_directory_path: str) -> Tuple[MinHashLSH, Dict[str, Tuple[Min
 def _jaccard_similarity(x: MinHash, y: MinHash) -> float:
     return x.jaccard(y)
 
-#==================== Retrieves the schema of the database ====================#
+#=================== Retrieves the schema of the database ===================#
 def get_db_schema(db_path: str) -> Dict[str, List[str]]:
     try:
         table_names = get_tables_from_db(db_path)
@@ -64,3 +65,52 @@ def get_columns_from_table(table_name: str, db_path: str) -> List[str]:
     except Exception as e:
         logging.error(f"Error in get_table_all_columns: {e}\nTable: {table_name}")
         raise e
+    
+#===================== Generate database schema string ======================#
+def get_database_schema_string(tentative_schema: Dict[str, Any], db_path: str) -> str:
+    all_schema = get_db_schema(db_path=db_path)
+    original_schema_string = get_original_schema_string(schema=all_schema, db_path=db_path)
+
+    filtered_ddl = {}
+    for table_name, allowed_columns in tentative_schema.items():
+        original_ddl = original_schema_string.get(table_name)
+        if original_ddl:
+            filtered_ddl[table_name] = _filter_column_definitions(original_ddl, allowed_columns)
+    
+    return "\n\n".join(filtered_ddl.values())
+
+def get_original_schema_string(schema: Dict[str, List[str]], db_path: str) -> Dict[str, str]:
+    original_schema_string = {}
+    for table_name in schema.keys():
+        table_schema_string = execute_sql(db_path=db_path,
+                                          sql=f"SELECT sql FROM sqlite_master WHERE type='table' AND name='{table_name}';",
+                                          fetch="one")
+        original_schema_string[table_name] = table_schema_string
+    
+    return original_schema_string
+
+def _filter_column_definitions(ddl: str, allowed_columns: List[str]) -> str:
+    create_table_match = re.match(r'CREATE TABLE "?`?([\w -]+)`?"?\s*\((.*)\)', ddl, re.DOTALL)
+    if not create_table_match:
+        return ddl
+    
+    table_name = create_table_match.group(1).strip()
+    column_definitions = create_table_match.group(2).strip()
+    filtered_columns = []
+
+    for column_def in re.split(r',\s*(?![^()]*\))', column_definitions):
+        column_def = column_def.strip()
+        if column_def.startswith('`'):
+            column_name = column_def.split('`')[1]
+        elif column_def.startswith('"'):
+            column_name = column_def.split('"')[1]
+        else:
+            column_name = column_def.split(' ')[0]
+
+        if column_name in allowed_columns or any(
+            keyword in column_def.lower() for keyword in ["primary key", "foreign key", "unique"]
+        ):
+            filtered_columns.append(column_def)
+    
+    new_column_definitions = ",\n  ".join(filtered_columns)
+    return f"CREATE TABLE {table_name} (\n  {new_column_definitions}\n);"
