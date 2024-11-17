@@ -12,8 +12,10 @@ def schema_filter(task: Any, tentative_schema: Dict[str, Any], execution_history
         potential_column_names = keyword_decomposition(keyword, task.question, task.evidence)
         all_schema = DatabaseManager().get_db_schema()
         relevant_schema = irrelevant_schema_filter(all_schema, potential_column_names)
+        update_tentative_schema(tentative_schema, relevant_schema)
 
-    return
+    result = {"tentative_schema", tentative_schema}
+    return result
 
 def irrelevant_schema_filter(schema: Dict[str, List[str]], potential_column_names: List[str]) -> Dict[str, List[str]]:
     result = {}
@@ -35,7 +37,13 @@ def irrelevant_schema_filter(schema: Dict[str, List[str]], potential_column_name
 
 def update_tentative_schema(tentative_schema: Dict[str, List[str]], relevant_schema: Dict[str, List[str]]) -> None:
     for table_name, columns in relevant_schema.items():
-        
+        target_table_name = next((t for t in tentative_schema.keys() if t.lower() == table_name.lower()), None)
+        if target_table_name:
+            for column in columns:
+                if column.lower() not in [c.lower() for c in tentative_schema[target_table_name]]:
+                    tentative_schema[target_table_name].append(column)
+        else:
+            tentative_schema[table_name] = columns
 
 def divied_by_equal_sign(keyword: str) -> str:
     if "=" in keyword:
