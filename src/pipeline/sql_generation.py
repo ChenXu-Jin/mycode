@@ -19,4 +19,10 @@ def sql_generation(task: Any, tentative_schema: Dict[str, Any], execution_histor
     logging.info("Initiating asynchronous LLM chain call for keyword extraction")
     sampling_count = PipelineManager().sql_generation.get("sampling_count", 1)
     response = async_llm_chain_call(engine=engine, prompt=prompt, parser=parser, request_list=[request_kwargs], step="sql_generate", sampling_count=sampling_count)[0]
-    
+
+    sqls = [res["SQL"] for res in response]
+    sql = DatabaseManager().aggregate_sqls(sqls)
+    result = next(res for res in response if res["SQL"] == sql)
+
+    logging.info("sql generation complete")
+    return result

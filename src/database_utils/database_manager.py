@@ -4,7 +4,7 @@ from threading import Lock
 from pathlib import Path
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
-from database_utils.execution import execute_sql
+from database_utils.execution import execute_sql, aggregate_sqls
 from database_utils.utils import query_lsh, get_db_schema, get_database_schema_string
 from typing import Dict, List, Any, Callable
 
@@ -82,6 +82,7 @@ class DatabaseManager:
 functions_to_add = [
     execute_sql,
     get_db_schema,
-    get_database_schema_string
+    get_database_schema_string,
+    aggregate_sqls
 ]
 DatabaseManager.add_methods_to_class(functions_to_add)

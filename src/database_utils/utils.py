@@ -67,7 +67,7 @@ def get_columns_from_table(table_name: str, db_path: str) -> List[str]:
         raise e
     
 #===================== Generate database schema string ======================#
-def get_database_schema_string(tentative_schema: Dict[str, Any], db_path: str) -> str:
+def get_database_schema_string(db_path: str, tentative_schema: Dict[str, Any], ) -> str:
     all_schema = get_db_schema(db_path=db_path)
     original_schema_string = get_original_schema_string(schema=all_schema, db_path=db_path)
 
