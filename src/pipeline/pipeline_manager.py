@@ -21,6 +21,7 @@ class PipelineManager:
     
     def _init(self, pipeline_setup: Dict[str, Any]):
         self.keyword_extraction = pipeline_setup.get("keyword_extraction", {})
+        self.schema_filter = pipeline_setup.get("schema_filter", {})
         self.sql_generation = pipeline_setup.get("sql_generation", {})
     
     def get_engine_prompt_parser(self, **kwargs: Any) -> Tuple[Any, Any, Any]:

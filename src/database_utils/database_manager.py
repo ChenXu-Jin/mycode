@@ -5,7 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from database_utils.execution import execute_sql
-from database_utils.utils import query_lsh, get_db_schema
+from database_utils.utils import query_lsh, get_db_schema, get_database_schema_string
 from typing import Dict, List, Any, Callable
 
 load_dotenv(override=True)
@@ -81,6 +81,7 @@ class DatabaseManager:
 
 functions_to_add = [
     execute_sql,
-    get_db_schema
+    get_db_schema,
+    get_database_schema_string
 ]
 DatabaseManager.add_methods_to_class(functions_to_add)
