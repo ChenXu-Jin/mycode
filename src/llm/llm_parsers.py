@@ -2,6 +2,8 @@ import logging
 import json
 import re
 from langchain_core.output_parsers.base import BaseOutputParser
+from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.pydantic_v1 import BaseModel, Field
 from typing import Dict, List, Any
 
 class PythonListOutputParser(BaseOutputParser):
@@ -15,9 +17,14 @@ class PythonListOutputParser(BaseOutputParser):
         output = re.sub(r"^\s+", "", output)
         return eval(output)
 
+class SQLGenerationOutputParser(BaseModel):
+    chain_of_thought_reasoning: str = Field(description="One line explanation of why or why not the column information is relevant to the question and the hint.")
+    is_column_information_relevant: str = Field(description="Yes or No")
+
 def get_llm_parser(parser_name: str):
     parser_configs = {
-        "keyword_extraction": PythonListOutputParser
+        "keyword_extraction": PythonListOutputParser,
+        "sql_generation": lambda: JsonOutputParser(pydantic_object=SQLGenerationOutputParser)
     }
 
     if parser_name not in parser_configs:

@@ -9,6 +9,7 @@ TEMPLATES_ROOT_PATH = "templates"
 def get_llm_prompt(template_name: str, schema_string: str=None) -> ChatPromptTemplate:
     template_configs = {
         "keyword_extraction": {"input_variables": ["HINT", "QUESTION"]},
+        "sql_generation": {"input_variables": ["HINT", "QUESTION"], "partial_variables": {"DATABASE_SCHEMA": schema_string}}
     }
 
     if template_name not in template_configs:
