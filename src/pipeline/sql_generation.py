@@ -6,7 +6,7 @@ from pipeline.pipeline_manager import PipelineManager
 from typing import Dict, List, Any
 
 @node_decorator(check_schema_status=False)
-def sql_generation(task: Any, tentative_schema: Dict[str, Any], execution_history: Dict[str, Any]):
+def sql_generation(task: Any, tentative_schema: Dict[str, Any], execution_history: Dict[str, Any]) -> Dict[str, Any]:
     request_kwargs = {
         "QUESTION": task.question,
         "HINT": task.evidence
