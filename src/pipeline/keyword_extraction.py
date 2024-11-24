@@ -23,6 +23,7 @@ def keyword_extraction(task: Any, tentative_schema: Dict[str, Any], execution_hi
         sampling_count=1
     )[0]
     keywords = response[0]
-    print(keywords)
+    result = {"keywords": keywords}
+    logging.info(f"Keywords extracted: {keywords}")
     
-    return keywords
+    return result

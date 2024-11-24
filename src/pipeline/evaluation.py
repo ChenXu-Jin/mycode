@@ -10,7 +10,7 @@ def evaluation(task: Any, tentative_schema: Dict[str, Any], execution_history: D
     gold_sql = task.SQL
     pred_and_revision_sql = {
         "sql_generation": get_last_node_result(execution_history, "sql_generation"),
-
+        
     }
     result = {}
 

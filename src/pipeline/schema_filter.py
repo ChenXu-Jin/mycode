@@ -1,4 +1,5 @@
 import difflib
+import logging
 from pipeline.utils import node_decorator, get_last_node_result
 from database_utils.database_manager import DatabaseManager
 from typing import Dict, List, Any
@@ -7,9 +8,10 @@ FILTER_THRESHOLD = 0.5
 
 @node_decorator(check_schema_status=False)
 def schema_filter(task: Any, tentative_schema: Dict[str, Any], execution_history: Dict[str, Any]) -> Dict[str, Any]:
-    keywords = get_last_node_result(execution_history, "keyword_extraction")
+    logging.info("Start schema filting")
+    keywords = get_last_node_result(execution_history, "keyword_extraction")["keywords"]
     for keyword in keywords:
-        potential_column_names = keyword_decomposition(keyword, task.question, task.evidence)
+        potential_column_names = keyword_decomposition(keyword)
         all_schema = DatabaseManager().get_db_schema()
         relevant_schema = irrelevant_schema_filter(all_schema, potential_column_names)
         update_tentative_schema(tentative_schema, relevant_schema)
