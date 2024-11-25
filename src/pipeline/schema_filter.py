@@ -6,7 +6,7 @@ from typing import Dict, List, Any
 
 FILTER_THRESHOLD = 0.5
 
-@node_decorator(check_schema_status=False)
+@node_decorator(check_schema_status=True)
 def schema_filter(task: Any, tentative_schema: Dict[str, Any], execution_history: Dict[str, Any]) -> Dict[str, Any]:
     logging.info("Start schema filting")
     keywords = get_last_node_result(execution_history, "keyword_extraction")["keywords"]
@@ -16,7 +16,9 @@ def schema_filter(task: Any, tentative_schema: Dict[str, Any], execution_history
         relevant_schema = irrelevant_schema_filter(all_schema, potential_column_names)
         update_tentative_schema(tentative_schema, relevant_schema)
 
-    result = {"tentative_schema", tentative_schema}
+    result = {"tentative_schema": tentative_schema}
+    logging.info("schema filter finish")
+
     return result
 
 def irrelevant_schema_filter(schema: Dict[str, List[str]], potential_column_names: List[str]) -> Dict[str, List[str]]:

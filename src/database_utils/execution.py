@@ -37,7 +37,7 @@ def aggregate_sqls(db_path: str, sqls: List[str]) -> str:
     aggregate_result = {}
 
     for result in results:
-        if result['STATUS'] == 'OK':
+        if result['STATUS'] == 'CORRECT':
             key = frozenset(tuple(row) for row in result['RESULT'])
             if key in aggregate_result:
                 aggregate_result[key].append(result['SQL'])

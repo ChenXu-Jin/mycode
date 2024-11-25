@@ -21,7 +21,7 @@ def evaluation(task: Any, tentative_schema: Dict[str, Any], execution_history: D
         try:
             if node_result["status"] == "success":
                 pred_sql = node_result["SQL"]
-                response = DatabaseManager().evaluation_sql(pred_sql, gold_sql)
+                response = DatabaseManager().evaluate_sql(pred_sql, gold_sql)
 
                 evaluation_result.update({
                     "result": response["result"],

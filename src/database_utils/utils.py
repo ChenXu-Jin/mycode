@@ -5,7 +5,9 @@ from pathlib import Path
 from datasketch import MinHash, MinHashLSH
 from database_utils.preprocess import _create_minhash
 from database_utils.execution import execute_sql
-from typing import Dict, List, Any, Tuple
+from sqlglot.optimizer.qualify import qualify, exp
+from sqlglot import parse_one
+from typing import Dict, List, Any, Tuple, Optional
 
 #==================== Queries the LSH for similar values ====================#
 def query_lsh(lsh:MinHashLSH, minhashes:Dict[str, Tuple[MinHash, str, str, str]], keyword: str, signature_size:int=20, n_gram:int=3, top_n:int=10) -> Dict[str, Dict[str, List[str]]]:
@@ -82,9 +84,10 @@ def get_database_schema_string(db_path: str, tentative_schema: Dict[str, Any], )
 def get_original_schema_string(schema: Dict[str, List[str]], db_path: str) -> Dict[str, str]:
     original_schema_string = {}
     for table_name in schema.keys():
-        table_schema_string = execute_sql(db_path=db_path,
+        result = execute_sql(db_path=db_path,
                                           sql=f"SELECT sql FROM sqlite_master WHERE type='table' AND name='{table_name}';",
                                           fetch="one")
+        table_schema_string = result[0] if isinstance(result, tuple) else result
         original_schema_string[table_name] = table_schema_string
     
     return original_schema_string
@@ -114,3 +117,49 @@ def _filter_column_definitions(ddl: str, allowed_columns: List[str]) -> str:
     
     new_column_definitions = ",\n  ".join(filtered_columns)
     return f"CREATE TABLE {table_name} (\n  {new_column_definitions}\n);"
+
+#===================== retrieval columns throught sql =======================#
+def get_sql_columns_dict(db_path: str, sql: str) -> Dict[str, List[str]]:
+    sql = qualify(parse_one(sql, read='sqlite'), qualify_columns=True, validate_qualify_columns=False) if isinstance(sql, str) else sql
+    columns_dict = {}
+
+    sub_queries = [subq for subq in sql.find_all(exp.Subquery) if subq != sql]
+    for sub_query in sub_queries:
+        subq_columns_dict = get_sql_columns_dict(db_path, sub_query)
+        for table, columns in subq_columns_dict.items():
+            if table not in columns_dict:
+                columns_dict[table] = columns
+            else:
+                columns_dict[table].extend([col for col in columns if col.lower() not in [c.lower() for c in columns_dict[table]]])
+
+    for column in sql.find_all(exp.Column):
+        column_name = column.name
+        table_alias = column.table
+        table = _get_table_with_alias(sql, table_alias) if table_alias else None
+        table_name = table.name if table else None
+
+        if not table_name:
+            candidate_tables = [t for t in sql.find_all(exp.Table) if _get_main_parent(t) == _get_main_parent(column)]
+            for candidate_table in candidate_tables:
+                table_columns = get_columns_from_table(db_path, candidate_table.name)
+                if column_name.lower() in [col.lower() for col in table_columns]:
+                    table_name = candidate_table.name
+                    break
+
+        if table_name:
+            if table_name not in columns_dict:
+                columns_dict[table_name] = []
+            if column_name.lower() not in [c.lower() for c in columns_dict[table_name]]:
+                columns_dict[table_name].append(column_name)
+
+    return columns_dict
+
+def _get_table_with_alias(parsed_sql: exp.Expression, alias: str) -> Optional[exp.Table]:
+    return next((table for table in parsed_sql.find_all(exp.Table) if table.alias == alias), None)
+
+def _get_main_parent(expression: exp.Expression) -> Optional[exp.Expression]:
+    parent = expression.parent
+    while parent and not isinstance(parent, exp.Subquery):
+        parent = parent.parent
+    return parent
+

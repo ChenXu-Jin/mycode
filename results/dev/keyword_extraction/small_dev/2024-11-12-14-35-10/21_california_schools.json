@@ -1,7 +1,0 @@
-[
-    {
-        "node_type": "keyword_extraction",
-        "status": "error",
-        "error": "<class 'ValueError'>: <dictionary update sequence element #0 has length 11; 2 is required>"
-    }
-]

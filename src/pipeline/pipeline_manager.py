@@ -43,6 +43,9 @@ class PipelineManager:
             if engine_name == "finetuned_nl2sql":
                 template_name = "finetuned_candidate_generation"
                 parser_name = "finetuned_candidate_generation"
+            else:
+                template_name = node_name
+                parser_name = node_name
         else:
             template_name = node_name
             parser_name = node_name
