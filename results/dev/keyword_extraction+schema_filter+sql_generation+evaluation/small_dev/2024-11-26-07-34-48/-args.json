@@ -4,5 +4,5 @@
     "pipeline_nodes": "keyword_extraction+schema_filter+sql_generation+evaluation",
     "pipeline_setup": "{\n    \"keyword_extraction\": {\n        \"engine\": \"gpt-3.5-turbo\",\n        \"temperature\": 0.2,\n        \"base_uri\": \"\"\n    },\n    \"schema_filter\": {\n        \"mode\": \"ask_model\"\n    },\n    \"sql_generation\": {\n        \"engine\": \"gpt-4o-mini\",\n        \"temperature\": 0,\n        \"base_uri\": \"\",\n        \"sampling_count\": 1\n    }\n}",
     "log_level": "warning",
-    "run_start_time": "2024-11-25-08-36-58"
+    "run_start_time": "2024-11-26-07-34-48"
 }

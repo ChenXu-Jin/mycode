@@ -46,8 +46,8 @@ class StatisticsManager:
             json.dump(self.statistics.to_dict(), f, indent=4)
     
     def update_stats(self, db_id: str, question_id: str, evaluation_for: str, result: Dict[str, Any]):
-        exec_res = result["exec_res"]
-        exec_err = result["exec_err"]
+        exec_res = result["result"]
+        exec_err = result["error"]
         self.statistics.total[evaluation_for] = self.statistics.total.get(evaluation_for, 0) + 1
 
         if exec_res == 1:

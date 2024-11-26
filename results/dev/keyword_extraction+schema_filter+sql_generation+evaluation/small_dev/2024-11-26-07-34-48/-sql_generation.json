@@ -1,0 +1,3 @@
+{
+    "21": "SELECT COUNT(*) FROM frpm T1 WHERE T1.`County Name` = 'Los Angeles' AND T1.`Free Meal Count (K-12)` > 500 AND T1.`FRPM Count (K-12)` < 700;"
+}
