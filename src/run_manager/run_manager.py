@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 from pathlib import Path
 from multiprocessing import Pool
 from run_manager.logger import Logger
@@ -77,6 +78,7 @@ class RunManager:
             return None, task.db_id, task.question_id
     
     def task_done(self, log: Tuple[Any, str, int]):
+        logging.info("One task is finished,start statistic")
         state, db_id, question_id = log
         if state is None:
             return
@@ -96,6 +98,7 @@ class RunManager:
         print(f"[{'=' * progress_length}>{' ' * (bar_length - progress_length)}] {self.processed_tasks}/{self.total_number_of_tasks}")
     
     def generate_sql_files(self):
+        logging.info("generating sql files for one task")
         sqls = {}
         for file in os.listdir(self.result_directory):
             if file.endswith(".json") and "_" in file:
