@@ -28,6 +28,12 @@ pipeline_setup='{
         "base_uri": "",
         "sampling_count": 1
     }
+    "self_reflexion: {
+        "engine": "'${engine3}'",
+        "temperature": 0,
+        "base_uri": "",
+        "sampling_count": 1
+    }"
 }'
 
 echo "run start"

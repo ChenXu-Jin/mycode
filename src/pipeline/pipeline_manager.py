@@ -23,6 +23,7 @@ class PipelineManager:
         self.keyword_extraction = pipeline_setup.get("keyword_extraction", {})
         self.schema_filter = pipeline_setup.get("schema_filter", {})
         self.sql_generation = pipeline_setup.get("sql_generation", {})
+        self.self_reflexion = pipeline_setup.get("self_reflexion", {})
     
     def get_engine_prompt_parser(self, **kwargs: Any) -> Tuple[Any, Any, Any]:
         frame = inspect.currentframe()

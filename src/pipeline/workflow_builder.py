@@ -5,6 +5,7 @@ from typing import Dict, TypedDict, Callable
 from pipeline.keyword_extraction import keyword_extraction
 from pipeline.schema_filter import schema_filter
 from pipeline.sql_generation import sql_generation
+from pipeline.self_reflexion import self_reflexion
 from pipeline.evaluation import evaluation
 
 class GraphState(TypedDict):
