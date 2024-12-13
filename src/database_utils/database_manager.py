@@ -3,8 +3,7 @@ import pickle
 from threading import Lock
 from pathlib import Path
 from dotenv import load_dotenv
-from langchain_chroma import Chroma
-from database_utils.execution import execute_sql, aggregate_sqls, evaluate_sql
+from database_utils.execution import *
 from database_utils.utils import query_lsh, get_db_schema, get_database_schema_string, get_sql_columns_dict
 from typing import Dict, List, Any, Callable
 
@@ -85,6 +84,7 @@ functions_to_add = [
     get_database_schema_string,
     aggregate_sqls,
     evaluate_sql,
-    get_sql_columns_dict
+    get_sql_columns_dict,
+    get_sql_result
 ]
 DatabaseManager.add_methods_to_class(functions_to_add)

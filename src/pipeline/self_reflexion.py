@@ -1,4 +1,6 @@
 import logging
+from sqlglot import parse_one
+from sqlglot.expressions import Expression
 from llm.llm_models import async_llm_chain_call
 from database_utils.database_manager import DatabaseManager
 from pipeline.pipeline_manager import PipelineManager
@@ -15,7 +17,7 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
         raise ValueError("The initial SQL generaion is not yet complete, self-reflexion cannot begin")
     
     actor = Actor(task=task, tentative_schema=tentative_schema)
-    evaluator = Evaluator(task=task)
+    evaluator = Evaluator(task=task, current_sql=first_time_sql)
     self_reflection = SelfReflection(task=task)
 
     actor.short_term_mems.append(first_time_sql)
@@ -57,19 +59,109 @@ class Actor:
         return result
 
 class Evaluator:
-    def __init__(self, task) -> None:
+    def __init__(self, task: Any, current_sql: str) -> None:
         self.is_pass = False
         self.task = task
-    
-    def execute_current_sql(self, current_sql: str) -> Any:
-        current_sql_result = DatabaseManager().execute_sql(sql=current_sql, fetch="one")
-        return current_sql_result
+        self.sql = current_sql
     
     def evaluate(self) -> Any:
-        logging.info(f"Actor start working for task: {self.task.question_id}")
+        logging.info(f"Evaluator start working for task: {self.task.question_id}")
+        sql_skeleton_schema = self.extract_sql_skeleton_and_schema()
+
+        request_kwargs = {
+            "QUESTION": self.task.question,
+            "SQL": self.sql,
+            "skeleton": sql_skeleton_schema["skeleton"],
+            "tables": sql_skeleton_schema["tables"],
+            "columns": sql_skeleton_schema["columns"],
+            "conditions": sql_skeleton_schema["conditions"]
+        }
+
+        engine, prompt, parser = PipelineManager().get_engine_prompt_parser()
+        sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
+        response = async_llm_chain_call(
+            engine=engine, 
+            prompt=prompt, 
+            parser=parser, 
+            request_list=[request_kwargs], 
+            step="evaluator_generate_result", 
+            sampling_count=sampling_count
+            )[0]
+
+        result = response[0]
+        return result
+
+    def execute_current_sql(self) -> Any:
+        try:
+            current_sql_result = DatabaseManager().execute_sql(sql=self.sql, fetch="one")
+            return {"result": current_sql_result, "STATS": "CORRECT"}
+        except Exception as e:
+            logging.info(f"Error in reflecting sql: {self.sql}")
+            return {"result": str(e), "STATS": "ERROR"}
+    
+    def extract_sql_skeleton_and_schema(self) -> Dict[str, Any]:
+        """
+        Parses a SQL query to extract its skeleton and schema-related elements.
+
+        Args:
+            sql (str): The SQL query to parse.
+
+        Returns:
+            dict: A dictionary containing the SQL skeleton and schema elements.
+                Example:
+                {
+                    "skeleton": "SELECT col FROM table WHERE col = ?",
+                    "tables": ["table"],
+                    "columns": ["col"],
+                    "conditions": ["col = ?"]
+                }
+        """
+        # Parse SQL into an abstract syntax tree (AST)
+        parsed = parse_one(self.sql)
+    
+        skeleton_parts = []
+        tables = set()
+        columns = set()
+        conditions = []
+
+        # Helper to recursively traverse the AST
+        def traverse_expression(expr: Expression):
+            if expr is None:
+                return
+
+            if expr.is_type("Identifier") and expr.parent and expr.parent.is_type("Table"):
+                tables.add(expr.name)
+            elif expr.is_type("Column"):
+                columns.add(expr.name)
+            elif expr.is_type("Condition"):
+                # Simplify condition with placeholders
+                condition_str = str(expr).replace(str(expr.args.get("this")), "?")
+                conditions.append(condition_str)
+
+            # General skeleton builder
+            if expr.is_type("Literal"):
+                skeleton_parts.append("?")
+            else:
+                skeleton_parts.append(expr.sql(dialect="sqlite"))
+
+            for child in expr.args.values():
+                traverse_expression(child)
+
+            # Traverse the AST
+        traverse_expression(parsed)
+
+            # Generate SQL skeleton
+        skeleton = " ".join(skeleton_parts)
+
+        return {
+            "skeleton": skeleton,
+            "tables": list(tables),
+            "columns": list(columns),
+            "conditions": conditions,
+        }
 
 class SelfReflection:
-    def __init__(self, task) -> None:
+    def __init__(self, task: Any) -> None:
         self.long_term_mems = []
         self.task = task
     
