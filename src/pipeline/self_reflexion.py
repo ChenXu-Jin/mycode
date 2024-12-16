@@ -22,10 +22,10 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
     Returns:
         str: Final SQL query that passes evaluation.
     """
-    logging.info(f"LLM self reflexion start for question: {task.quesiton_id}")
+    logging.info(f"LLM self reflexion start for question: {task.question_id}")
     first_time_sql = get_last_node_result(execution_history, "sql_generation")
     if first_time_sql is None:
-        raise ValueError("The initial SQL generaion is not yet complete, self-reflexion cannot begin")
+        raise ValueError(f"Initial SQL generation is incomplete for task {task.question_id}. Self-reflexion cannot begin.")
     
     actor = Actor(task=task, tentative_schema=tentative_schema)
     evaluator = Evaluator(task=task, current_sql=first_time_sql)
@@ -33,8 +33,7 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
 
     current_sql = first_time_sql
     iteration_count = 0
-    max_iterations = 5
-    while iteration_count < max_iterations:
+    while iteration_count < MAX_REFLEXION_TIMES:
         iteration_count += 1
         logging.info(f"Iteration {iteration_count}: Evaluating SQL")
 
@@ -48,15 +47,18 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
         execute_result = evaluator.execute_current_sql()
         self_reflection.generate_feedback_mems(execute_result, evaluation_result, current_sql)
         long_term_mems = self_reflection.get_long_term_memory()
+        if not long_term_mems:
+            logging.warning(f"Long-term memory is empty at task {task.question_id} iteration {iteration_count}.")
 
         logging.info("Generating new SQL using actor.")
         actor.short_term_mems.append(current_sql)
-        current_sql = actor.actor_generate_sql(long_term_mems)
+        actor.check_mems_length()
 
+        current_sql = actor.actor_generate_sql(long_term_mems)
         evaluator.sql = current_sql
     
     logging.error("Max iterations reached. Could not generate a valid SQL query.")
-    return current_sql
+    return "error"
 
 class Actor:
     def __init__(self, task: Any, tentative_schema: Dict[str, Any]) -> None:
@@ -85,6 +87,10 @@ class Actor:
         logging.info("Actor's work complete")
 
         return result
+    
+    def check_mems_length(self, max_mems_length: int = 5) -> None:
+        if len(self.short_term_mems) > max_mems_length:
+            self.short_term_mems.pop(0)
 
 class Evaluator:
     def __init__(self, task: Any, current_sql: str) -> None:
