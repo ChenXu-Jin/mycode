@@ -11,6 +11,17 @@ MAX_REFLEXION_TIMES = 5
 
 @node_decorator(check_schema_status=False)
 def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_history: Dict[str, Any]) -> str:
+    """
+    Self-reflection loop for SQL generation and evaluation.
+
+    Args:
+        task (Any): Task containing details like question and metadata.
+        tentative_schema (Dict[str, Any]): Schema details for SQL generation.
+        execution_history (Dict[str, Any]): Execution history, including generated SQL.
+
+    Returns:
+        str: Final SQL query that passes evaluation.
+    """
     logging.info(f"LLM self reflexion start for question: {task.quesiton_id}")
     first_time_sql = get_last_node_result(execution_history, "sql_generation")
     if first_time_sql is None:
@@ -20,15 +31,32 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
     evaluator = Evaluator(task=task, current_sql=first_time_sql)
     self_reflection = SelfReflection(task=task)
 
-    actor.short_term_mems.append(first_time_sql)
+    current_sql = first_time_sql
+    iteration_count = 0
+    max_iterations = 5
+    while iteration_count < max_iterations:
+        iteration_count += 1
+        logging.info(f"Iteration {iteration_count}: Evaluating SQL")
 
+        evaluation_result = evaluator.evaluate()
 
-    for round in range(MAX_REFLEXION_TIMES):
-        logging.info(f"Reflexion round: {round}")
+        if evaluation_result["stats"] == "success":
+            logging.info("SQL passed evaluation")
+            return current_sql
+        
+        logging.info("SQL failed evaluation. Generating feedback.")
+        execute_result = evaluator.execute_current_sql()
+        self_reflection.generate_feedback_mems(execute_result, evaluation_result, current_sql)
         long_term_mems = self_reflection.get_long_term_memory()
 
-        sql = actor.actor_generate_sql(long_term_mems)
-        assert isinstance(sql, str)
+        logging.info("Generating new SQL using actor.")
+        actor.short_term_mems.append(current_sql)
+        current_sql = actor.actor_generate_sql(long_term_mems)
+
+        evaluator.sql = current_sql
+    
+    logging.error("Max iterations reached. Could not generate a valid SQL query.")
+    return current_sql
 
 class Actor:
     def __init__(self, task: Any, tentative_schema: Dict[str, Any]) -> None:
@@ -64,7 +92,7 @@ class Evaluator:
         self.task = task
         self.sql = current_sql
     
-    def evaluate(self) -> Any:
+    def evaluate(self) -> Dict[str, Any]:
         logging.info(f"Evaluator start working for task: {self.task.question_id}")
         sql_skeleton_schema = self.extract_sql_skeleton_and_schema()
 
@@ -157,7 +185,7 @@ class Evaluator:
             "skeleton": skeleton,
             "tables": list(tables),
             "columns": list(columns),
-            "conditions": conditions,
+            "conditions": conditions
         }
 
 class SelfReflection:
@@ -165,11 +193,22 @@ class SelfReflection:
         self.long_term_mems = []
         self.task = task
     
-    def generate_feedback_mems():
-        pass
+    def generate_feedback_mems(self, execute_result: Dict[str, Any], evaluate_result: Dict[str, Any], sql: str):
+        logging.info(f"SelfReflection start working for task: {self.task.question_id}")
 
-    def set_long_term_memory(self, long_term_mem_item: str):
-        self.long_term_mems.append(long_term_mem_item)
+        request_kwargs = {
+            "QUESTION": self.task.question,
+            "SQL": sql,
+            "execute_result": execute_result,
+            "evaluate_result": evaluate_result
+        }
+
+        engine, prompt, parser = PipelineManager().get_engine_prompt_parser()
+        sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
+        response = async_llm_chain_call(engine=engine, prompt=prompt, parser=parser, request_list=[request_kwargs], step="Generate feedbacks", sampling_count=sampling_count)
+
+        feedback = response["feedback"]
+        self.long_term_mems.append(feedback)
     
     def get_long_term_memory(self) -> List[str]:
         return self.long_term_mems

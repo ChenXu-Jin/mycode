@@ -27,7 +27,7 @@ def get_llm_chain(engine: str, temperature: float=0, base_uri: str=None) -> Any:
         llm_chain = model
     return llm_chain
 
-def async_llm_chain_call(engine, prompt, parser, request_list: List[Dict[str, Any]], step: int, sampling_count: int) -> List[List[Any]]:
+def async_llm_chain_call(engine, prompt, parser, request_list: List[Dict[str, Any]], step: str, sampling_count: int) -> List[List[Any]]:
     result_queue = queue.Queue()
     log_file_lock = threading.Lock()
 
@@ -45,7 +45,7 @@ def async_llm_chain_call(engine, prompt, parser, request_list: List[Dict[str, An
     grouped_results = [sorted_results[i * sampling_count: (i + 1) * sampling_count] for i in range(len(request_list))]
     return grouped_results
 
-def threading_llm_call(request_id: int, engine, prompt, parser, request_kwargs: Dict[str, Any], step: int, result_queue: queue.Queue, log_file_lock: threading.Lock) -> None:
+def threading_llm_call(request_id: int, engine, prompt, parser, request_kwargs: Dict[str, Any], step: str, result_queue: queue.Queue, log_file_lock: threading.Lock) -> None:
     try:
         result = call_llm_chain(engine, prompt, parser, request_kwargs, step, log_file_lock)
         result_queue.put((request_id, result))
@@ -53,7 +53,7 @@ def threading_llm_call(request_id: int, engine, prompt, parser, request_kwargs: 
         logging.error(f"Exception in thread with request: {request_kwargs}\n{e}")
         result_queue.put((request_id, None)) 
 
-def call_llm_chain(engine: Any, prompt: Any, parser: Any, request_kwargs: Dict[str, Any], step: int, log_file_lock: threading.Lock, max_attempts: int=2, backoff_base: int=2, jitter_max: int=60) -> Any:
+def call_llm_chain(engine: Any, prompt: Any, parser: Any, request_kwargs: Dict[str, Any], step: str, log_file_lock: threading.Lock, max_attempts: int=2, backoff_base: int=2, jitter_max: int=60) -> Any:
     logger = Logger()
     for attempt in range(max_attempts):
         try:
