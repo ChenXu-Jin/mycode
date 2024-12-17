@@ -66,7 +66,7 @@ class Actor:
         self.task = task
         self.tentative_schema = tentative_schema
     
-    def actor_generate_sql(self, long_term_mems):
+    def actor_generate_sql(self, long_term_mems) -> str:
         logging.info(f"Actor start working for task: {self.task.question_id}")
         request_kwargs = {
             "QUESTION": self.task.question,
@@ -75,18 +75,26 @@ class Actor:
             "SHORT_TERM_MEMORY": self.short_term_mems
         }
 
-        db_schema_string = DatabaseManager().get_database_schema_string(self.tentative_schema)
-        engine, prompt, parser = PipelineManager().get_engine_prompt_parser(schema_string=db_schema_string)
-        sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
-        response = async_llm_chain_call(engine=engine, prompt=prompt, parser=parser, request_list=[request_kwargs], step="actor_generate_sql", sampling_count=sampling_count)
+        try:
+            db_schema_string = DatabaseManager().get_database_schema_string(self.tentative_schema)
+            engine, prompt, parser = PipelineManager().get_engine_prompt_parser(schema_string=db_schema_string)
+            sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
+            response = async_llm_chain_call(engine=engine, prompt=prompt, parser=parser, request_list=[request_kwargs], step="actor_generate_sql", sampling_count=sampling_count)
 
-        sqls = [res["SQL"] for res in response]
-        sql = DatabaseManager().aggregate_sqls(sqls)
-        result = next(res for res in response if res["SQL"] == sql)
-        self.short_term_mems.append(result)
-        logging.info("Actor's work complete")
+            sqls = [res["SQL"] for res in response]
+            sql = DatabaseManager().aggregate_sqls(sqls)
 
-        return result
+            result = next(res for res in response if res["SQL"] == sql)
+            if result is None:
+                raise ValueError("No valid SQL found in the response.")
+
+            self.short_term_mems.append(result)
+            logging.info("Actor's work complete")
+
+            return result
+        except Exception as e:
+            logging.error(f"Failed to generate SQL for task {self.task.question_id}: {e}")
+            raise RuntimeError(f"Actor failed to generate SQL for task {self.task.question_id}.") from e
     
     def check_mems_length(self, max_mems_length: int = 5) -> None:
         if len(self.short_term_mems) > max_mems_length:
@@ -121,8 +129,11 @@ class Evaluator:
             step="evaluator_generate_result", 
             sampling_count=sampling_count
             )[0]
-
+        
+        if not response or not isinstance(response[0], dict):
+            raise ValueError("Invalid response format from async_llm_chain_call.")
         result = response[0]
+        
         return result
 
     def execute_current_sql(self) -> Any:
@@ -130,7 +141,7 @@ class Evaluator:
             current_sql_result = DatabaseManager().execute_sql(sql=self.sql, fetch="one")
             return {"result": current_sql_result, "STATS": "CORRECT"}
         except Exception as e:
-            logging.info(f"Error in reflecting sql: {self.sql}")
+            logging.error(f"Error executing SQL '{self.sql}': {e}")
             return {"result": str(e), "STATS": "ERROR"}
     
     def extract_sql_skeleton_and_schema(self) -> Dict[str, Any]:
@@ -199,7 +210,7 @@ class SelfReflection:
         self.long_term_mems = []
         self.task = task
     
-    def generate_feedback_mems(self, execute_result: Dict[str, Any], evaluate_result: Dict[str, Any], sql: str):
+    def generate_feedback_mems(self, execute_result: Dict[str, Any], evaluate_result: Dict[str, Any], sql: str) -> None:
         logging.info(f"SelfReflection start working for task: {self.task.question_id}")
 
         request_kwargs = {
@@ -211,10 +222,26 @@ class SelfReflection:
 
         engine, prompt, parser = PipelineManager().get_engine_prompt_parser()
         sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
-        response = async_llm_chain_call(engine=engine, prompt=prompt, parser=parser, request_list=[request_kwargs], step="Generate feedbacks", sampling_count=sampling_count)
+        response = async_llm_chain_call(
+            engine=engine, 
+            prompt=prompt, 
+            parser=parser, 
+            request_list=[request_kwargs], 
+            step="Generate feedbacks", 
+            sampling_count=sampling_count
+            )
+        
+        if not response or not isinstance(response, dict) or "feedback" not in response:
+            logging.error("Invalid response from async_llm_chain_call. Missing 'feedback'.")
+            raise ValueError("Response from LLM does not contain 'feedback'.")
 
         feedback = response["feedback"]
+        if not isinstance(feedback, str):
+            logging.warning("Feedback is not a string. Converting to string format.")
+            feedback = str(feedback)
+
         self.long_term_mems.append(feedback)
+        logging.info("Feedback successfully added to long-term memory.")
     
     def get_long_term_memory(self) -> List[str]:
         return self.long_term_mems
