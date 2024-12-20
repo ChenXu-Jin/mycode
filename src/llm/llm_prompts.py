@@ -3,13 +3,25 @@ import os
 from langchain.prompts import ChatPromptTemplate
 from langchain.prompts import HumanMessagePromptTemplate
 from langchain.prompts import PromptTemplate
+from typing import Dict, List, Any
 
 TEMPLATES_ROOT_PATH = "templates"
 
-def get_llm_prompt(template_name: str, schema_string: str=None) -> ChatPromptTemplate:
+def get_llm_prompt(
+        template_name: str, 
+        long_term_mems: List[Any], 
+        short_term_mems: List[Dict[str, Any]],
+        schema_string: str=None,
+        ) -> ChatPromptTemplate:
     template_configs = {
         "keyword_extraction": {"input_variables": ["HINT", "QUESTION"]},
-        "sql_generation": {"input_variables": ["HINT", "QUESTION"], "partial_variables": {"DATABASE_SCHEMA": schema_string}}
+        "sql_generation": {"input_variables": ["HINT", "QUESTION"], "partial_variables": {"DATABASE_SCHEMA": schema_string}},
+        "evaluate": {},
+        "actor_generate_sql": {
+            "input_variables": ["HINT", "QUESTION"], 
+            "partial_variables": {"LONG_TERM_MEMS": long_term_mems, "SHORT_TERM_MEMS": short_term_mems}
+        },
+        "generate_long_term_mems": {}
     }
 
     if template_name not in template_configs:

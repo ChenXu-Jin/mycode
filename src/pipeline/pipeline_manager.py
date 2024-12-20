@@ -29,7 +29,12 @@ class PipelineManager:
         frame = inspect.currentframe()
         caller_frame = frame.f_back
         node_name = caller_frame.f_code.co_name
-        node_setup = self.pipeline_setup.get(node_name, {})
+        
+        if node_name == "evaluate" or node_name == "actor_generate_sql" or node_name == "generate_feedback_mems":
+            node_setup = self.pipeline_setup.get("self_reflexion", {})
+        else:
+            node_setup = self.pipeline_setup.get(node_name, {})
+
         try:
             engine_name = node_setup["engine"]
         except KeyError:

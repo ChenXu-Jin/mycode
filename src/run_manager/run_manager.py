@@ -53,11 +53,14 @@ class RunManager:
         print(f"Total number of tasks: {self.total_number_of_tasks}")
     
     def run_tasks(self):
-        with Pool(TASK_WORKERS) as pool:
-            for task in self.tasks:
-                pool.apply_async(self.worker, args=(task,), callback=self.task_done)
-            pool.close()
-            pool.join()
+        for task in self.tasks:
+            task_result = self.worker(task=task)
+            self.task_done(log=task_result)
+        # with Pool(TASK_WORKERS) as pool:
+        #     for task in self.tasks:
+        #         pool.apply_async(self.worker, args=(task,), callback=self.task_done)
+        #     pool.close()
+        #     pool.join()
     
     def worker(self, task: Task) -> Tuple[Any, str, int]:
         database_manager = DatabaseManager(db_mode=self.args.data_mode, db_id=task.db_id)

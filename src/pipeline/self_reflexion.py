@@ -1,5 +1,5 @@
 import logging
-from sqlglot import parse_one
+from sqlglot import parse_one, exp
 from sqlglot.expressions import Expression
 from llm.llm_models import async_llm_chain_call
 from database_utils.database_manager import DatabaseManager
@@ -7,7 +7,7 @@ from pipeline.pipeline_manager import PipelineManager
 from pipeline.utils import node_decorator, get_last_node_result
 from typing import Dict, List, Any
 
-MAX_REFLEXION_TIMES = 5
+MAX_REFLEXION_TIMES = 3
 
 @node_decorator(check_schema_status=False)
 def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_history: Dict[str, Any]) -> str:
@@ -23,13 +23,20 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
         str: Final SQL query that passes evaluation.
     """
     logging.info(f"LLM self reflexion start for question: {task.question_id}")
-    first_time_sql = get_last_node_result(execution_history, "sql_generation")
+
+    first_time_sql = get_last_node_result(execution_history, "sql_generation")["SQL"]
+    first_time_cot = get_last_node_result(execution_history, "sql_generation")["chain_of_thought_reasoning"]
+    first_time_result = {
+        "chain_of_thought": first_time_cot,
+        "SQL": first_time_sql
+    }
     if first_time_sql is None:
         raise ValueError(f"Initial SQL generation is incomplete for task {task.question_id}. Self-reflexion cannot begin.")
     
     actor = Actor(task=task, tentative_schema=tentative_schema)
     evaluator = Evaluator(task=task, current_sql=first_time_sql)
     self_reflection = SelfReflection(task=task)
+    actor.short_term_mems.append(first_time_result)
 
     current_sql = first_time_sql
     iteration_count = 0
@@ -62,7 +69,7 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
 
 class Actor:
     def __init__(self, task: Any, tentative_schema: Dict[str, Any]) -> None:
-        self.short_term_mems = []
+        self.short_term_mems: List[Dict[str, Any]] = []
         self.task = task
         self.tentative_schema = tentative_schema
     
@@ -102,7 +109,6 @@ class Actor:
 
 class Evaluator:
     def __init__(self, task: Any, current_sql: str) -> None:
-        self.is_pass = False
         self.task = task
         self.sql = current_sql
     
@@ -153,49 +159,53 @@ class Evaluator:
 
         Returns:
             dict: A dictionary containing the SQL skeleton and schema elements.
-                Example:
-                {
-                    "skeleton": "SELECT col FROM table WHERE col = ?",
-                    "tables": ["table"],
-                    "columns": ["col"],
-                    "conditions": ["col = ?"]
-                }
         """
-        # Parse SQL into an abstract syntax tree (AST)
-        parsed = parse_one(self.sql)
-    
+        # Parse the SQL query into an AST
+        parsed = parse_one(self.sql, read='sqlite')
+
         skeleton_parts = []
         tables = set()
         columns = set()
         conditions = []
 
-        # Helper to recursively traverse the AST
-        def traverse_expression(expr: Expression):
+        # Helper to recursively process the AST
+        def traverse_expression(expr):
             if expr is None:
                 return
 
-            if expr.is_type("Identifier") and expr.parent and expr.parent.is_type("Table"):
-                tables.add(expr.name)
-            elif expr.is_type("Column"):
-                columns.add(expr.name)
-            elif expr.is_type("Condition"):
-                # Simplify condition with placeholders
-                condition_str = str(expr).replace(str(expr.args.get("this")), "?")
+            # Process tables (e.g., "FROM frpm T1")
+            if isinstance(expr, exp.Table):
+                tables.add(expr.sql(dialect="sqlite"))
+
+            # Process columns (e.g., "T1.`County Name`")
+            elif isinstance(expr, exp.Column):
+                columns.add(expr.sql(dialect="sqlite"))
+
+            # Process conditions (e.g., "T1.`County Name` = 'Los Angeles'")
+            elif isinstance(expr, exp.Condition):
+                condition_str = expr.sql(dialect="sqlite")
+                for literal in expr.find_all(exp.Literal):  # Replace literals with placeholders
+                    condition_str = condition_str.replace(literal.sql(dialect="sqlite"), "?")
                 conditions.append(condition_str)
 
-            # General skeleton builder
-            if expr.is_type("Literal"):
+            # Build skeleton (replace literals with placeholders)
+            if isinstance(expr, exp.Literal):
                 skeleton_parts.append("?")
             else:
                 skeleton_parts.append(expr.sql(dialect="sqlite"))
 
+            # Recursively process child nodes
             for child in expr.args.values():
-                traverse_expression(child)
+                if isinstance(child, list):  # Handle lists of expressions
+                    for item in child:
+                        traverse_expression(item)
+                elif isinstance(child, exp.Expression):
+                    traverse_expression(child)
 
-            # Traverse the AST
+        # Start traversal from the root node
         traverse_expression(parsed)
 
-            # Generate SQL skeleton
+        # Generate SQL skeleton
         skeleton = " ".join(skeleton_parts)
 
         return {
