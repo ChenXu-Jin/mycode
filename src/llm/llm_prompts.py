@@ -8,30 +8,36 @@ from typing import Dict, List, Any
 TEMPLATES_ROOT_PATH = "templates"
 
 def get_llm_prompt(
-        template_name: str, 
-        long_term_mems: List[Any], 
-        short_term_mems: List[Dict[str, Any]],
-        schema_string: str=None,
-        ) -> ChatPromptTemplate:
+        template_name: str,
+        **kwargs: Any
+    ) -> ChatPromptTemplate:
     template_configs = {
         "keyword_extraction": {"input_variables": ["HINT", "QUESTION"]},
-        "sql_generation": {"input_variables": ["HINT", "QUESTION"], "partial_variables": {"DATABASE_SCHEMA": schema_string}},
+        "sql_generation": {"input_variables": ["HINT", "QUESTION"]},
         "evaluate": {},
         "actor_generate_sql": {
-            "input_variables": ["HINT", "QUESTION"], 
-            "partial_variables": {"LONG_TERM_MEMS": long_term_mems, "SHORT_TERM_MEMS": short_term_mems}
+            "input_variables": ["HINT", "QUESTION"]
         },
         "generate_long_term_mems": {}
     }
 
     if template_name not in template_configs:
         raise ValueError(f"Invalid template name: {template_name}")
-    
+
     config = template_configs[template_name]
-    input_variables = config["input_variables"]
+    input_variables = config.get("input_variables", [])
     partial_variables = config.get("partial_variables", {})
+
+    # Dynamically update partial variables based on provided kwargs
+    if "long_term_mems" in kwargs:
+        partial_variables["LONG_TERM_MEMS"] = kwargs["long_term_mems"]
+    if "short_term_mems" in kwargs:
+        partial_variables["SHORT_TERM_MEMS"] = kwargs["short_term_mems"]
+    if "schema_string" in kwargs:
+        partial_variables["DATABASE_SCHEMA"] = kwargs["schema_string"]
+
     template_content = load_template(template_name)
-    
+
     human_message_prompt_template = HumanMessagePromptTemplate(
         prompt=PromptTemplate(
             template=template_content,
@@ -39,7 +45,7 @@ def get_llm_prompt(
             partial_variables=partial_variables
         )
     )
-    
+
     combined_prompt_template = ChatPromptTemplate.from_messages(
         [human_message_prompt_template]
     )
