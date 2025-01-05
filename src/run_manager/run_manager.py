@@ -5,6 +5,7 @@ from pathlib import Path
 from multiprocessing import Pool
 from run_manager.logger import Logger
 from run_manager.task import Task
+from run_manager.memory import Memory
 from run_manager.statistics_manager import StatisticsManager
 from database_utils.database_manager import DatabaseManager
 from pipeline.pipeline_manager import PipelineManager
@@ -53,16 +54,17 @@ class RunManager:
         print(f"Total number of tasks: {self.total_number_of_tasks}")
     
     def run_tasks(self):
-        for task in self.tasks:
-            task_result = self.worker(task=task)
-            self.task_done(log=task_result)
-        # with Pool(TASK_WORKERS) as pool:
-        #     for task in self.tasks:
-        #         pool.apply_async(self.worker, args=(task,), callback=self.task_done)
-        #     pool.close()
-        #     pool.join()
+        # for task in self.tasks:
+        #     task_result = self.worker(task=task)
+        #     self.task_done(log=task_result)
+        with Pool(TASK_WORKERS) as pool:
+            for task in self.tasks:
+                pool.apply_async(self.worker, args=(task,), callback=self.task_done)
+            pool.close()
+            pool.join()
     
     def worker(self, task: Task) -> Tuple[Any, str, int]:
+        memory_instance = Memory(max_memory_count=10)
         database_manager = DatabaseManager(db_mode=self.args.data_mode, db_id=task.db_id)
         logger = Logger(db_id=task.db_id, question_id=task.question_id, result_directory=self.result_directory)
         logger.set_log_level(self.args.log_level)

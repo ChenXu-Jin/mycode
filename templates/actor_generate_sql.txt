@@ -16,18 +16,16 @@ Short-Term Memory:
 Specific reasoning steps and SQL queries generated earlier in this task.
 {SHORT_TERM_MEMS}
 
-Validation Rules
-1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
-2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
-3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
-4. Focus on accuracy, alignment, and completeness of the SQL query based on the Question.
-5. Avoid unnecessary columns or redundant information; only output what is specifically required by the Question.
-
 Question: 
 {QUESTION} 
 
 Hint:
 {HINT}
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
 
 Please respond with a JSON object structured as follows:
 
