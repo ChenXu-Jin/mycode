@@ -1,8 +1,8 @@
 data_mode='dev'
-data_path='/root/data/dev/small_dev.json'
+data_path='/root/data/dev/small_dev_set.json'
 
 #all nodes: keyword_extraction schema_filter sql_generation self_reflexion evaluation
-pipeline_nodes='keyword_extraction+schema_filter+sql_generation+evaluation'
+pipeline_nodes='keyword_extraction+schema_filter+sql_generation+self_reflexion+evaluation'
 
 ########## engines ##########
 engine1='gemini-1.5-pro'

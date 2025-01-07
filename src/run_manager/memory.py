@@ -23,14 +23,14 @@ class Memory:
         if max_memory_count is not None:
             with cls._lock:
                 cls._instance = super(Memory, cls).__new__(cls)
-                cls._instance.__init__()
+                cls._instance.__init__(max_memory_count=max_memory_count)
         else:
             if cls._instance is None:
                 raise ValueError("Long term memory instance has not been initialized yet.")
         return cls._instance
     
-    def __init__(self, max_memory_counts: int):
-        self.max_memory_counts = max_memory_counts
+    def __init__(self, max_memory_count: int):
+        self.max_memory_count = max_memory_count
         self.long_term_memory = self.initialize_long_term_memory()
 
     def initialize_long_term_memory(self) -> Dict[str, List[str]]:

@@ -14,11 +14,9 @@ def get_llm_prompt(
     template_configs = {
         "keyword_extraction": {"input_variables": ["HINT", "QUESTION"]},
         "sql_generation": {"input_variables": ["HINT", "QUESTION"]},
-        "evaluate": {},
-        "actor_generate_sql": {
-            "input_variables": ["HINT", "QUESTION"]
-        },
-        "generate_long_term_mems": {}
+        "evaluate": {"input_variables": ["QUESTION", "SQL"]},
+        "actor_generate_sql": {"input_variables": ["HINT", "QUESTION"]},
+        "generate_long_term_mems": {"input_variables": ["HINT", "QUESTION"]}
     }
 
     if template_name not in template_configs:
@@ -29,12 +27,16 @@ def get_llm_prompt(
     partial_variables = config.get("partial_variables", {})
 
     # Dynamically update partial variables based on provided kwargs
-    if "long_term_mems" in kwargs:
+    if "long_term_mems" in kwargs and kwargs["long_term_mems"] is not Ellipsis:
         partial_variables["LONG_TERM_MEMS"] = kwargs["long_term_mems"]
-    if "short_term_mems" in kwargs:
+    if "short_term_mems" in kwargs and kwargs["short_term_mems"] is not Ellipsis:
         partial_variables["SHORT_TERM_MEMS"] = kwargs["short_term_mems"]
-    if "schema_string" in kwargs:
+    if "schema_string" in kwargs and kwargs["short_term_mems"] is not Ellipsis:
         partial_variables["DATABASE_SCHEMA"] = kwargs["schema_string"]
+    if "execute_result" in kwargs and kwargs["execute_result"] is not Ellipsis:
+        partial_variables["EXECUTE_RESULT"] = kwargs["execute_result"]
+    if "evaluate_result" in kwargs and kwargs["evaluate_result"] is not Ellipsis:
+        partial_variables["EVALUATE_RESULT"] = kwargs["evaluate_result"]
 
     template_content = load_template(template_name)
 

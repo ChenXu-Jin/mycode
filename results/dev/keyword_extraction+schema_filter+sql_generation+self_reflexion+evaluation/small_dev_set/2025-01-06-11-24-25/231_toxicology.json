@@ -1,0 +1,7 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "status": "error",
+        "error": "<class 'IndexError'>: <list index out of range>"
+    }
+]

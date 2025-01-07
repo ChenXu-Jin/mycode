@@ -55,7 +55,14 @@ class PipelineManager:
         else:
             template_name = node_name
             parser_name = node_name
-        prompt = get_llm_prompt(template_name, long_term_mems=..., short_term_mems=..., schema_string=...)
+        prompt = get_llm_prompt(
+            template_name, 
+            long_term_mems=..., 
+            short_term_mems=..., 
+            schema_string=...,
+            execute_result=...,
+            evaluate_result=...
+            )
         parser = get_llm_parser(parser_name)
 
         return engine, prompt, parser

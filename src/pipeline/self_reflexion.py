@@ -1,6 +1,6 @@
 import logging
 from sqlglot import parse_one, exp
-from sqlglot.expressions import Expression
+from run_manager.memory import Memory
 from llm.llm_models import async_llm_chain_call
 from database_utils.database_manager import DatabaseManager
 from pipeline.pipeline_manager import PipelineManager
@@ -32,7 +32,7 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
     }
     if first_time_sql is None:
         raise ValueError(f"Initial SQL generation is incomplete for task {task.question_id}. Self-reflexion cannot begin.")
-    
+
     actor = Actor(task=task, tentative_schema=tentative_schema)
     evaluator = Evaluator(task=task, current_sql=first_time_sql)
     self_reflection = SelfReflection(task=task)
@@ -52,10 +52,10 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
         
         logging.info("SQL failed evaluation. Generating feedback.")
         execute_result = evaluator.execute_current_sql()
-        self_reflection.generate_feedback_mems(execute_result, evaluation_result, current_sql)
-        long_term_mems = self_reflection.get_long_term_memory()
-        if not long_term_mems:
-            logging.warning(f"Long-term memory is empty at task {task.question_id} iteration {iteration_count}.")
+        new_memory = self_reflection.generate_feedback_mems(execute_result, evaluation_result, current_sql)
+
+        Memory().update_memory(new_long_term_memory=new_memory)
+        long_term_mems = Memory().get_exist_memory()
 
         logging.info("Generating new SQL using actor.")
         actor.short_term_mems.append(current_sql)
@@ -217,10 +217,9 @@ class Evaluator:
 
 class SelfReflection:
     def __init__(self, task: Any) -> None:
-        self.long_term_mems = []
         self.task = task
     
-    def generate_feedback_mems(self, execute_result: Dict[str, Any], evaluate_result: Dict[str, Any], sql: str) -> None:
+    def generate_feedback_mems(self, execute_result: Dict[str, Any], evaluate_result: Dict[str, Any], sql: str) -> str:
         logging.info(f"SelfReflection start working for task: {self.task.question_id}")
 
         request_kwargs = {
@@ -250,8 +249,4 @@ class SelfReflection:
             logging.warning("Feedback is not a string. Converting to string format.")
             feedback = str(feedback)
 
-        self.long_term_mems.append(feedback)
-        logging.info("Feedback successfully added to long-term memory.")
-    
-    def get_long_term_memory(self) -> List[str]:
-        return self.long_term_mems
+        return feedback

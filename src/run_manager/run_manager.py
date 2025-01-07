@@ -12,8 +12,6 @@ from pipeline.pipeline_manager import PipelineManager
 from pipeline.workflow_builder import build_pipeline
 from typing import Dict, List, Any, Tuple
 
-TASK_WORKERS = 1
-
 class RunManager:
     RESULT_ROOT_PATH = "results"
     
@@ -54,14 +52,9 @@ class RunManager:
         print(f"Total number of tasks: {self.total_number_of_tasks}")
     
     def run_tasks(self):
-        # for task in self.tasks:
-        #     task_result = self.worker(task=task)
-        #     self.task_done(log=task_result)
-        with Pool(TASK_WORKERS) as pool:
-            for task in self.tasks:
-                pool.apply_async(self.worker, args=(task,), callback=self.task_done)
-            pool.close()
-            pool.join()
+        for task in self.tasks:
+            log = self.worker(task=task)
+            self.task_done(log)
     
     def worker(self, task: Task) -> Tuple[Any, str, int]:
         memory_instance = Memory(max_memory_count=10)
