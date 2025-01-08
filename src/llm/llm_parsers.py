@@ -18,13 +18,23 @@ class PythonListOutputParser(BaseOutputParser):
         return eval(output)
 
 class SQLGenerationOutputParser(BaseModel):
-    chain_of_thought_reasoning: str = Field(description="One line explanation of why or why not the column information is relevant to the question and the hint.")
-    is_column_information_relevant: str = Field(description="Yes or No")
+    chain_of_thought_reasoning: str = Field(description="Your thought process on how you arrived at the final SQL query.")
+    SQL: str = Field(description="The generated SQL query in a single string.")
+
+class EvaluateOutputParser(BaseModel):
+    chain_of_thought_reasoning: str = Field(description="Your thought process on how you arrived at the final judgment.")
+    judgment: str = Field(description="Valid or Invalid")
+
+class SelfReflectionOutputParser(BaseModel):
+    feedback: str = Field(description="Specific, actionable steps to modify the SQL query to align with the question's intent.")
 
 def get_llm_parser(parser_name: str):
     parser_configs = {
         "keyword_extraction": PythonListOutputParser,
-        "sql_generation": lambda: JsonOutputParser(pydantic_object=SQLGenerationOutputParser)
+        "sql_generation": lambda: JsonOutputParser(pydantic_object=SQLGenerationOutputParser),
+        "actor_generate_sql": lambda: JsonOutputParser(pydantic_object=SQLGenerationOutputParser),
+        "evaluate": lambda: JsonOutputParser(pydantic_object=EvaluateOutputParser),
+        "generate_feedback_mems": lambda: JsonOutputParser(pydantic_object=SelfReflectionOutputParser)
     }
 
     if parser_name not in parser_configs:
