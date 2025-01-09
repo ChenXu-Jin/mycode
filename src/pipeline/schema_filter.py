@@ -4,7 +4,7 @@ from pipeline.utils import node_decorator, get_last_node_result
 from database_utils.database_manager import DatabaseManager
 from typing import Dict, List, Any
 
-FILTER_THRESHOLD = 0.5
+FILTER_THRESHOLD = 0.8
 
 @node_decorator(check_schema_status=True)
 def schema_filter(task: Any, tentative_schema: Dict[str, Any], execution_history: Dict[str, Any]) -> Dict[str, Any]:

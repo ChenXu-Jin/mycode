@@ -27,15 +27,15 @@ def get_llm_prompt(
     partial_variables = config.get("partial_variables", {})
 
     # Dynamically update partial variables based on provided kwargs
-    if "long_term_mems" in kwargs and kwargs["long_term_mems"] is not Ellipsis:
+    if "long_term_mems" in kwargs:
         partial_variables["LONG_TERM_MEMS"] = kwargs["long_term_mems"]
-    if "short_term_mems" in kwargs and kwargs["short_term_mems"] is not Ellipsis:
+    if "short_term_mems" in kwargs:
         partial_variables["SHORT_TERM_MEMS"] = kwargs["short_term_mems"]
-    if "schema_string" in kwargs and kwargs["short_term_mems"] is not Ellipsis:
+    if "schema_string" in kwargs:
         partial_variables["DATABASE_SCHEMA"] = kwargs["schema_string"]
-    if "execute_result" in kwargs and kwargs["execute_result"] is not Ellipsis:
+    if "execute_result" in kwargs:
         partial_variables["EXECUTE_RESULT"] = kwargs["execute_result"]
-    if "evaluate_result" in kwargs and kwargs["evaluate_result"] is not Ellipsis:
+    if "evaluate_result" in kwargs:
         partial_variables["EVALUATE_RESULT"] = kwargs["evaluate_result"]
 
     template_content = load_template(template_name)

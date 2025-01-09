@@ -2,7 +2,7 @@ data_mode='dev'
 data_path='/root/data/dev/small_dev_set.json'
 
 #all nodes: keyword_extraction schema_filter sql_generation self_reflexion evaluation
-pipeline_nodes='keyword_extraction+schema_filter+sql_generation+self_reflexion+evaluation'
+pipeline_nodes='keyword_extraction+schema_filter+sql_generation+evaluation'
 
 ########## engines ##########
 engine1='gemini-1.5-pro'
@@ -36,12 +36,12 @@ pipeline_setup='{
     }
 }'
 
-echo "run start"
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate mycode
-python3 -m debugpy --listen 5678 --wait-for-client ./src/main.py \
-  --data_mode ${data_mode} \
-  --data_path ${data_path} \
-  --pipeline_nodes ${pipeline_nodes} \
-  --pipeline_setup "$pipeline_setup"
-# python -u ./src/main.py --data_mode ${data_mode} --data_path ${data_path} --pipeline_nodes ${pipeline_nodes} --pipeline_setup "$pipeline_setup"
+# echo "run start"
+# source ~/miniconda3/etc/profile.d/conda.sh
+# conda activate mycode
+# python3 -m debugpy --listen 5678 --wait-for-client ./src/main.py \
+#   --data_mode ${data_mode} \
+#   --data_path ${data_path} \
+#   --pipeline_nodes ${pipeline_nodes} \
+#   --pipeline_setup "$pipeline_setup"
+python -u ./src/main.py --data_mode ${data_mode} --data_path ${data_path} --pipeline_nodes ${pipeline_nodes} --pipeline_setup "$pipeline_setup"

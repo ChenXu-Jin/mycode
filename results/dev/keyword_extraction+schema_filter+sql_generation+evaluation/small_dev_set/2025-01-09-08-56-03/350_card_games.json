@@ -1,0 +1,180 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "alternative languages",
+            "card",
+            "Annul",
+            "numbered 29",
+            "name = 'annul'",
+            "number = '29'"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "cards": [
+                "id",
+                "artist",
+                "asciiName",
+                "availability",
+                "borderColor",
+                "cardKingdomFoilId",
+                "cardKingdomId",
+                "colorIdentity",
+                "colorIndicator",
+                "colors",
+                "convertedManaCost",
+                "duelDeck",
+                "edhrecRank",
+                "faceConvertedManaCost",
+                "faceName",
+                "flavorName",
+                "flavorText",
+                "frameEffects",
+                "frameVersion",
+                "hand",
+                "hasAlternativeDeckLimit",
+                "hasContentWarning",
+                "hasFoil",
+                "hasNonFoil",
+                "isAlternative",
+                "isFullArt",
+                "isOnlineOnly",
+                "isOversized",
+                "isPromo",
+                "isReprint",
+                "isReserved",
+                "isStarter",
+                "isStorySpotlight",
+                "isTextless",
+                "isTimeshifted",
+                "keywords",
+                "layout",
+                "leadershipSkills",
+                "life",
+                "loyalty",
+                "manaCost",
+                "mcmId",
+                "mcmMetaId",
+                "mtgArenaId",
+                "mtgjsonV4Id",
+                "mtgoFoilId",
+                "mtgoId",
+                "multiverseId",
+                "name",
+                "number",
+                "originalReleaseDate",
+                "originalText",
+                "originalType",
+                "otherFaceIds",
+                "power",
+                "printings",
+                "promoTypes",
+                "purchaseUrls",
+                "rarity",
+                "scryfallId",
+                "scryfallIllustrationId",
+                "scryfallOracleId",
+                "setCode",
+                "side",
+                "subtypes",
+                "supertypes",
+                "tcgplayerProductId",
+                "text",
+                "toughness",
+                "type",
+                "types",
+                "uuid",
+                "variations",
+                "watermark"
+            ],
+            "foreign_data": [
+                "id",
+                "flavorText",
+                "language",
+                "multiverseid",
+                "name",
+                "text",
+                "type",
+                "uuid"
+            ],
+            "legalities": [
+                "id",
+                "format",
+                "status",
+                "uuid"
+            ],
+            "sets": [
+                "id",
+                "baseSetSize",
+                "block",
+                "booster",
+                "code",
+                "isFoilOnly",
+                "isForeignOnly",
+                "isNonFoilOnly",
+                "isOnlineOnly",
+                "isPartialPreview",
+                "keyruneCode",
+                "mcmId",
+                "mcmIdExtras",
+                "mcmName",
+                "mtgoCode",
+                "name",
+                "parentCode",
+                "releaseDate",
+                "tcgplayerGroupId",
+                "totalSetSize",
+                "type"
+            ],
+            "set_translations": [
+                "id",
+                "language",
+                "setCode",
+                "translation"
+            ],
+            "rulings": [
+                "id",
+                "date",
+                "text",
+                "uuid"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "foreign_data": [
+                "language",
+                "uuid"
+            ],
+            "cards": [
+                "uuid",
+                "name",
+                "number"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To retrieve the alternative languages available for the card named 'Annul' with a specific number '29', I first need to identify the relevant tables and columns. The 'cards' table contains the card's name and number, while the 'foreign_data' table contains information on alternative languages related to the cards. I will join these two tables on the uuid column to link the card data with its foreign language data. The WHERE clause will filter for the card name 'Annul' and the number '29'. Finally, I will select the 'language' column from the foreign_data table to get the available alternative languages.",
+        "SQL": "SELECT T2.language FROM cards T1 JOIN foreign_data T2 ON T1.uuid = T2.uuid WHERE T1.name = 'Annul' AND T1.number = '29';",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 1,
+            "error": "--",
+            "Question": "State the alternative languages available for card named Annul numbered 29.",
+            "Evidence": "annul refers to name = 'annul'; numbered 29 refers to number = '29';",
+            "pred_sql": "SELECT T2.language FROM cards T1 JOIN foreign_data T2 ON T1.uuid = T2.uuid WHERE T1.name = 'Annul' AND T1.number = '29';",
+            "gold_sql": "SELECT T2.language FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid WHERE T1.name = 'Annul' AND T1.number = 29"
+        },
+        "status": "success"
+    }
+]
