@@ -16,7 +16,7 @@ def get_llm_prompt(
         "sql_generation": {"input_variables": ["HINT", "QUESTION"]},
         "evaluate": {"input_variables": ["QUESTION", "SQL"]},
         "actor_generate_sql": {"input_variables": ["HINT", "QUESTION"]},
-        "generate_long_term_mems": {"input_variables": ["HINT", "QUESTION"]}
+        "generate_feedback_mems": {"input_variables": ["HINT", "QUESTION"]}
     }
 
     if template_name not in template_configs:
@@ -24,7 +24,7 @@ def get_llm_prompt(
 
     config = template_configs[template_name]
     input_variables = config.get("input_variables", [])
-    partial_variables = config.get("partial_variables", {})
+    partial_variables = {}
 
     # Dynamically update partial variables based on provided kwargs
     if "long_term_mems" in kwargs:

@@ -46,7 +46,7 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
 
         evaluation_result = evaluator.evaluate()
 
-        if evaluation_result["stats"] == "success":
+        if evaluation_result["judgment"] == "Valid":
             logging.info("SQL passed evaluation")
             return current_sql
         
@@ -77,14 +77,16 @@ class Actor:
         logging.info(f"Actor start working for task: {self.task.question_id}")
         request_kwargs = {
             "QUESTION": self.task.question,
-            "HINT": self.task.evidence,
-            "LONG_TERM_MEMORY": long_term_mems,
-            "SHORT_TERM_MEMORY": self.short_term_mems
+            "HINT": self.task.evidence
         }
 
         try:
             db_schema_string = DatabaseManager().get_database_schema_string(self.tentative_schema)
-            engine, prompt, parser = PipelineManager().get_engine_prompt_parser(schema_string=db_schema_string)
+            engine, prompt, parser = PipelineManager().get_engine_prompt_parser(
+                schema_string=db_schema_string, 
+                long_term_mems=long_term_mems, 
+                short_term_mems=self.short_term_mems
+                )
             sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
             response = async_llm_chain_call(engine=engine, prompt=prompt, parser=parser, request_list=[request_kwargs], step="actor_generate_sql", sampling_count=sampling_count)
 
@@ -114,18 +116,14 @@ class Evaluator:
     
     def evaluate(self) -> Dict[str, Any]:
         logging.info(f"Evaluator start working for task: {self.task.question_id}")
-        sql_skeleton_schema = self.extract_sql_skeleton_and_schema()
+        sql_execute_result = self.execute_current_sql()["result"]
 
         request_kwargs = {
             "QUESTION": self.task.question,
-            "SQL": self.sql,
-            "skeleton": sql_skeleton_schema["skeleton"],
-            "tables": sql_skeleton_schema["tables"],
-            "columns": sql_skeleton_schema["columns"],
-            "conditions": sql_skeleton_schema["conditions"]
+            "SQL": self.sql
         }
 
-        engine, prompt, parser = PipelineManager().get_engine_prompt_parser()
+        engine, prompt, parser = PipelineManager().get_engine_prompt_parser(execute_result=sql_execute_result)
         sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
         response = async_llm_chain_call(
             engine=engine, 
@@ -224,12 +222,10 @@ class SelfReflection:
 
         request_kwargs = {
             "QUESTION": self.task.question,
-            "SQL": sql,
-            "execute_result": execute_result,
-            "evaluate_result": evaluate_result
+            "SQL": sql
         }
 
-        engine, prompt, parser = PipelineManager().get_engine_prompt_parser()
+        engine, prompt, parser = PipelineManager().get_engine_prompt_parser(execute_result=execute_result, evaluate_result=evaluate_result)
         sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
         response = async_llm_chain_call(
             engine=engine, 
