@@ -4,17 +4,17 @@ Your task is to generate actionable feedback to guide the modification of the SQ
 
 Input Data
 
+Question:
+{QUESTION}
+
+Predicted SQL:
+{SQL}
+
 Execution Result:
 {EXECUTE_RESULT}
 
 Evaluation Result:
 {EVALUATE_RESULT}
-
-Question:
-{QUESTION}
-
-Hint:
-{HINT}
 
 Instructions:
 1. Understand the Issue:
