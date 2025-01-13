@@ -100,7 +100,7 @@ class Actor:
             sqls = [res["SQL"] for res in response]
             sql = DatabaseManager().aggregate_sqls(sqls)
 
-            result = next(res for res in response if res["SQL"] == sql)
+            result = next(res for res in response if res["SQL"] == sql)["SQL"]
             if result is None:
                 raise ValueError("No valid SQL found in the response.")
 
