@@ -1,0 +1,12 @@
+{
+    "1082": "SELECT L.id, L.name FROM League AS L INNER JOIN Country AS C ON L.country_id = C.id WHERE C.name = 'Germany';",
+    "1195": "SELECT AVG(T2.ALB) FROM Patient AS T1 JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.SEX = 'F' AND T2.PLT > 400 AND T1.Diagnosis = 'SLE';",
+    "111": "SELECT COUNT(T1.account_id) FROM account T1 JOIN district T2 ON T1.district_id = T2.district_id WHERE T2.A2 = 'Litomerice' AND strftime('%Y', T1.date) = '1996';",
+    "657": "SELECT U.DisplayName, U.WebsiteUrl FROM votes V JOIN users U ON V.UserId = U.Id WHERE V.VoteTypeId = 8 AND V.BountyAmount = (SELECT MAX(BountyAmount) FROM votes WHERE VoteTypeId = 8)",
+    "9": "SELECT COUNT(*) FROM satscores T1 JOIN frpm T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.`Charter Funding Type` = 'Direct Charter Funded';",
+    "860": "SELECT T2.nationality FROM qualifying T1 JOIN drivers T2 ON T1.driverId = T2.driverId WHERE T1.q2 = '0:01:40' AND T1.raceId = 355",
+    "1032": "SELECT L.name, COUNT(M.id) AS match_count FROM Match M JOIN League L ON M.league_id = L.id GROUP BY L.id ORDER BY match_count DESC LIMIT 1;",
+    "729": "SELECT AVG(T1.height_cm) FROM superhero T1 JOIN publisher T2 ON T1.publisher_id = T2.id WHERE T2.publisher_name = 'Marvel Comics' AND T1.height_cm IS NOT NULL;",
+    "231": "SELECT T2.bond_type, T1.label FROM bond T2 JOIN molecule T1 ON T2.molecule_id = T1.molecule_id WHERE T1.molecule_id = 'TR018' GROUP BY T2.bond_type, T1.label ORDER BY COUNT(T2.bond_type) DESC LIMIT 1;",
+    "350": "SELECT FD.language FROM cards AS C JOIN foreign_data AS FD ON C.uuid = FD.uuid WHERE C.name = 'Annul' AND C.number = '29';"
+}

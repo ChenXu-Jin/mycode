@@ -1,0 +1,872 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: What is the hero's full name with the highest attribute in strength?
+Hint: highest attribute in strength refers to MAX(attribute_value) WHERE attribute_name = 'strength';
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "hero's full name",
+    "highest attribute",
+    "strength",
+    "MAX(attribute_value)",
+    "attribute_name"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE alignment (
+  id        INTEGER not null
+            primary key,
+  alignment TEXT default NULL
+);
+
+CREATE TABLE attribute (
+  id             INTEGER not null
+            primary key,
+  attribute_name TEXT default NULL
+);
+
+CREATE TABLE colour (
+  id     INTEGER not null
+            primary key,
+  colour TEXT default NULL
+);
+
+CREATE TABLE gender (
+  id     INTEGER not null
+            primary key,
+  gender TEXT default NULL
+);
+
+CREATE TABLE publisher (
+  id             INTEGER not null
+            primary key,
+  publisher_name TEXT default NULL
+);
+
+CREATE TABLE race (
+  id   INTEGER not null
+            primary key,
+  race TEXT default NULL
+);
+
+CREATE TABLE superhero (
+  id             INTEGER not null
+            primary key,
+  superhero_name TEXT default NULL,
+  full_name      TEXT default NULL,
+  gender_id      INTEGER          default NULL,
+  eye_colour_id  INTEGER          default NULL,
+  hair_colour_id INTEGER          default NULL,
+  skin_colour_id INTEGER          default NULL,
+  race_id        INTEGER          default NULL,
+  publisher_id   INTEGER          default NULL,
+  alignment_id   INTEGER          default NULL,
+  height_cm      INTEGER          default NULL,
+  weight_kg      INTEGER          default NULL,
+  foreign key (alignment_id) references alignment(id),
+  foreign key (eye_colour_id) references colour(id),
+  foreign key (gender_id) references gender(id),
+  foreign key (hair_colour_id) references colour(id),
+  foreign key (publisher_id) references publisher(id),
+  foreign key (race_id) references race(id),
+  foreign key (skin_colour_id) references colour(id)
+);
+
+CREATE TABLE hero_attribute (
+  hero_id         INTEGER default NULL,
+  attribute_id    INTEGER default NULL,
+  attribute_value INTEGER default NULL,
+  foreign key (attribute_id) references attribute(id),
+  foreign key (hero_id) references superhero(id)
+);
+
+CREATE TABLE superpower (
+  id         INTEGER not null
+            primary key,
+  power_name TEXT default NULL
+);
+
+CREATE TABLE hero_power (
+  hero_id  INTEGER default NULL,
+  power_id INTEGER default NULL,
+  foreign key (hero_id) references superhero(id),
+  foreign key (power_id) references superpower(id)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+What is the hero's full name with the highest attribute in strength? 
+
+Hint:
+highest attribute in strength refers to MAX(attribute_value) WHERE attribute_name = 'strength';
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the hero's full name with the highest attribute in strength, I need to first identify the relevant tables: `superhero`, `hero_attribute`, and `attribute`. I should focus on the 'strength' attribute from the `attribute` table and filter the results where the `attribute_name` equals 'strength'. Next, I'll use the `hero_attribute` table to find the corresponding `hero_id` and `attribute_value` for that attribute. To get the hero's full name, I will join the `superhero` table with the `hero_attribute` table on the `hero_id`. Finally, I need to sort the results by the `attribute_value` in descending order and limit the results to only the highest attribute value. Therefore, the SQL query will join the three tables, filter for strength, order by the attribute value, and provide the superhero's full name of the highest strength.",
+    "SQL": "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' ORDER BY T2.attribute_value DESC LIMIT 1"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+What is the hero's full name with the highest attribute in strength?
+
+SQL Query:
+SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' ORDER BY T2.attribute_value DESC LIMIT 1
+
+Execution Result:
+None
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the superhero's full name that has the highest attribute in strength. The provided SQL query attempts to retrieve this information by joining the superhero, hero_attribute, and attribute tables. It correctly filters for the 'strength' attribute and orders the results by the attribute_value in descending order, limiting the output to the top result. However, the execution result returns 'None,' indicating that there were no results found. This could mean that either there are no heroes with strength attributes or that the relationships in the joins do not yield any matches. Since the execution result does not provide a valid output relevant to the question, even though the SQL query is logically aligned with the question, the ultimate outcome fails to deliver the requested information. Therefore, I conclude that the SQL query does not satisfy the question's requirements due to the absence of results.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+What is the hero's full name with the highest attribute in strength?
+
+Predicted SQL:
+SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' ORDER BY T2.attribute_value DESC LIMIT 1
+
+Execution Result:
+None
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the superhero's full name that has the highest attribute in strength. The provided SQL query attempts to retrieve this information by joining the superhero, hero_attribute, and attribute tables. It correctly filters for the 'strength' attribute and orders the results by the attribute_value in descending order, limiting the output to the top result. However, the execution result returns 'None,' indicating that there were no results found. This could mean that either there are no heroes with strength attributes or that the relationships in the joins do not yield any matches. Since the execution result does not provide a valid output relevant to the question, even though the SQL query is logically aligned with the question, the ultimate outcome fails to deliver the requested information. Therefore, I conclude that the SQL query does not satisfy the question's requirements due to the absence of results.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "1. Verify the Existence of Data: First, check if there are actually any records in the 'hero_attribute' table associated with 'strength'. You can execute a simpler query like 'SELECT * FROM hero_attribute WHERE attribute_id IN (SELECT id FROM attribute WHERE attribute_name = 'strength')' to ensure that data exists. 2. Confirm Joins: Ensure that the foreign keys between the tables are correctly defined and that there are matching entries across the 'superhero', 'hero_attribute', and 'attribute' tables. It might be useful to run separate JOIN queries to see if the individual JOIN operations yield results. 3. Additional Filtering: If there are NULL values in the 'attribute_value' column, consider adding a condition to filter out NULLs in your original query; for example, you could add 'AND T2.attribute_value IS NOT NULL' to the WHERE clause. 4. Review Data Types: Ensure that the attribute_value being compared is of the correct data type for sorting. Confirm that there is no data type mismatch that could be causing the issue. 5. Refine Your Query: Once data presence is confirmed and integrity checks are done, consider modifying the SQL query to something like this for clarity: 'SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1'. This ensures you are explicitly checking for non-null values while fetching the highest attribute value."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE alignment (
+  id        INTEGER not null
+            primary key,
+  alignment TEXT default NULL
+);
+
+CREATE TABLE attribute (
+  id             INTEGER not null
+            primary key,
+  attribute_name TEXT default NULL
+);
+
+CREATE TABLE colour (
+  id     INTEGER not null
+            primary key,
+  colour TEXT default NULL
+);
+
+CREATE TABLE gender (
+  id     INTEGER not null
+            primary key,
+  gender TEXT default NULL
+);
+
+CREATE TABLE publisher (
+  id             INTEGER not null
+            primary key,
+  publisher_name TEXT default NULL
+);
+
+CREATE TABLE race (
+  id   INTEGER not null
+            primary key,
+  race TEXT default NULL
+);
+
+CREATE TABLE superhero (
+  id             INTEGER not null
+            primary key,
+  superhero_name TEXT default NULL,
+  full_name      TEXT default NULL,
+  gender_id      INTEGER          default NULL,
+  eye_colour_id  INTEGER          default NULL,
+  hair_colour_id INTEGER          default NULL,
+  skin_colour_id INTEGER          default NULL,
+  race_id        INTEGER          default NULL,
+  publisher_id   INTEGER          default NULL,
+  alignment_id   INTEGER          default NULL,
+  height_cm      INTEGER          default NULL,
+  weight_kg      INTEGER          default NULL,
+  foreign key (alignment_id) references alignment(id),
+  foreign key (eye_colour_id) references colour(id),
+  foreign key (gender_id) references gender(id),
+  foreign key (hair_colour_id) references colour(id),
+  foreign key (publisher_id) references publisher(id),
+  foreign key (race_id) references race(id),
+  foreign key (skin_colour_id) references colour(id)
+);
+
+CREATE TABLE hero_attribute (
+  hero_id         INTEGER default NULL,
+  attribute_id    INTEGER default NULL,
+  attribute_value INTEGER default NULL,
+  foreign key (attribute_id) references attribute(id),
+  foreign key (hero_id) references superhero(id)
+);
+
+CREATE TABLE superpower (
+  id         INTEGER not null
+            primary key,
+  power_name TEXT default NULL
+);
+
+CREATE TABLE hero_power (
+  hero_id  INTEGER default NULL,
+  power_id INTEGER default NULL,
+  foreign key (hero_id) references superhero(id),
+  foreign key (power_id) references superpower(id)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. 1. Verify the Existence of Data: First, check if there are actually any records in the 'hero_attribute' table associated with 'strength'. You can execute a simpler query like 'SELECT * FROM hero_attribute WHERE attribute_id IN (SELECT id FROM attribute WHERE attribute_name = 'strength')' to ensure that data exists. 2. Confirm Joins: Ensure that the foreign keys between the tables are correctly defined and that there are matching entries across the 'superhero', 'hero_attribute', and 'attribute' tables. It might be useful to run separate JOIN queries to see if the individual JOIN operations yield results. 3. Additional Filtering: If there are NULL values in the 'attribute_value' column, consider adding a condition to filter out NULLs in your original query; for example, you could add 'AND T2.attribute_value IS NOT NULL' to the WHERE clause. 4. Review Data Types: Ensure that the attribute_value being compared is of the correct data type for sorting. Confirm that there is no data type mismatch that could be causing the issue. 5. Refine Your Query: Once data presence is confirmed and integrity checks are done, consider modifying the SQL query to something like this for clarity: 'SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1'. This ensures you are explicitly checking for non-null values while fetching the highest attribute value.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To find the hero's full name with the highest attribute in strength, I need to first identify the relevant tables: `superhero`, `hero_attribute`, and `attribute`. I should focus on the 'strength' attribute from the `attribute` table and filter the results where the `attribute_name` equals 'strength'. Next, I'll use the `hero_attribute` table to find the corresponding `hero_id` and `attribute_value` for that attribute. To get the hero's full name, I will join the `superhero` table with the `hero_attribute` table on the `hero_id`. Finally, I need to sort the results by the `attribute_value` in descending order and limit the results to only the highest attribute value. Therefore, the SQL query will join the three tables, filter for strength, order by the attribute value, and provide the superhero's full name of the highest strength.", 'SQL': "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' ORDER BY T2.attribute_value DESC LIMIT 1"}, "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' ORDER BY T2.attribute_value DESC LIMIT 1"]
+
+Question: 
+What is the hero's full name with the highest attribute in strength? 
+
+Hint:
+highest attribute in strength refers to MAX(attribute_value) WHERE attribute_name = 'strength';
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the hero's full name with the highest strength attribute, I start with identifying the key tables: `superhero`, `hero_attribute`, and `attribute`. The specific attribute I need to focus on is 'strength', which I can find in the `attribute` table. My first step is to obtain the `id` of the 'strength' attribute from the `attribute` table. Then, I'll check the `hero_attribute` table for any records that match this `attribute_id` and ensure that `attribute_value` is not null. This table will help me find the `hero_id` associated with each strength value. Next, I'll join the `superhero` table to retrieve the `full_name` of the hero corresponding to the `hero_id`. To get the hero with the highest attribute, I'll sort the results based on `attribute_value` in descending order and limit the output to one result. The complete SQL query will thus perform these joins and filter accordingly to yield the desired output of the hero's full name with the highest strength value, while following the principles of avoiding unnecessary columns and ensuring the integrity of the joins. Therefore, the final SQL query is: SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1.",
+    "SQL": "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+What is the hero's full name with the highest attribute in strength?
+
+SQL Query:
+SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1
+
+Execution Result:
+None
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the hero's full name with the highest strength attribute. The SQL query correctly retrieves the full name of superheroes where their strength attribute exists and is not null, ordering by the strength's attribute value in descending order, which effectively targets the hero with the highest strength. However, the execution result returned 'None', indicating that either there are no entries in the relevant tables matching the criteria for strength, or the data is missing, which implies the query did not find any results to answer the question. Although the SQL query is logically constructed, the lack of results means it does not fulfill the requirement of providing the hero's full name as requested. Therefore, despite the query being appropriately formed, the execution result indicates that it fails to answer the question due to the absence of data.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+What is the hero's full name with the highest attribute in strength?
+
+Predicted SQL:
+SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1
+
+Execution Result:
+None
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the hero's full name with the highest strength attribute. The SQL query correctly retrieves the full name of superheroes where their strength attribute exists and is not null, ordering by the strength's attribute value in descending order, which effectively targets the hero with the highest strength. However, the execution result returned 'None', indicating that either there are no entries in the relevant tables matching the criteria for strength, or the data is missing, which implies the query did not find any results to answer the question. Although the SQL query is logically constructed, the lack of results means it does not fulfill the requirement of providing the hero's full name as requested. Therefore, despite the query being appropriately formed, the execution result indicates that it fails to answer the question due to the absence of data.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "1. Confirm Data Availability: First, check if there are entries in the 'hero_attribute' and 'attribute' tables, particularly for the 'strength' attribute. Ensure that these tables contain relevant data before running the query. If they are empty or missing expected entries, you will not yield results. \n\n2. Adjust for Missing Data: If the data for 'strength' does not exist, consider extending the query to return a default response or a message indicating that no hero has a recorded strength attribute. This can be done by using a LEFT JOIN or by checking the count of results returned. \n\n3. Ensure Correct Joins: Make sure that the join conditions are correct. Ensure that there are no issues with the 'hero_id' or 'attribute_id' references which might lead to missing links in the resulting dataset. \n\n4. Review Attribute Naming: Verify that the attribute name 'strength' exactly matches how it is stored in the 'attribute' table, as any discrepancies in casing or spelling will lead to no matches. Consider using a wildcard in a WHERE clause (e.g., WHERE T3.attribute_name LIKE '%strength%') if there may be variations. \n\n5. Output Verification: Adjust the query to check if ordering by 'attribute_value' is causing any issues or if additional filtering might be applied unnecessarily. \n\n6. Test Iteratively: Run iterations of the query by progressively relaxing conditions (like filtering out 'IS NOT NULL') to identify where results may be becoming empty, and ensure the query is functioning as intended for existing data."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE alignment (
+  id        INTEGER not null
+            primary key,
+  alignment TEXT default NULL
+);
+
+CREATE TABLE attribute (
+  id             INTEGER not null
+            primary key,
+  attribute_name TEXT default NULL
+);
+
+CREATE TABLE colour (
+  id     INTEGER not null
+            primary key,
+  colour TEXT default NULL
+);
+
+CREATE TABLE gender (
+  id     INTEGER not null
+            primary key,
+  gender TEXT default NULL
+);
+
+CREATE TABLE publisher (
+  id             INTEGER not null
+            primary key,
+  publisher_name TEXT default NULL
+);
+
+CREATE TABLE race (
+  id   INTEGER not null
+            primary key,
+  race TEXT default NULL
+);
+
+CREATE TABLE superhero (
+  id             INTEGER not null
+            primary key,
+  superhero_name TEXT default NULL,
+  full_name      TEXT default NULL,
+  gender_id      INTEGER          default NULL,
+  eye_colour_id  INTEGER          default NULL,
+  hair_colour_id INTEGER          default NULL,
+  skin_colour_id INTEGER          default NULL,
+  race_id        INTEGER          default NULL,
+  publisher_id   INTEGER          default NULL,
+  alignment_id   INTEGER          default NULL,
+  height_cm      INTEGER          default NULL,
+  weight_kg      INTEGER          default NULL,
+  foreign key (alignment_id) references alignment(id),
+  foreign key (eye_colour_id) references colour(id),
+  foreign key (gender_id) references gender(id),
+  foreign key (hair_colour_id) references colour(id),
+  foreign key (publisher_id) references publisher(id),
+  foreign key (race_id) references race(id),
+  foreign key (skin_colour_id) references colour(id)
+);
+
+CREATE TABLE hero_attribute (
+  hero_id         INTEGER default NULL,
+  attribute_id    INTEGER default NULL,
+  attribute_value INTEGER default NULL,
+  foreign key (attribute_id) references attribute(id),
+  foreign key (hero_id) references superhero(id)
+);
+
+CREATE TABLE superpower (
+  id         INTEGER not null
+            primary key,
+  power_name TEXT default NULL
+);
+
+CREATE TABLE hero_power (
+  hero_id  INTEGER default NULL,
+  power_id INTEGER default NULL,
+  foreign key (hero_id) references superhero(id),
+  foreign key (power_id) references superpower(id)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. 1. Verify the Existence of Data: First, check if there are actually any records in the 'hero_attribute' table associated with 'strength'. You can execute a simpler query like 'SELECT * FROM hero_attribute WHERE attribute_id IN (SELECT id FROM attribute WHERE attribute_name = 'strength')' to ensure that data exists. 2. Confirm Joins: Ensure that the foreign keys between the tables are correctly defined and that there are matching entries across the 'superhero', 'hero_attribute', and 'attribute' tables. It might be useful to run separate JOIN queries to see if the individual JOIN operations yield results. 3. Additional Filtering: If there are NULL values in the 'attribute_value' column, consider adding a condition to filter out NULLs in your original query; for example, you could add 'AND T2.attribute_value IS NOT NULL' to the WHERE clause. 4. Review Data Types: Ensure that the attribute_value being compared is of the correct data type for sorting. Confirm that there is no data type mismatch that could be causing the issue. 5. Refine Your Query: Once data presence is confirmed and integrity checks are done, consider modifying the SQL query to something like this for clarity: 'SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1'. This ensures you are explicitly checking for non-null values while fetching the highest attribute value.
+7. 1. Confirm Data Availability: First, check if there are entries in the 'hero_attribute' and 'attribute' tables, particularly for the 'strength' attribute. Ensure that these tables contain relevant data before running the query. If they are empty or missing expected entries, you will not yield results. 
+
+2. Adjust for Missing Data: If the data for 'strength' does not exist, consider extending the query to return a default response or a message indicating that no hero has a recorded strength attribute. This can be done by using a LEFT JOIN or by checking the count of results returned. 
+
+3. Ensure Correct Joins: Make sure that the join conditions are correct. Ensure that there are no issues with the 'hero_id' or 'attribute_id' references which might lead to missing links in the resulting dataset. 
+
+4. Review Attribute Naming: Verify that the attribute name 'strength' exactly matches how it is stored in the 'attribute' table, as any discrepancies in casing or spelling will lead to no matches. Consider using a wildcard in a WHERE clause (e.g., WHERE T3.attribute_name LIKE '%strength%') if there may be variations. 
+
+5. Output Verification: Adjust the query to check if ordering by 'attribute_value' is causing any issues or if additional filtering might be applied unnecessarily. 
+
+6. Test Iteratively: Run iterations of the query by progressively relaxing conditions (like filtering out 'IS NOT NULL') to identify where results may be becoming empty, and ensure the query is functioning as intended for existing data.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To find the hero's full name with the highest attribute in strength, I need to first identify the relevant tables: `superhero`, `hero_attribute`, and `attribute`. I should focus on the 'strength' attribute from the `attribute` table and filter the results where the `attribute_name` equals 'strength'. Next, I'll use the `hero_attribute` table to find the corresponding `hero_id` and `attribute_value` for that attribute. To get the hero's full name, I will join the `superhero` table with the `hero_attribute` table on the `hero_id`. Finally, I need to sort the results by the `attribute_value` in descending order and limit the results to only the highest attribute value. Therefore, the SQL query will join the three tables, filter for strength, order by the attribute value, and provide the superhero's full name of the highest strength.", 'SQL': "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' ORDER BY T2.attribute_value DESC LIMIT 1"}, "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' ORDER BY T2.attribute_value DESC LIMIT 1", "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1", "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1"]
+
+Question: 
+What is the hero's full name with the highest attribute in strength? 
+
+Hint:
+highest attribute in strength refers to MAX(attribute_value) WHERE attribute_name = 'strength';
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the hero's full name with the highest strength attribute, I will first confirm the relevant tables involved: `superhero`, `hero_attribute`, and `attribute`. The attribute of interest is 'strength', so I will join the `hero_attribute` table to get the attribute values and the `attribute` table to filter where the `attribute_name` equals 'strength'. I will use the `superhero` table to obtain the full name of the hero associated with the highest strength. I will ensure to order the results by `attribute_value` in descending order and limit the results to just one to get the highest value. It's important to handle nulls, so I will add a condition to ensure `attribute_value` is not null. This method ensures clarity in getting exactly what is requested without unnecessary data. Therefore, the final SQL query reflects this approach.",
+    "SQL": "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+What is the hero's full name with the highest attribute in strength?
+
+SQL Query:
+SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1
+
+Execution Result:
+None
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the hero's full name with the highest strength attribute. The provided SQL query appropriately joins three tables to retrieve this information: it selects the hero's full name and joins on hero attributes to filter by strength. The filtering is correctly applied by checking for the attribute name 'strength' and ensuring that the attribute value is not null. The query also sorts the results in descending order by the strength value and limits the output to just one record, which aligns with the intent to get the highest value. However, despite the query's correctness in structure and logic, the execution result is 'None,' which indicates that there are no entries meeting the criteria specified in the question, meaning there is no hero with a defined strength attribute in the database. Since the query does not yield an answer, even though it correctly attempts to do so, it ultimately fails to fulfill the requirements of the question. Therefore, the judgment must be 'Invalid' due to the lack of output that answers the question, despite correct SQL structure.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+What is the hero's full name with the highest attribute in strength?
+
+Predicted SQL:
+SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1
+
+Execution Result:
+None
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the hero's full name with the highest strength attribute. The provided SQL query appropriately joins three tables to retrieve this information: it selects the hero's full name and joins on hero attributes to filter by strength. The filtering is correctly applied by checking for the attribute name 'strength' and ensuring that the attribute value is not null. The query also sorts the results in descending order by the strength value and limits the output to just one record, which aligns with the intent to get the highest value. However, despite the query's correctness in structure and logic, the execution result is 'None,' which indicates that there are no entries meeting the criteria specified in the question, meaning there is no hero with a defined strength attribute in the database. Since the query does not yield an answer, even though it correctly attempts to do so, it ultimately fails to fulfill the requirements of the question. Therefore, the judgment must be 'Invalid' due to the lack of output that answers the question, despite correct SQL structure.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "1. Confirm that there are entries in the 'hero_attribute' table for strength and that the 'attribute_value' is not null. If there are no such entries, the query will always return 'None'. If the table is empty or lacks valid entries, add data to it that satisfies these conditions.\n\n2. Make sure that there is a valid mapping in the 'attribute' table for an attribute named 'strength'. Check if the attribute name is spelled correctly and exists in the database. If it\u2019s misspelled or missing, correct it or add it.\n\n3. If there are potential records with null or insignificant strength values, adjust the logic to account for this. Consider whether you want to include heroes with a strength of zero or a minimal value as potential candidates, or explicitly manage instances where attribute values may not be populated.\n\n4. Verify that the 'full_name' field in the 'superhero' table is being populated correctly, and assure compliance with the database entries for specific heroes. Confirm that there's at least one hero that has a defined unique 'full_name'.\n\n5. Finally, run the query parts individually (each JOIN and WHERE clause) to confirm the output at each step and diagnose where the breakdown occurs that leads to no records being returned."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE alignment (
+  id        INTEGER not null
+            primary key,
+  alignment TEXT default NULL
+);
+
+CREATE TABLE attribute (
+  id             INTEGER not null
+            primary key,
+  attribute_name TEXT default NULL
+);
+
+CREATE TABLE colour (
+  id     INTEGER not null
+            primary key,
+  colour TEXT default NULL
+);
+
+CREATE TABLE gender (
+  id     INTEGER not null
+            primary key,
+  gender TEXT default NULL
+);
+
+CREATE TABLE publisher (
+  id             INTEGER not null
+            primary key,
+  publisher_name TEXT default NULL
+);
+
+CREATE TABLE race (
+  id   INTEGER not null
+            primary key,
+  race TEXT default NULL
+);
+
+CREATE TABLE superhero (
+  id             INTEGER not null
+            primary key,
+  superhero_name TEXT default NULL,
+  full_name      TEXT default NULL,
+  gender_id      INTEGER          default NULL,
+  eye_colour_id  INTEGER          default NULL,
+  hair_colour_id INTEGER          default NULL,
+  skin_colour_id INTEGER          default NULL,
+  race_id        INTEGER          default NULL,
+  publisher_id   INTEGER          default NULL,
+  alignment_id   INTEGER          default NULL,
+  height_cm      INTEGER          default NULL,
+  weight_kg      INTEGER          default NULL,
+  foreign key (alignment_id) references alignment(id),
+  foreign key (eye_colour_id) references colour(id),
+  foreign key (gender_id) references gender(id),
+  foreign key (hair_colour_id) references colour(id),
+  foreign key (publisher_id) references publisher(id),
+  foreign key (race_id) references race(id),
+  foreign key (skin_colour_id) references colour(id)
+);
+
+CREATE TABLE hero_attribute (
+  hero_id         INTEGER default NULL,
+  attribute_id    INTEGER default NULL,
+  attribute_value INTEGER default NULL,
+  foreign key (attribute_id) references attribute(id),
+  foreign key (hero_id) references superhero(id)
+);
+
+CREATE TABLE superpower (
+  id         INTEGER not null
+            primary key,
+  power_name TEXT default NULL
+);
+
+CREATE TABLE hero_power (
+  hero_id  INTEGER default NULL,
+  power_id INTEGER default NULL,
+  foreign key (hero_id) references superhero(id),
+  foreign key (power_id) references superpower(id)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. 1. Verify the Existence of Data: First, check if there are actually any records in the 'hero_attribute' table associated with 'strength'. You can execute a simpler query like 'SELECT * FROM hero_attribute WHERE attribute_id IN (SELECT id FROM attribute WHERE attribute_name = 'strength')' to ensure that data exists. 2. Confirm Joins: Ensure that the foreign keys between the tables are correctly defined and that there are matching entries across the 'superhero', 'hero_attribute', and 'attribute' tables. It might be useful to run separate JOIN queries to see if the individual JOIN operations yield results. 3. Additional Filtering: If there are NULL values in the 'attribute_value' column, consider adding a condition to filter out NULLs in your original query; for example, you could add 'AND T2.attribute_value IS NOT NULL' to the WHERE clause. 4. Review Data Types: Ensure that the attribute_value being compared is of the correct data type for sorting. Confirm that there is no data type mismatch that could be causing the issue. 5. Refine Your Query: Once data presence is confirmed and integrity checks are done, consider modifying the SQL query to something like this for clarity: 'SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1'. This ensures you are explicitly checking for non-null values while fetching the highest attribute value.
+7. 1. Confirm Data Availability: First, check if there are entries in the 'hero_attribute' and 'attribute' tables, particularly for the 'strength' attribute. Ensure that these tables contain relevant data before running the query. If they are empty or missing expected entries, you will not yield results. 
+
+2. Adjust for Missing Data: If the data for 'strength' does not exist, consider extending the query to return a default response or a message indicating that no hero has a recorded strength attribute. This can be done by using a LEFT JOIN or by checking the count of results returned. 
+
+3. Ensure Correct Joins: Make sure that the join conditions are correct. Ensure that there are no issues with the 'hero_id' or 'attribute_id' references which might lead to missing links in the resulting dataset. 
+
+4. Review Attribute Naming: Verify that the attribute name 'strength' exactly matches how it is stored in the 'attribute' table, as any discrepancies in casing or spelling will lead to no matches. Consider using a wildcard in a WHERE clause (e.g., WHERE T3.attribute_name LIKE '%strength%') if there may be variations. 
+
+5. Output Verification: Adjust the query to check if ordering by 'attribute_value' is causing any issues or if additional filtering might be applied unnecessarily. 
+
+6. Test Iteratively: Run iterations of the query by progressively relaxing conditions (like filtering out 'IS NOT NULL') to identify where results may be becoming empty, and ensure the query is functioning as intended for existing data.
+8. 1. Confirm that there are entries in the 'hero_attribute' table for strength and that the 'attribute_value' is not null. If there are no such entries, the query will always return 'None'. If the table is empty or lacks valid entries, add data to it that satisfies these conditions.
+
+2. Make sure that there is a valid mapping in the 'attribute' table for an attribute named 'strength'. Check if the attribute name is spelled correctly and exists in the database. If it’s misspelled or missing, correct it or add it.
+
+3. If there are potential records with null or insignificant strength values, adjust the logic to account for this. Consider whether you want to include heroes with a strength of zero or a minimal value as potential candidates, or explicitly manage instances where attribute values may not be populated.
+
+4. Verify that the 'full_name' field in the 'superhero' table is being populated correctly, and assure compliance with the database entries for specific heroes. Confirm that there's at least one hero that has a defined unique 'full_name'.
+
+5. Finally, run the query parts individually (each JOIN and WHERE clause) to confirm the output at each step and diagnose where the breakdown occurs that leads to no records being returned.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' ORDER BY T2.attribute_value DESC LIMIT 1", "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1", "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1", "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1", "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1"]
+
+Question: 
+What is the hero's full name with the highest attribute in strength? 
+
+Hint:
+highest attribute in strength refers to MAX(attribute_value) WHERE attribute_name = 'strength';
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "First, the goal is to find the full name of the superhero who has the highest attribute value for strength. To do this, I need to join the 'superhero', 'hero_attribute', and 'attribute' tables because the strength attribute is located in the 'hero_attribute' table while the superhero's full name is in the 'superhero' table. The attribute name 'strength' must be confirmed by joining with the 'attribute' table. Additionally, I'll ensure to filter out any NULL values for the 'attribute_value'. Following the guiding principles, I will use ORDER BY in combination with LIMIT to retrieve the superhero with the highest strength attribute. Since I only need the full name and not any other details, I will specifically select the 'full_name' of the superhero. I will construct the SQL query maintaining clear joins and conditions, ensuring to filter out nulls in 'attribute_value'. Lastly, I will adhere to avoiding the use of aggregates like MAX and instead rely on ORDER BY + LIMIT to extract the result directly.",
+    "SQL": "SELECT T1.full_name FROM superhero T1 JOIN hero_attribute T2 ON T1.id = T2.hero_id JOIN attribute T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'strength' AND T2.attribute_value IS NOT NULL ORDER BY T2.attribute_value DESC LIMIT 1"
+}
+

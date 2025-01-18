@@ -1,0 +1,562 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: List out all post that are related to post ID 61217 and what is the popularity of this post?
+Hint: post related refers to RelatedPostId; popularity refers to ViewCount
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "post",
+    "post ID 61217",
+    "popularity",
+    "RelatedPostId",
+    "ViewCount"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE badges (
+  Id     INTEGER          not null
+        primary key,
+  UserId INTEGER          null,
+  Name   TEXT null,
+  Date   DATETIME     null,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE comments (
+  Id              INTEGER          not null
+        primary key,
+  PostId          INTEGER          null,
+  Score           INTEGER          null,
+  Text            TEXT     null,
+  CreationDate    DATETIME     null,
+  UserId          INTEGER          null,
+  UserDisplayName TEXT null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE postHistory (
+  Id                INTEGER          not null UNIQUE
+        primary key,
+  PostHistoryTypeId INTEGER          null,
+  PostId            INTEGER          null,
+  RevisionGUID      TEXT null,
+  CreationDate      DATETIME     null,
+  UserId            INTEGER          null,
+  Text              TEXT     null,
+  Comment           TEXT         null,
+  UserDisplayName   TEXT null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE postLinks (
+  Id            INTEGER      not null
+        primary key,
+  CreationDate  DATETIME null,
+  PostId        INTEGER      null,
+  RelatedPostId INTEGER      null,
+  LinkTypeId    INTEGER      null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (RelatedPostId) references posts (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE posts (
+  Id                    INTEGER          not null UNIQUE
+        primary key,
+  PostTypeId            INTEGER          null,
+  AcceptedAnswerId      INTEGER          null,
+  CreaionDate           DATETIME     null,
+  Score                 INTEGER          null,
+  ViewCount             INTEGER          null,
+  Body                  TEXT     null,
+  OwnerUserId           INTEGER          null,
+  LasActivityDate       DATETIME     null,
+  Title                 TEXT null,
+  Tags                  TEXT null,
+  AnswerCount           INTEGER          null,
+  CommentCount          INTEGER          null,
+  FavoriteCount         INTEGER          null,
+  LastEditorUserId      INTEGER          null,
+  LastEditDate          DATETIME     null,
+  CommunityOwnedDate    DATETIME    null,
+  ParentId              INTEGER          null,
+  ClosedDate            DATETIME     null,
+  OwnerDisplayName      TEXT null,
+  LastEditorDisplayName TEXT null,
+  foreign key (LastEditorUserId) references users (Id)
+            on update cascade on delete cascade,
+  foreign key (OwnerUserId) references users (Id)
+            on update cascade on delete cascade,
+  foreign key (ParentId) references posts (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE tags (
+  Id            INTEGER          not null
+        primary key,
+  TagName       TEXT null,
+  Count         INTEGER          null,
+  ExcerptPostId INTEGER          null,
+  WikiPostId    INTEGER          null,
+  foreign key (ExcerptPostId) references posts (Id)
+        on update cascade on delete cascade
+);
+
+CREATE TABLE users (
+  Id              INTEGER          not null UNIQUE
+        primary key,
+  Reputation      INTEGER          null,
+  CreationDate    DATETIME     null,
+  DisplayName     TEXT null,
+  LastAccessDate  DATETIME     null,
+  WebsiteUrl      TEXT null,
+  Location        TEXT null,
+  AboutMe         TEXT     null,
+  Views           INTEGER          null,
+  UpVotes         INTEGER          null,
+  DownVotes       INTEGER          null,
+  AccountId       INTEGER          null,
+  Age             INTEGER          null,
+  ProfileImageUrl TEXT null
+);
+
+CREATE TABLE votes (
+  Id           INTEGER  not null
+        primary key,
+  PostId       INTEGER  null,
+  VoteTypeId   INTEGER  null,
+  CreationDate DATE null,
+  UserId       INTEGER  null,
+  BountyAmount INTEGER  null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+List out all post that are related to post ID 61217 and what is the popularity of this post? 
+
+Hint:
+post related refers to RelatedPostId; popularity refers to ViewCount
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question, we need to identify posts that are related to the given Post ID 61217. The relationship is established using the postLinks table, where the RelatedPostId column corresponds to the given Post ID. We'll then join the posts table to retrieve the ViewCount for each of these related posts, which represents their popularity. According to the instructions, we should select only the relevant information - in this case, the Id of the related posts and their ViewCount. We'll use aliases for the tables to make the query clearer.",
+    "SQL": "SELECT T2.Id, T2.ViewCount FROM postLinks AS T1 JOIN posts AS T2 ON T1.RelatedPostId = T2.Id WHERE T1.PostId = 61217"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+List out all post that are related to post ID 61217 and what is the popularity of this post?
+
+SQL Query:
+SELECT T2.Id, T2.ViewCount FROM postLinks AS T1 JOIN posts AS T2 ON T1.RelatedPostId = T2.Id WHERE T1.PostId = 61217
+
+Database Content:
+{'badges': ['Id', 'UserId', 'Name', 'Date'], 'comments': ['Id', 'PostId', 'Score', 'Text', 'CreationDate', 'UserId', 'UserDisplayName'], 'postHistory': ['Id', 'PostHistoryTypeId', 'PostId', 'RevisionGUID', 'CreationDate', 'UserId', 'Text', 'Comment', 'UserDisplayName'], 'postLinks': ['Id', 'CreationDate', 'PostId', 'RelatedPostId', 'LinkTypeId'], 'posts': ['Id', 'PostTypeId', 'AcceptedAnswerId', 'CreaionDate', 'Score', 'ViewCount', 'Body', 'OwnerUserId', 'LasActivityDate', 'Title', 'Tags', 'AnswerCount', 'CommentCount', 'FavoriteCount', 'LastEditorUserId', 'LastEditDate', 'CommunityOwnedDate', 'ParentId', 'ClosedDate', 'OwnerDisplayName', 'LastEditorDisplayName'], 'tags': ['Id', 'TagName', 'Count', 'ExcerptPostId', 'WikiPostId'], 'users': ['Id', 'Reputation', 'CreationDate', 'DisplayName', 'LastAccessDate', 'WebsiteUrl', 'Location', 'AboutMe', 'Views', 'UpVotes', 'DownVotes', 'AccountId', 'Age', 'ProfileImageUrl'], 'votes': ['Id', 'PostId', 'VoteTypeId', 'CreationDate', 'UserId', 'BountyAmount']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks to list all posts that are related to post ID 61217 and inquire about the popularity of this post. The SQL query aims to select the ID and view count of posts related to post ID 61217. The query correctly joins the 'postLinks' and 'posts' tables based on their IDs and filters for the desired post ID. However, the question explicitly mentions the need to know the popularity of the specified post (ID 61217), which is not included in the SQL query. The popularity could refer to various metrics, such as 'ViewCount' or 'Score,' but since the question does not specify which criterion to use, a complete response should ideally include both the related posts and the metrics of the specified post (ID 61217). As a result, while the SQL query partially addresses the question by retrieving related posts, it fails to provide the popularity metric of the original post referenced in the question, leading to an incomplete answer.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+List out all post that are related to post ID 61217 and what is the popularity of this post?
+
+Predicted SQL:
+SELECT T2.Id, T2.ViewCount FROM postLinks AS T1 JOIN posts AS T2 ON T1.RelatedPostId = T2.Id WHERE T1.PostId = 61217
+
+Execution Result:
+(33392, 1494)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks to list all posts that are related to post ID 61217 and inquire about the popularity of this post. The SQL query aims to select the ID and view count of posts related to post ID 61217. The query correctly joins the 'postLinks' and 'posts' tables based on their IDs and filters for the desired post ID. However, the question explicitly mentions the need to know the popularity of the specified post (ID 61217), which is not included in the SQL query. The popularity could refer to various metrics, such as 'ViewCount' or 'Score,' but since the question does not specify which criterion to use, a complete response should ideally include both the related posts and the metrics of the specified post (ID 61217). As a result, while the SQL query partially addresses the question by retrieving related posts, it fails to provide the popularity metric of the original post referenced in the question, leading to an incomplete answer.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query to fully align with the question's intent, you should include an additional selection for the popularity metric of the specified post ID 61217 along with the related posts. Here are the steps to achieve this:\n\n1. Use a Common Table Expression (CTE) or a subquery to first retrieve the popularity details (e.g., ViewCount) for the post with ID 61217.\n2. Update the SELECT statement to include both the popularity of post ID 61217 and the related posts' information. This can be done by selecting the related posts in the same result set or including it as separate output.\n3. Join the tables as you already did, but also include a separate SELECT for the popularity of the main post (ID 61217).\n\nExample revised SQL:\n\n```sql\nSELECT T2.Id AS RelatedPostId, T2.ViewCount AS RelatedPostViewCount,\n       (SELECT ViewCount FROM posts WHERE Id = 61217) AS OriginalPostViewCount\nFROM postLinks AS T1 \nJOIN posts AS T2 ON T1.RelatedPostId = T2.Id \nWHERE T1.PostId = 61217\n```\n\nThis query retrieves both the related post IDs and their view counts, along with the view count of the specified post (ID 61217), thus fully addressing the question's requirements."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE badges (
+  Id     INTEGER          not null
+        primary key,
+  UserId INTEGER          null,
+  Name   TEXT null,
+  Date   DATETIME     null,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE comments (
+  Id              INTEGER          not null
+        primary key,
+  PostId          INTEGER          null,
+  Score           INTEGER          null,
+  Text            TEXT     null,
+  CreationDate    DATETIME     null,
+  UserId          INTEGER          null,
+  UserDisplayName TEXT null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE postHistory (
+  Id                INTEGER          not null UNIQUE
+        primary key,
+  PostHistoryTypeId INTEGER          null,
+  PostId            INTEGER          null,
+  RevisionGUID      TEXT null,
+  CreationDate      DATETIME     null,
+  UserId            INTEGER          null,
+  Text              TEXT     null,
+  Comment           TEXT         null,
+  UserDisplayName   TEXT null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE postLinks (
+  Id            INTEGER      not null
+        primary key,
+  CreationDate  DATETIME null,
+  PostId        INTEGER      null,
+  RelatedPostId INTEGER      null,
+  LinkTypeId    INTEGER      null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (RelatedPostId) references posts (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE posts (
+  Id                    INTEGER          not null UNIQUE
+        primary key,
+  PostTypeId            INTEGER          null,
+  AcceptedAnswerId      INTEGER          null,
+  CreaionDate           DATETIME     null,
+  Score                 INTEGER          null,
+  ViewCount             INTEGER          null,
+  Body                  TEXT     null,
+  OwnerUserId           INTEGER          null,
+  LasActivityDate       DATETIME     null,
+  Title                 TEXT null,
+  Tags                  TEXT null,
+  AnswerCount           INTEGER          null,
+  CommentCount          INTEGER          null,
+  FavoriteCount         INTEGER          null,
+  LastEditorUserId      INTEGER          null,
+  LastEditDate          DATETIME     null,
+  CommunityOwnedDate    DATETIME    null,
+  ParentId              INTEGER          null,
+  ClosedDate            DATETIME     null,
+  OwnerDisplayName      TEXT null,
+  LastEditorDisplayName TEXT null,
+  foreign key (LastEditorUserId) references users (Id)
+            on update cascade on delete cascade,
+  foreign key (OwnerUserId) references users (Id)
+            on update cascade on delete cascade,
+  foreign key (ParentId) references posts (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE tags (
+  Id            INTEGER          not null
+        primary key,
+  TagName       TEXT null,
+  Count         INTEGER          null,
+  ExcerptPostId INTEGER          null,
+  WikiPostId    INTEGER          null,
+  foreign key (ExcerptPostId) references posts (Id)
+        on update cascade on delete cascade
+);
+
+CREATE TABLE users (
+  Id              INTEGER          not null UNIQUE
+        primary key,
+  Reputation      INTEGER          null,
+  CreationDate    DATETIME     null,
+  DisplayName     TEXT null,
+  LastAccessDate  DATETIME     null,
+  WebsiteUrl      TEXT null,
+  Location        TEXT null,
+  AboutMe         TEXT     null,
+  Views           INTEGER          null,
+  UpVotes         INTEGER          null,
+  DownVotes       INTEGER          null,
+  AccountId       INTEGER          null,
+  Age             INTEGER          null,
+  ProfileImageUrl TEXT null
+);
+
+CREATE TABLE votes (
+  Id           INTEGER  not null
+        primary key,
+  PostId       INTEGER  null,
+  VoteTypeId   INTEGER  null,
+  CreationDate DATE null,
+  UserId       INTEGER  null,
+  BountyAmount INTEGER  null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To modify the SQL query to fully align with the question's intent, you should include an additional selection for the popularity metric of the specified post ID 61217 along with the related posts. Here are the steps to achieve this:
+
+1. Use a Common Table Expression (CTE) or a subquery to first retrieve the popularity details (e.g., ViewCount) for the post with ID 61217.
+2. Update the SELECT statement to include both the popularity of post ID 61217 and the related posts' information. This can be done by selecting the related posts in the same result set or including it as separate output.
+3. Join the tables as you already did, but also include a separate SELECT for the popularity of the main post (ID 61217).
+
+Example revised SQL:
+
+```sql
+SELECT T2.Id AS RelatedPostId, T2.ViewCount AS RelatedPostViewCount,
+       (SELECT ViewCount FROM posts WHERE Id = 61217) AS OriginalPostViewCount
+FROM postLinks AS T1 
+JOIN posts AS T2 ON T1.RelatedPostId = T2.Id 
+WHERE T1.PostId = 61217
+```
+
+This query retrieves both the related post IDs and their view counts, along with the view count of the specified post (ID 61217), thus fully addressing the question's requirements.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To answer the question, we need to identify posts that are related to the given Post ID 61217. The relationship is established using the postLinks table, where the RelatedPostId column corresponds to the given Post ID. We'll then join the posts table to retrieve the ViewCount for each of these related posts, which represents their popularity. According to the instructions, we should select only the relevant information - in this case, the Id of the related posts and their ViewCount. We'll use aliases for the tables to make the query clearer.", 'SQL': 'SELECT T2.Id, T2.ViewCount FROM postLinks AS T1 JOIN posts AS T2 ON T1.RelatedPostId = T2.Id WHERE T1.PostId = 61217'}, 'SELECT T2.Id, T2.ViewCount FROM postLinks AS T1 JOIN posts AS T2 ON T1.RelatedPostId = T2.Id WHERE T1.PostId = 61217']
+
+Question: 
+List out all post that are related to post ID 61217 and what is the popularity of this post? 
+
+Hint:
+post related refers to RelatedPostId; popularity refers to ViewCount
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To address the question, we first need to find all the posts related to post ID 61217. We will accomplish this by looking into the postLinks table, where we will use the PostId column to identify links that involve post ID 61217, and then retrieve the corresponding RelatedPostId. Following that, we need to join this result with the posts table to get the ViewCount for each RelatedPostId, which indicates their popularity. Additionally, we must include the ViewCount of the original post (ID 61217) in our results. Therefore, we will use a subquery to select the ViewCount for the original post while also selecting the related post IDs and their ViewCounts from the join of the postLinks and posts tables. The final SELECT statement will capture this information clearly, ensuring we comply with the guiding principles of precise column selection and providing the popularities as required by the question.",
+    "SQL": "SELECT T2.Id AS RelatedPostId, T2.ViewCount AS RelatedPostViewCount, (SELECT ViewCount FROM posts WHERE Id = 61217) AS OriginalPostViewCount FROM postLinks AS T1 JOIN posts AS T2 ON T1.RelatedPostId = T2.Id WHERE T1.PostId = 61217"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+List out all post that are related to post ID 61217 and what is the popularity of this post?
+
+SQL Query:
+SELECT T2.Id AS RelatedPostId, T2.ViewCount AS RelatedPostViewCount, (SELECT ViewCount FROM posts WHERE Id = 61217) AS OriginalPostViewCount FROM postLinks AS T1 JOIN posts AS T2 ON T1.RelatedPostId = T2.Id WHERE T1.PostId = 61217
+
+Database Content:
+{'badges': ['Id', 'UserId', 'Name', 'Date'], 'comments': ['Id', 'PostId', 'Score', 'Text', 'CreationDate', 'UserId', 'UserDisplayName'], 'postHistory': ['Id', 'PostHistoryTypeId', 'PostId', 'RevisionGUID', 'CreationDate', 'UserId', 'Text', 'Comment', 'UserDisplayName'], 'postLinks': ['Id', 'CreationDate', 'PostId', 'RelatedPostId', 'LinkTypeId'], 'posts': ['Id', 'PostTypeId', 'AcceptedAnswerId', 'CreaionDate', 'Score', 'ViewCount', 'Body', 'OwnerUserId', 'LasActivityDate', 'Title', 'Tags', 'AnswerCount', 'CommentCount', 'FavoriteCount', 'LastEditorUserId', 'LastEditDate', 'CommunityOwnedDate', 'ParentId', 'ClosedDate', 'OwnerDisplayName', 'LastEditorDisplayName'], 'tags': ['Id', 'TagName', 'Count', 'ExcerptPostId', 'WikiPostId'], 'users': ['Id', 'Reputation', 'CreationDate', 'DisplayName', 'LastAccessDate', 'WebsiteUrl', 'Location', 'AboutMe', 'Views', 'UpVotes', 'DownVotes', 'AccountId', 'Age', 'ProfileImageUrl'], 'votes': ['Id', 'PostId', 'VoteTypeId', 'CreationDate', 'UserId', 'BountyAmount']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks to list all posts related to post ID 61217 and to include the popularity (view count) of that post. The SQL query attempts to extract related posts from the 'postLinks' table and their corresponding view counts from the 'posts' table. The inner SELECT statement retrieves the view count of the original post (ID 61217). Both the related post IDs and their view counts are selected, which aligns with the question's requirements. The main condition in the WHERE clause correctly filters for relationships based on the provided post ID (61217). Therefore, the SQL query and the question align well because it correctly retrieves the necessary information and follows the requirements laid out in the question. Based on this analysis, I conclude that the SQL query is fulfilling the question's criteria adequately.",
+    "judgment": "Valid"
+}
+

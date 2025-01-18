@@ -1,0 +1,144 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "patient",
+            "hospital",
+            "1991/6/13",
+            "SJS",
+            "total number",
+            "Laboratory tests",
+            "1995",
+            "First Date",
+            "Diagnosis",
+            "COUNT(ID)",
+            "Date"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "Examination": [
+                "ID",
+                "Examination Date",
+                "aCL IgG",
+                "aCL IgM",
+                "ANA",
+                "ANA Pattern",
+                "aCL IgA",
+                "Diagnosis",
+                "KCT",
+                "RVVT",
+                "LAC",
+                "Symptoms",
+                "Thrombosis",
+                "Diagnosi"
+            ],
+            "Patient": [
+                "ID",
+                "SEX",
+                "Birthday",
+                "Description",
+                "First Date",
+                "Admission",
+                "Diagnosis",
+                "FirstDate",
+                "Diagnosi"
+            ],
+            "Laboratory": [
+                "ID",
+                "Date",
+                "GOT",
+                "GPT",
+                "LDH",
+                "ALP",
+                "TP",
+                "ALB",
+                "UA",
+                "UN",
+                "CRE",
+                "T-BIL",
+                "T-CHO",
+                "TG",
+                "CPK",
+                "GLU",
+                "WBC",
+                "RBC",
+                "HGB",
+                "HCT",
+                "PLT",
+                "PT",
+                "APTT",
+                "FG",
+                "PIC",
+                "TAT",
+                "TAT2",
+                "U-PRO",
+                "IGG",
+                "IGA",
+                "IGM",
+                "CRP",
+                "RA",
+                "RF",
+                "C3",
+                "C4",
+                "RNP",
+                "SM",
+                "SC170",
+                "SSA",
+                "SSB",
+                "CENTROMEA",
+                "DNA",
+                "DNA-II"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "patient": [
+                "id",
+                "First Date",
+                "diagnosis"
+            ],
+            "laboratory": [
+                "id",
+                "date"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To answer the question, I need to determine the total number of laboratory tests conducted in 1995 for a patient who first came to the hospital on '1991-06-13' and was diagnosed with 'SJS'. First, I'll identify the patient from the Patient table whose 'First Date' matches '1991-06-13' and 'Diagnosis' matches 'SJS'. After that, I'll count the number of records in the Laboratory table that correspond to this specific patient's ID and have a 'Date' in the year 1995. This requires a join between the Patient and Laboratory tables using the foreign key 'ID'. I will apply the necessary filters accordingly to get the desired count.",
+        "SQL": "SELECT COUNT(L.ID) FROM Patient AS P JOIN Laboratory AS L ON P.ID = L.ID WHERE P.`First Date` = '1991-06-13' AND P.Diagnosis = 'SJS' AND L.Date BETWEEN '1995-01-01' AND '1995-12-31';",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT COUNT(L.ID) FROM Patient AS P JOIN Laboratory AS L ON P.ID = L.ID WHERE P.`First Date` = '1991-06-13' AND P.Diagnosis = 'SJS' AND L.Date BETWEEN '1995-01-01' AND '1995-12-31';",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 1,
+            "error": "--",
+            "Question": "For the patient who first came to the hospital on 1991/6/13 who was diagnosed with SJS, what is the total number of his/her Laboratory tests in 1995?",
+            "Evidence": "1991/6/13 refers to `First Date` = '1991-06-13'; 'SJS' refers to Diagnosis; total number of his/her Laboratory tests refers to COUNT(ID); 1995 refers to Date",
+            "pred_sql": "SELECT COUNT(L.ID) FROM Patient AS P JOIN Laboratory AS L ON P.ID = L.ID WHERE P.`First Date` = '1991-06-13' AND P.Diagnosis = 'SJS' AND L.Date BETWEEN '1995-01-01' AND '1995-12-31';",
+            "gold_sql": "SELECT COUNT(*) FROM Laboratory WHERE ID = ( SELECT ID FROM Patient WHERE `First Date` = '1991-06-13' AND Diagnosis = 'SJS' ) AND STRFTIME('%Y', Date) = '1995'"
+        },
+        "self_reflexion": {
+            "result": 1,
+            "error": "--",
+            "Question": "For the patient who first came to the hospital on 1991/6/13 who was diagnosed with SJS, what is the total number of his/her Laboratory tests in 1995?",
+            "Evidence": "1991/6/13 refers to `First Date` = '1991-06-13'; 'SJS' refers to Diagnosis; total number of his/her Laboratory tests refers to COUNT(ID); 1995 refers to Date",
+            "pred_sql": "SELECT COUNT(L.ID) FROM Patient AS P JOIN Laboratory AS L ON P.ID = L.ID WHERE P.`First Date` = '1991-06-13' AND P.Diagnosis = 'SJS' AND L.Date BETWEEN '1995-01-01' AND '1995-12-31';",
+            "gold_sql": "SELECT COUNT(*) FROM Laboratory WHERE ID = ( SELECT ID FROM Patient WHERE `First Date` = '1991-06-13' AND Diagnosis = 'SJS' ) AND STRFTIME('%Y', Date) = '1995'"
+        },
+        "status": "success"
+    }
+]

@@ -1,6 +1,7 @@
-You are an SQL validation expert.
-Below, you are presented with a natural language question, an SQL query, and its execution result.
-Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
 Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
 
 Input Data
@@ -11,8 +12,8 @@ Question:
 SQL Query:
 {SQL}
 
-Execution Result:
-{EXECUTE_RESULT}
+Database Content:
+{DATABASE_SCHEMA}
 
 Validation Guidelines:
 

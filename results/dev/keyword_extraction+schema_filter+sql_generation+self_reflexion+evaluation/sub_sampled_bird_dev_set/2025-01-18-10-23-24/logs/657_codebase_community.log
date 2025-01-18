@@ -1,0 +1,571 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: Under the vote type of 8, provide the display names and websites URLs of the user who got the highest bounty amount.
+Hint: vote type of 8 refers to VoteTypeId = 8; the highest bounty amount refers to MAX(BountyAmount);
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "vote type",
+    "8",
+    "display names",
+    "websites URLs",
+    "user",
+    "highest bounty amount",
+    "VoteTypeId",
+    "BountyAmount",
+    "MAX(BountyAmount)"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE badges (
+  Id     INTEGER          not null
+        primary key,
+  UserId INTEGER          null,
+  Name   TEXT null,
+  Date   DATETIME     null,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE comments (
+  Id              INTEGER          not null
+        primary key,
+  PostId          INTEGER          null,
+  Score           INTEGER          null,
+  Text            TEXT     null,
+  CreationDate    DATETIME     null,
+  UserId          INTEGER          null,
+  UserDisplayName TEXT null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE postHistory (
+  Id                INTEGER          not null UNIQUE
+        primary key,
+  PostHistoryTypeId INTEGER          null,
+  PostId            INTEGER          null,
+  RevisionGUID      TEXT null,
+  CreationDate      DATETIME     null,
+  UserId            INTEGER          null,
+  Text              TEXT     null,
+  Comment           TEXT         null,
+  UserDisplayName   TEXT null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE postLinks (
+  Id            INTEGER      not null
+        primary key,
+  CreationDate  DATETIME null,
+  PostId        INTEGER      null,
+  RelatedPostId INTEGER      null,
+  LinkTypeId    INTEGER      null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (RelatedPostId) references posts (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE posts (
+  Id                    INTEGER          not null UNIQUE
+        primary key,
+  PostTypeId            INTEGER          null,
+  AcceptedAnswerId      INTEGER          null,
+  CreaionDate           DATETIME     null,
+  Score                 INTEGER          null,
+  ViewCount             INTEGER          null,
+  Body                  TEXT     null,
+  OwnerUserId           INTEGER          null,
+  LasActivityDate       DATETIME     null,
+  Title                 TEXT null,
+  Tags                  TEXT null,
+  AnswerCount           INTEGER          null,
+  CommentCount          INTEGER          null,
+  FavoriteCount         INTEGER          null,
+  LastEditorUserId      INTEGER          null,
+  LastEditDate          DATETIME     null,
+  CommunityOwnedDate    DATETIME    null,
+  ParentId              INTEGER          null,
+  ClosedDate            DATETIME     null,
+  OwnerDisplayName      TEXT null,
+  LastEditorDisplayName TEXT null,
+  foreign key (LastEditorUserId) references users (Id)
+            on update cascade on delete cascade,
+  foreign key (OwnerUserId) references users (Id)
+            on update cascade on delete cascade,
+  foreign key (ParentId) references posts (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE tags (
+  Id            INTEGER          not null
+        primary key,
+  TagName       TEXT null,
+  Count         INTEGER          null,
+  ExcerptPostId INTEGER          null,
+  WikiPostId    INTEGER          null,
+  foreign key (ExcerptPostId) references posts (Id)
+        on update cascade on delete cascade
+);
+
+CREATE TABLE users (
+  Id              INTEGER          not null UNIQUE
+        primary key,
+  Reputation      INTEGER          null,
+  CreationDate    DATETIME     null,
+  DisplayName     TEXT null,
+  LastAccessDate  DATETIME     null,
+  WebsiteUrl      TEXT null,
+  Location        TEXT null,
+  AboutMe         TEXT     null,
+  Views           INTEGER          null,
+  UpVotes         INTEGER          null,
+  DownVotes       INTEGER          null,
+  AccountId       INTEGER          null,
+  Age             INTEGER          null,
+  ProfileImageUrl TEXT null
+);
+
+CREATE TABLE votes (
+  Id           INTEGER  not null
+        primary key,
+  PostId       INTEGER  null,
+  VoteTypeId   INTEGER  null,
+  CreationDate DATE null,
+  UserId       INTEGER  null,
+  BountyAmount INTEGER  null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+Under the vote type of 8, provide the display names and websites URLs of the user who got the highest bounty amount. 
+
+Hint:
+vote type of 8 refers to VoteTypeId = 8; the highest bounty amount refers to MAX(BountyAmount);
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the display names and websites URLs of the user with the highest bounty amount under the vote type of 8, I first need to identify votes for VoteTypeId 8 in the votes table. Then, I'll extract the maximum BountyAmount from these votes. After that, I'll join the users table to get the DisplayName and WebsiteUrl of the user associated with this maximum bounty amount. I will utilize an INNER JOIN to efficiently combine the votes and users based on UserId. Finally, I'll select only the required columns: DisplayName and WebsiteUrl. Following all the instructions regarding selecting relevant columns and ordering the results correctly leads to constructing this final SQL query.",
+    "SQL": "SELECT U.DisplayName, U.WebsiteUrl FROM votes V INNER JOIN users U ON V.UserId = U.Id WHERE V.VoteTypeId = 8 AND V.BountyAmount = (SELECT MAX(BountyAmount) FROM votes WHERE VoteTypeId = 8)"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Under the vote type of 8, provide the display names and websites URLs of the user who got the highest bounty amount.
+
+SQL Query:
+SELECT U.DisplayName, U.WebsiteUrl FROM votes V INNER JOIN users U ON V.UserId = U.Id WHERE V.VoteTypeId = 8 AND V.BountyAmount = (SELECT MAX(BountyAmount) FROM votes WHERE VoteTypeId = 8)
+
+Database Content:
+{'badges': ['Id', 'UserId', 'Name', 'Date'], 'comments': ['Id', 'PostId', 'Score', 'Text', 'CreationDate', 'UserId', 'UserDisplayName'], 'postHistory': ['Id', 'PostHistoryTypeId', 'PostId', 'RevisionGUID', 'CreationDate', 'UserId', 'Text', 'Comment', 'UserDisplayName'], 'postLinks': ['Id', 'CreationDate', 'PostId', 'RelatedPostId', 'LinkTypeId'], 'posts': ['Id', 'PostTypeId', 'AcceptedAnswerId', 'CreaionDate', 'Score', 'ViewCount', 'Body', 'OwnerUserId', 'LasActivityDate', 'Title', 'Tags', 'AnswerCount', 'CommentCount', 'FavoriteCount', 'LastEditorUserId', 'LastEditDate', 'CommunityOwnedDate', 'ParentId', 'ClosedDate', 'OwnerDisplayName', 'LastEditorDisplayName'], 'tags': ['Id', 'TagName', 'Count', 'ExcerptPostId', 'WikiPostId'], 'users': ['Id', 'Reputation', 'CreationDate', 'DisplayName', 'LastAccessDate', 'WebsiteUrl', 'Location', 'AboutMe', 'Views', 'UpVotes', 'DownVotes', 'AccountId', 'Age', 'ProfileImageUrl'], 'votes': ['Id', 'PostId', 'VoteTypeId', 'CreationDate', 'UserId', 'BountyAmount']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the display names and website URLs of users who received the highest bounty amount under vote type 8. The SQL query tries to achieve this by selecting the DisplayName and WebsiteUrl from the 'users' table, joining it with the 'votes' table where the VoteTypeId is 8 and the BountyAmount matches the maximum bounty amount for that vote type. The query logically covers the necessary components: it filters for VoteTypeId = 8 and selects the maximum BountyAmount. However, the mistake is that it does not account for the possibility of multiple users receiving the same highest bounty amount; if there are multiple users with the highest bounty, only one will be returned due to the use of a subquery with the MAX() function. Additionally, there is an assumption that 'BountyAmount' is a column in 'votes', but executing the SQL query without specified results makes it unclear how it performs in practice. Since the query correctly captures and processes the required data, but may be limited in its output regarding users tied for the highest bounty amount, it can be seen as only partially valid but fundamentally incorrect for completely satisfying the criteria.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Under the vote type of 8, provide the display names and websites URLs of the user who got the highest bounty amount.
+
+Predicted SQL:
+SELECT U.DisplayName, U.WebsiteUrl FROM votes V INNER JOIN users U ON V.UserId = U.Id WHERE V.VoteTypeId = 8 AND V.BountyAmount = (SELECT MAX(BountyAmount) FROM votes WHERE VoteTypeId = 8)
+
+Execution Result:
+('probabilityislogic', None)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the display names and website URLs of users who received the highest bounty amount under vote type 8. The SQL query tries to achieve this by selecting the DisplayName and WebsiteUrl from the 'users' table, joining it with the 'votes' table where the VoteTypeId is 8 and the BountyAmount matches the maximum bounty amount for that vote type. The query logically covers the necessary components: it filters for VoteTypeId = 8 and selects the maximum BountyAmount. However, the mistake is that it does not account for the possibility of multiple users receiving the same highest bounty amount; if there are multiple users with the highest bounty, only one will be returned due to the use of a subquery with the MAX() function. Additionally, there is an assumption that 'BountyAmount' is a column in 'votes', but executing the SQL query without specified results makes it unclear how it performs in practice. Since the query correctly captures and processes the required data, but may be limited in its output regarding users tied for the highest bounty amount, it can be seen as only partially valid but fundamentally incorrect for completely satisfying the criteria.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To ensure the SQL query aligns with the question's intent, we need to modify the query to account for the possibility of multiple users receiving the highest bounty amount. Here are the specific steps to achieve this:\n\n1. **Adjust the maximum bounty selection**: Instead of using a subquery to obtain the maximum bounty amount, we can utilize a Common Table Expression (CTE) or a derived table to first determine the maximum bounty amount and then join it with the user information. This allows us to extract all users tied to that maximum amount.\n\n2. **Update the SQL query structure**: Change the SQL to first calculate the maximum bounty for vote TypeId 8, and then join this result with the users table. Here's an optimized structure:\n\n```sql\nWITH MaxBounty AS (\n    SELECT MAX(BountyAmount) as HighestBounty\n    FROM votes\n    WHERE VoteTypeId = 8\n) \nSELECT U.DisplayName, U.WebsiteUrl \nFROM users U \nINNER JOIN votes V ON V.UserId = U.Id \nINNER JOIN MaxBounty MB ON V.BountyAmount = MB.HighestBounty \nWHERE V.VoteTypeId = 8;\n```\n\n3. **Test the query**: After modifying the SQL, run the query again to ensure it returns all users who have the highest bounty amount under the specified vote type, rather than just one user. Confirm that the results include both DisplayName and WebsiteUrl for each user and that there are no duplicates unless necessary.\n\nBy implementing these changes, the SQL query will correctly fulfill the requirements stated in the original question."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE badges (
+  Id     INTEGER          not null
+        primary key,
+  UserId INTEGER          null,
+  Name   TEXT null,
+  Date   DATETIME     null,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE comments (
+  Id              INTEGER          not null
+        primary key,
+  PostId          INTEGER          null,
+  Score           INTEGER          null,
+  Text            TEXT     null,
+  CreationDate    DATETIME     null,
+  UserId          INTEGER          null,
+  UserDisplayName TEXT null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE postHistory (
+  Id                INTEGER          not null UNIQUE
+        primary key,
+  PostHistoryTypeId INTEGER          null,
+  PostId            INTEGER          null,
+  RevisionGUID      TEXT null,
+  CreationDate      DATETIME     null,
+  UserId            INTEGER          null,
+  Text              TEXT     null,
+  Comment           TEXT         null,
+  UserDisplayName   TEXT null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE postLinks (
+  Id            INTEGER      not null
+        primary key,
+  CreationDate  DATETIME null,
+  PostId        INTEGER      null,
+  RelatedPostId INTEGER      null,
+  LinkTypeId    INTEGER      null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (RelatedPostId) references posts (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE posts (
+  Id                    INTEGER          not null UNIQUE
+        primary key,
+  PostTypeId            INTEGER          null,
+  AcceptedAnswerId      INTEGER          null,
+  CreaionDate           DATETIME     null,
+  Score                 INTEGER          null,
+  ViewCount             INTEGER          null,
+  Body                  TEXT     null,
+  OwnerUserId           INTEGER          null,
+  LasActivityDate       DATETIME     null,
+  Title                 TEXT null,
+  Tags                  TEXT null,
+  AnswerCount           INTEGER          null,
+  CommentCount          INTEGER          null,
+  FavoriteCount         INTEGER          null,
+  LastEditorUserId      INTEGER          null,
+  LastEditDate          DATETIME     null,
+  CommunityOwnedDate    DATETIME    null,
+  ParentId              INTEGER          null,
+  ClosedDate            DATETIME     null,
+  OwnerDisplayName      TEXT null,
+  LastEditorDisplayName TEXT null,
+  foreign key (LastEditorUserId) references users (Id)
+            on update cascade on delete cascade,
+  foreign key (OwnerUserId) references users (Id)
+            on update cascade on delete cascade,
+  foreign key (ParentId) references posts (Id)
+            on update cascade on delete cascade
+);
+
+CREATE TABLE tags (
+  Id            INTEGER          not null
+        primary key,
+  TagName       TEXT null,
+  Count         INTEGER          null,
+  ExcerptPostId INTEGER          null,
+  WikiPostId    INTEGER          null,
+  foreign key (ExcerptPostId) references posts (Id)
+        on update cascade on delete cascade
+);
+
+CREATE TABLE users (
+  Id              INTEGER          not null UNIQUE
+        primary key,
+  Reputation      INTEGER          null,
+  CreationDate    DATETIME     null,
+  DisplayName     TEXT null,
+  LastAccessDate  DATETIME     null,
+  WebsiteUrl      TEXT null,
+  Location        TEXT null,
+  AboutMe         TEXT     null,
+  Views           INTEGER          null,
+  UpVotes         INTEGER          null,
+  DownVotes       INTEGER          null,
+  AccountId       INTEGER          null,
+  Age             INTEGER          null,
+  ProfileImageUrl TEXT null
+);
+
+CREATE TABLE votes (
+  Id           INTEGER  not null
+        primary key,
+  PostId       INTEGER  null,
+  VoteTypeId   INTEGER  null,
+  CreationDate DATE null,
+  UserId       INTEGER  null,
+  BountyAmount INTEGER  null,
+  foreign key (PostId) references posts (Id)
+            on update cascade on delete cascade,
+  foreign key (UserId) references users (Id)
+            on update cascade on delete cascade
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To ensure the SQL query aligns with the question's intent, we need to modify the query to account for the possibility of multiple users receiving the highest bounty amount. Here are the specific steps to achieve this:
+
+1. **Adjust the maximum bounty selection**: Instead of using a subquery to obtain the maximum bounty amount, we can utilize a Common Table Expression (CTE) or a derived table to first determine the maximum bounty amount and then join it with the user information. This allows us to extract all users tied to that maximum amount.
+
+2. **Update the SQL query structure**: Change the SQL to first calculate the maximum bounty for vote TypeId 8, and then join this result with the users table. Here's an optimized structure:
+
+```sql
+WITH MaxBounty AS (
+    SELECT MAX(BountyAmount) as HighestBounty
+    FROM votes
+    WHERE VoteTypeId = 8
+) 
+SELECT U.DisplayName, U.WebsiteUrl 
+FROM users U 
+INNER JOIN votes V ON V.UserId = U.Id 
+INNER JOIN MaxBounty MB ON V.BountyAmount = MB.HighestBounty 
+WHERE V.VoteTypeId = 8;
+```
+
+3. **Test the query**: After modifying the SQL, run the query again to ensure it returns all users who have the highest bounty amount under the specified vote type, rather than just one user. Confirm that the results include both DisplayName and WebsiteUrl for each user and that there are no duplicates unless necessary.
+
+By implementing these changes, the SQL query will correctly fulfill the requirements stated in the original question.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To find the display names and websites URLs of the user with the highest bounty amount under the vote type of 8, I first need to identify votes for VoteTypeId 8 in the votes table. Then, I'll extract the maximum BountyAmount from these votes. After that, I'll join the users table to get the DisplayName and WebsiteUrl of the user associated with this maximum bounty amount. I will utilize an INNER JOIN to efficiently combine the votes and users based on UserId. Finally, I'll select only the required columns: DisplayName and WebsiteUrl. Following all the instructions regarding selecting relevant columns and ordering the results correctly leads to constructing this final SQL query.", 'SQL': 'SELECT U.DisplayName, U.WebsiteUrl FROM votes V INNER JOIN users U ON V.UserId = U.Id WHERE V.VoteTypeId = 8 AND V.BountyAmount = (SELECT MAX(BountyAmount) FROM votes WHERE VoteTypeId = 8)'}, 'SELECT U.DisplayName, U.WebsiteUrl FROM votes V INNER JOIN users U ON V.UserId = U.Id WHERE V.VoteTypeId = 8 AND V.BountyAmount = (SELECT MAX(BountyAmount) FROM votes WHERE VoteTypeId = 8)']
+
+Question: 
+Under the vote type of 8, provide the display names and websites URLs of the user who got the highest bounty amount. 
+
+Hint:
+vote type of 8 refers to VoteTypeId = 8; the highest bounty amount refers to MAX(BountyAmount);
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To address the question about finding the display names and website URLs of users who received the highest bounty amount under vote type 8, I will first check the votes table for entries where VoteTypeId is 8. Then, I need to determine the maximum bounty amount for these votes. To accomplish this efficiently and according to the guiding principles, I will make use of a Common Table Expression (CTE) to calculate the maximum bounty amount in advance. After identifying the highest bounty amount, I will join the users table with the votes table to obtain the DisplayName and WebsiteUrl of users who match this maximum bounty amount, ensuring I include all users associated with that amount instead of limiting to just one. This is important as multiple users could potentially have the same highest bounty. The final SQL query will select only the needed columns from the relevant tables and use INNER JOIN to link them based on UserId. Hence, the produced SQL will ensure it retrieves all users tied to the highest bounty under the specified conditions.",
+    "SQL": "WITH MaxBounty AS (SELECT MAX(BountyAmount) AS HighestBounty FROM votes WHERE VoteTypeId = 8) SELECT U.DisplayName, U.WebsiteUrl FROM users U INNER JOIN votes V ON V.UserId = U.Id INNER JOIN MaxBounty MB ON V.BountyAmount = MB.HighestBounty WHERE V.VoteTypeId = 8;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Under the vote type of 8, provide the display names and websites URLs of the user who got the highest bounty amount.
+
+SQL Query:
+WITH MaxBounty AS (SELECT MAX(BountyAmount) AS HighestBounty FROM votes WHERE VoteTypeId = 8) SELECT U.DisplayName, U.WebsiteUrl FROM users U INNER JOIN votes V ON V.UserId = U.Id INNER JOIN MaxBounty MB ON V.BountyAmount = MB.HighestBounty WHERE V.VoteTypeId = 8;
+
+Database Content:
+{'badges': ['Id', 'UserId', 'Name', 'Date'], 'comments': ['Id', 'PostId', 'Score', 'Text', 'CreationDate', 'UserId', 'UserDisplayName'], 'postHistory': ['Id', 'PostHistoryTypeId', 'PostId', 'RevisionGUID', 'CreationDate', 'UserId', 'Text', 'Comment', 'UserDisplayName'], 'postLinks': ['Id', 'CreationDate', 'PostId', 'RelatedPostId', 'LinkTypeId'], 'posts': ['Id', 'PostTypeId', 'AcceptedAnswerId', 'CreaionDate', 'Score', 'ViewCount', 'Body', 'OwnerUserId', 'LasActivityDate', 'Title', 'Tags', 'AnswerCount', 'CommentCount', 'FavoriteCount', 'LastEditorUserId', 'LastEditDate', 'CommunityOwnedDate', 'ParentId', 'ClosedDate', 'OwnerDisplayName', 'LastEditorDisplayName'], 'tags': ['Id', 'TagName', 'Count', 'ExcerptPostId', 'WikiPostId'], 'users': ['Id', 'Reputation', 'CreationDate', 'DisplayName', 'LastAccessDate', 'WebsiteUrl', 'Location', 'AboutMe', 'Views', 'UpVotes', 'DownVotes', 'AccountId', 'Age', 'ProfileImageUrl'], 'votes': ['Id', 'PostId', 'VoteTypeId', 'CreationDate', 'UserId', 'BountyAmount']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the display names and website URLs of the users who received the highest bounty amount under the vote type of 8. The SQL query correctly identifies the maximum bounty amount from the 'votes' table where the 'VoteTypeId' is 8. It then joins this result with the 'users' table to get the corresponding display names and website URLs. The query also includes the necessary filters to ensure that only votes of type 8 are considered. The structure of the query reflects the requirements set by the question, including the use of a Common Table Expression (CTE) to isolate the maximum bounty. Since the query directly answers the question posed and retrieves the expected columns, it seems to fulfill the intent without missing any critical parts.",
+    "judgment": "Valid"
+}
+

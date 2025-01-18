@@ -1,0 +1,99 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "consumption of gas",
+            "CZK",
+            "year",
+            "yearmonth",
+            "table",
+            "values",
+            "strings",
+            "represent"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "customers": [
+                "CustomerID",
+                "Segment",
+                "Currency"
+            ],
+            "gasstations": [
+                "GasStationID",
+                "ChainID",
+                "Country",
+                "Segment"
+            ],
+            "products": [
+                "ProductID",
+                "Description"
+            ],
+            "transactions_1k": [
+                "TransactionID",
+                "Date",
+                "Time",
+                "CustomerID",
+                "CardID",
+                "GasStationID",
+                "ProductID",
+                "Amount",
+                "Price"
+            ],
+            "yearmonth": [
+                "CustomerID",
+                "Date",
+                "Consumption"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "yearmonth": [
+                "date",
+                "customerid",
+                "consumption"
+            ],
+            "customers": [
+                "customerid",
+                "currency"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To answer the question, I need to determine which year recorded the most consumption of gas that was paid in the currency CZK. First, I must filter the `yearmonth` table for records associated with customers who are using CZK. Since 'Currency' is a relevant column in the 'customers' table, I will use this table to find customers who are associated with CZK. Then, I will join the `customers` table with the `yearmonth` table on 'CustomerID' to get the years and their corresponding consumption values. Next, I will group the results by the year extracted from the 'Date' field (the first four characters represent the year) and sum the consumption for each year. Finally, I will order the results by consumption in descending order and limit the results to just the top result to find the year with the highest consumption.",
+        "SQL": "SELECT SUBSTR(T2.Date, 1, 4) AS Year FROM yearmonth T2 JOIN customers T1 ON T1.CustomerID = T2.CustomerID WHERE T1.Currency = 'CZK' GROUP BY Year ORDER BY SUM(T2.Consumption) DESC LIMIT 1",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT SUBSTR(T2.Date, 1, 4) AS Year FROM yearmonth T2 JOIN customers T1 ON T1.CustomerID = T2.CustomerID WHERE T1.Currency = 'CZK' GROUP BY Year ORDER BY SUM(T2.Consumption) DESC LIMIT 1",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 1,
+            "error": "--",
+            "Question": "Which year recorded the most consumption of gas paid in CZK?",
+            "Evidence": "The first 4 strings of the values in the table yearmonth can represent year.",
+            "pred_sql": "SELECT SUBSTR(T2.Date, 1, 4) AS Year FROM yearmonth T2 JOIN customers T1 ON T1.CustomerID = T2.CustomerID WHERE T1.Currency = 'CZK' GROUP BY Year ORDER BY SUM(T2.Consumption) DESC LIMIT 1",
+            "gold_sql": "SELECT SUBSTRING(T2.Date, 1, 4) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE T1.Currency = 'CZK' GROUP BY SUBSTRING(T2.Date, 1, 4) ORDER BY SUM(T2.Consumption) DESC LIMIT 1"
+        },
+        "self_reflexion": {
+            "result": 1,
+            "error": "--",
+            "Question": "Which year recorded the most consumption of gas paid in CZK?",
+            "Evidence": "The first 4 strings of the values in the table yearmonth can represent year.",
+            "pred_sql": "SELECT SUBSTR(T2.Date, 1, 4) AS Year FROM yearmonth T2 JOIN customers T1 ON T1.CustomerID = T2.CustomerID WHERE T1.Currency = 'CZK' GROUP BY Year ORDER BY SUM(T2.Consumption) DESC LIMIT 1",
+            "gold_sql": "SELECT SUBSTRING(T2.Date, 1, 4) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE T1.Currency = 'CZK' GROUP BY SUBSTRING(T2.Date, 1, 4) ORDER BY SUM(T2.Consumption) DESC LIMIT 1"
+        },
+        "status": "success"
+    }
+]

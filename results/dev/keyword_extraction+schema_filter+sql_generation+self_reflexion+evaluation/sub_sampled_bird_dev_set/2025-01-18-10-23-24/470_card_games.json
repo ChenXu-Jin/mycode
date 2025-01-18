@@ -1,0 +1,191 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "Ancestor's Chosen",
+            "set of cards",
+            "released",
+            "releaseDate",
+            "name"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "cards": [
+                "id",
+                "artist",
+                "asciiName",
+                "availability",
+                "borderColor",
+                "cardKingdomFoilId",
+                "cardKingdomId",
+                "colorIdentity",
+                "colorIndicator",
+                "colors",
+                "convertedManaCost",
+                "duelDeck",
+                "edhrecRank",
+                "faceConvertedManaCost",
+                "faceName",
+                "flavorName",
+                "flavorText",
+                "frameEffects",
+                "frameVersion",
+                "hand",
+                "hasAlternativeDeckLimit",
+                "hasContentWarning",
+                "hasFoil",
+                "hasNonFoil",
+                "isAlternative",
+                "isFullArt",
+                "isOnlineOnly",
+                "isOversized",
+                "isPromo",
+                "isReprint",
+                "isReserved",
+                "isStarter",
+                "isStorySpotlight",
+                "isTextless",
+                "isTimeshifted",
+                "keywords",
+                "layout",
+                "leadershipSkills",
+                "life",
+                "loyalty",
+                "manaCost",
+                "mcmId",
+                "mcmMetaId",
+                "mtgArenaId",
+                "mtgjsonV4Id",
+                "mtgoFoilId",
+                "mtgoId",
+                "multiverseId",
+                "name",
+                "number",
+                "originalReleaseDate",
+                "originalText",
+                "originalType",
+                "otherFaceIds",
+                "power",
+                "printings",
+                "promoTypes",
+                "purchaseUrls",
+                "rarity",
+                "scryfallId",
+                "scryfallIllustrationId",
+                "scryfallOracleId",
+                "setCode",
+                "side",
+                "subtypes",
+                "supertypes",
+                "tcgplayerProductId",
+                "text",
+                "toughness",
+                "type",
+                "types",
+                "uuid",
+                "variations",
+                "watermark"
+            ],
+            "foreign_data": [
+                "id",
+                "flavorText",
+                "language",
+                "multiverseid",
+                "name",
+                "text",
+                "type",
+                "uuid"
+            ],
+            "legalities": [
+                "id",
+                "format",
+                "status",
+                "uuid"
+            ],
+            "sets": [
+                "id",
+                "baseSetSize",
+                "block",
+                "booster",
+                "code",
+                "isFoilOnly",
+                "isForeignOnly",
+                "isNonFoilOnly",
+                "isOnlineOnly",
+                "isPartialPreview",
+                "keyruneCode",
+                "mcmId",
+                "mcmIdExtras",
+                "mcmName",
+                "mtgoCode",
+                "name",
+                "parentCode",
+                "releaseDate",
+                "tcgplayerGroupId",
+                "totalSetSize",
+                "type"
+            ],
+            "set_translations": [
+                "id",
+                "language",
+                "setCode",
+                "translation"
+            ],
+            "rulings": [
+                "id",
+                "date",
+                "text",
+                "uuid"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "sets": [
+                "releasedate",
+                "code"
+            ],
+            "cards": [
+                "setcode",
+                "name"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To find the release date of the card set that contains 'Ancestor's Chosen', we need to look up the set that contains the card. First, we identify that 'Ancestor's Chosen' corresponds to the name in the cards table. Then, we need to join the cards table with the sets table on the relevant key, which is the corresponding set code. Finally, we select the release date for the set from the sets table. The query should account for the selection of the release date specifically based on the card's name. Thus, I'll use appropriate table aliases and only select the required release date.",
+        "SQL": "SELECT S.releaseDate FROM cards AS C JOIN sets AS S ON C.setCode = S.code WHERE C.name = 'Ancestor''s Chosen';",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT S.releaseDate FROM cards AS C JOIN sets AS S ON C.setCode = S.code WHERE C.name = 'Ancestor''s Chosen';",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 1,
+            "error": "--",
+            "Question": "When was the set of cards with \"Ancestor's Chosen\" released?",
+            "Evidence": "card set \"Ancestor's Chosen\" refers to name = 'Ancestor''s Chosen'; when released refers to releaseDate",
+            "pred_sql": "SELECT S.releaseDate FROM cards AS C JOIN sets AS S ON C.setCode = S.code WHERE C.name = 'Ancestor''s Chosen';",
+            "gold_sql": "SELECT DISTINCT T2.releaseDate FROM cards AS T1 INNER JOIN sets AS T2 ON T2.code = T1.setCode WHERE T1.name = 'Ancestor''s Chosen'"
+        },
+        "self_reflexion": {
+            "result": 1,
+            "error": "--",
+            "Question": "When was the set of cards with \"Ancestor's Chosen\" released?",
+            "Evidence": "card set \"Ancestor's Chosen\" refers to name = 'Ancestor''s Chosen'; when released refers to releaseDate",
+            "pred_sql": "SELECT S.releaseDate FROM cards AS C JOIN sets AS S ON C.setCode = S.code WHERE C.name = 'Ancestor''s Chosen';",
+            "gold_sql": "SELECT DISTINCT T2.releaseDate FROM cards AS T1 INNER JOIN sets AS T2 ON T2.code = T1.setCode WHERE T1.name = 'Ancestor''s Chosen'"
+        },
+        "status": "success"
+    }
+]

@@ -1,0 +1,251 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: What is the telephone number for the school with the lowest average score in reading in Fresno Unified?
+Hint: Fresno Unified is a name of district;
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "telephone number",
+    "school",
+    "lowest average score",
+    "reading",
+    "Fresno Unified",
+    "district"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE frpm (
+  CDSCode                                       TEXT not null
+        primary key,
+  `Academic Year`                               TEXT  null,
+  `County Code`                                 TEXT  null,
+  `District Code`                               INTEGER         null,
+  `School Code`                                 TEXT  null,
+  `County Name`                                 TEXT null,
+  `District Name`                               TEXT null,
+  `School Name`                                 TEXT null,
+  `District Type`                               TEXT null,
+  `School Type`                                 TEXT null,
+  `Educational Option Type`                     TEXT null,
+  `NSLP Provision Status`                       TEXT null,
+  `Charter School (Y/N)`                        INTEGER    null,
+  `Charter School Number`                       TEXT  null,
+  `Charter Funding Type`                        TEXT null,
+  IRC                                           INTEGER    null,
+  `Low Grade`                                   TEXT  null,
+  `High Grade`                                  TEXT null,
+  `Enrollment (K-12)`                           REAL      null,
+  `Free Meal Count (K-12)`                      REAL       null,
+  `Percent (%) Eligible Free (K-12)`            REAL       null,
+  `FRPM Count (K-12)`                           REAL       null,
+  `Percent (%) Eligible FRPM (K-12)`            REAL       null,
+  `Enrollment (Ages 5-17)`                      REAL       null,
+  `Free Meal Count (Ages 5-17)`                 REAL       null,
+  `Percent (%) Eligible Free (Ages 5-17)`       REAL       null,
+  `FRPM Count (Ages 5-17)`                      REAL       null,
+  `Percent (%) Eligible FRPM (Ages 5-17)`       REAL       null,
+  `2013-14 CALPADS Fall 1 Certification Status` INTEGER    null,
+  foreign key (CDSCode) references schools (CDSCode)
+);
+
+CREATE TABLE satscores (
+  cds         TEXT not null
+        primary key,
+  rtype       TEXT  not null,
+  sname       TEXT null,
+  dname       TEXT null,
+  cname       TEXT null,
+  enroll12    INTEGER         not null,
+  NumTstTakr  INTEGER          not null,
+  AvgScrRead  INTEGER          null,
+  AvgScrMath  INTEGER          null,
+  AvgScrWrite INTEGER          null,
+  NumGE1500   INTEGER          null,
+  foreign key (cds) references schools (CDSCode)
+);
+
+CREATE TABLE schools (
+  CDSCode     TEXT not null
+        primary key,
+  NCESDist    TEXT  null,
+  NCESSchool  TEXT  null,
+  StatusType  TEXT  not null,
+  County      TEXT not null,
+  District    TEXT not null,
+  School      TEXT null,
+  Street      TEXT null,
+  StreetAbr   TEXT null,
+  City        TEXT null,
+  Zip         TEXT null,
+  State       TEXT  null,
+  MailStreet  TEXT null,
+  MailStrAbr  TEXT null,
+  MailCity    TEXT null,
+  MailZip     TEXT null,
+  MailState   TEXT  null,
+  Phone       TEXT null,
+  Ext         TEXT  null,
+  Website     TEXT null,
+  OpenDate    DATE        null,
+  ClosedDate  DATE        null,
+  Charter     INTEGER    null,
+  CharterNum  TEXT  null,
+  FundingType TEXT null,
+  DOC         TEXT  not null,
+  DOCType     TEXT not null,
+  SOC         TEXT  null,
+  SOCType     TEXT null,
+  EdOpsCode   TEXT  null,
+  EdOpsName   TEXT null,
+  EILCode     TEXT  null,
+  EILName     TEXT null,
+  GSoffered   TEXT null,
+  GSserved    TEXT  null,
+  Virtual     TEXT  null,
+  Magnet      INTEGER   null,
+  Latitude    REAL      null,
+  Longitude   REAL      null,
+  AdmFName1   TEXT null,
+  AdmLName1   TEXT null,
+  AdmEmail1   TEXT null,
+  AdmFName2   TEXT null,
+  AdmLName2   TEXT null,
+  AdmEmail2   TEXT null,
+  AdmFName3   TEXT  null,
+  AdmLName3   TEXT null,
+  AdmEmail3   TEXT null,
+  LastUpdate  DATE        not null
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+What is the telephone number for the school with the lowest average score in reading in Fresno Unified? 
+
+Hint:
+Fresno Unified is a name of district;
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the telephone number for the school with the lowest average score in reading in the Fresno Unified district, I will start by identifying the schools in the district. This will be done by filtering the 'schools' table based on the district name 'Fresno Unified'. Next, I will need to retrieve the average reading scores from the 'satscores' table, joining it with the 'schools' table using the common 'CDSCode'. I will filter these records to calculate the lowest average score in reading. Since I want the telephone number of the corresponding school, I\u2019ll select the phone number from the 'schools' table. I will use ORDER BY to sort based on the average reading scores and LIMIT 1 to retrieve only the school with the lowest score. This logic aligns with the provided guidelines to ensure that I select only the necessary columns and avoid any unnecessary data in my output.",
+    "SQL": "SELECT T1.Phone FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.District = 'Fresno Unified' AND T2.AvgScrRead IS NOT NULL ORDER BY T2.AvgScrRead ASC LIMIT 1"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+What is the telephone number for the school with the lowest average score in reading in Fresno Unified?
+
+SQL Query:
+SELECT T1.Phone FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.District = 'Fresno Unified' AND T2.AvgScrRead IS NOT NULL ORDER BY T2.AvgScrRead ASC LIMIT 1
+
+Database Content:
+{'frpm': ['CDSCode', 'Academic Year', 'County Code', 'District Code', 'School Code', 'County Name', 'District Name', 'School Name', 'District Type', 'School Type', 'Educational Option Type', 'NSLP Provision Status', 'Charter School (Y/N)', 'Charter School Number', 'Charter Funding Type', 'IRC', 'Low Grade', 'High Grade', 'Enrollment (K-12)', 'Free Meal Count (K-12)', 'Percent (%) Eligible Free (K-12)', 'FRPM Count (K-12)', 'Percent (%) Eligible FRPM (K-12)', 'Enrollment (Ages 5-17)', 'Free Meal Count (Ages 5-17)', 'Percent (%) Eligible Free (Ages 5-17)', 'FRPM Count (Ages 5-17)', 'Percent (%) Eligible FRPM (Ages 5-17)', '2013-14 CALPADS Fall 1 Certification Status'], 'satscores': ['cds', 'rtype', 'sname', 'dname', 'cname', 'enroll12', 'NumTstTakr', 'AvgScrRead', 'AvgScrMath', 'AvgScrWrite', 'NumGE1500'], 'schools': ['CDSCode', 'NCESDist', 'NCESSchool', 'StatusType', 'County', 'District', 'School', 'Street', 'StreetAbr', 'City', 'Zip', 'State', 'MailStreet', 'MailStrAbr', 'MailCity', 'MailZip', 'MailState', 'Phone', 'Ext', 'Website', 'OpenDate', 'ClosedDate', 'Charter', 'CharterNum', 'FundingType', 'DOC', 'DOCType', 'SOC', 'SOCType', 'EdOpsCode', 'EdOpsName', 'EILCode', 'EILName', 'GSoffered', 'GSserved', 'Virtual', 'Magnet', 'Latitude', 'Longitude', 'AdmFName1', 'AdmLName1', 'AdmEmail1', 'AdmFName2', 'AdmLName2', 'AdmEmail2', 'AdmFName3', 'AdmLName3', 'AdmEmail3', 'LastUpdate']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the telephone number of the school with the lowest average reading score in Fresno Unified. The SQL query attempts to find this by joining the 'schools' table and 'satscores' table on 'CDSCode', filtering for the 'Fresno Unified' district, and sorting by average reading score in ascending order to get the lowest. The query then limits the result to 1 row. The logic of the query aligns with the question's requirements. Since it is targeting the necessary columns and joins and applying the filters correctly to retrieve the required data, I conclude that it should correctly select the corresponding telephone number. As there are no apparent omissions or errors in the provided SQL, I judge the overall structure as valid.",
+    "judgment": "Valid"
+}
+

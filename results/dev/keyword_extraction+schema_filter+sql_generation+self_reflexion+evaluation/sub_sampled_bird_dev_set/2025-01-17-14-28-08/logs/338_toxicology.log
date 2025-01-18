@@ -1,0 +1,551 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: What is the atom ID of double bonded carbon in TR012 molecule?
+Hint: carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "atom ID",
+    "double bonded carbon",
+    "TR012 molecule",
+    "carbon",
+    "element = 'c'",
+    "double bond",
+    "bond_type = ' = '"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+What is the atom ID of double bonded carbon in TR012 molecule? 
+
+Hint:
+carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question, I need to identify the atom IDs of carbon atoms that are double bonded in the molecule with ID 'TR012'. Here are the steps I'm taking: 1. First, I will filter the `molecule` table to get the `molecule_id` for 'TR012'. 2. Next, I will join the `bond` table to find the double bonds (where `bond_type` is ' = ') associated with that molecule. 3. I'll then join the `connected` table to find the atoms connected by these double bonds. 4. Finally, I need to focus on the atoms that are carbon (element = 'c') in the `atom` table, joining everything appropriately to collect the atom IDs. By carefully navigating through the data, I can accurately pull out the specific information requested in the question.",
+    "SQL": "SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+What is the atom ID of double bonded carbon in TR012 molecule?
+
+SQL Query:
+SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';
+
+Execution Result:
+None
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the atom ID of double bonded carbon in the TR012 molecule. Analyzing the SQL query, it attempts to find atom IDs from the 'atom' table where the element is carbon and it also involves checks related to the 'connected' and 'bond' tables. The critical component is ensuring that the bond type indicates double bonding, which is usually represented differently (often as '=' or 'double'). However, the bond type in the query is checked against ' = ', which is unusual and may not correctly filter for a double bond. Additionally, the execution result shows 'None', suggesting that either there are no such records that meet the conditions or that an error in the query logic prevented it from finding relevant records. Thus, the query fails to meet the requirements of the question because it does not accurately target double bonded carbons, and the absence of any records further indicates its inadequacy. Therefore, the SQL query does not correctly and fully answer the question above.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+What is the atom ID of double bonded carbon in TR012 molecule?
+
+Predicted SQL:
+SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';
+
+Execution Result:
+None
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the atom ID of double bonded carbon in the TR012 molecule. Analyzing the SQL query, it attempts to find atom IDs from the 'atom' table where the element is carbon and it also involves checks related to the 'connected' and 'bond' tables. The critical component is ensuring that the bond type indicates double bonding, which is usually represented differently (often as '=' or 'double'). However, the bond type in the query is checked against ' = ', which is unusual and may not correctly filter for a double bond. Additionally, the execution result shows 'None', suggesting that either there are no such records that meet the conditions or that an error in the query logic prevented it from finding relevant records. Thus, the query fails to meet the requirements of the question because it does not accurately target double bonded carbons, and the absence of any records further indicates its inadequacy. Therefore, the SQL query does not correctly and fully answer the question above.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "1. Update the bond_type condition: Change 'T3.bond_type = ' = '' to check for the correct representation of double bonds. Instead, use 'T3.bond_type = 'double'' or an equivalent value that correctly indicates a double bond in your database schema. Ensure you consult the schema or data dictionary to verify the accurate representation of bond types.\n\n2. Review the JOIN conditions: Ensure that the JOIN conditions between the tables are correct and inclusive for identifying atom IDs related to bond types. You might want to check if both connections (atom_id and atom_id2) are needed or if one would suffice in your context.\n\n3. Make sure that you filter for the correct molecule: The condition 'T3.molecule_id = 'TR012'' should remain, but review this against your database to confirm that the molecule ID exists and that it's formatted correctly.\n\n4. Test for edge cases: Since the execution result is 'None', consider running preliminary queries to check if there are atoms of type 'C' and corresponding double bonds in the TR012 molecule. This can help verify if the lack of results is due to missing data or query logic issues.\n\n5. Use more descriptive aliases: Improve readability by using more descriptive table aliases (e.g., atom AS a, connected AS c, bond AS b) to indicate the purpose of each join more clearly.\n\n6. Finally, validate the expected output: Ensure the final SELECT statement accurately reflects the desired output by specifically querying 'T1.atom_id'. If multiple results are expected, consider aggregating or ensuring the output comprehensively captures all double bonded carbons in the specified molecule."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. 1. Update the bond_type condition: Change 'T3.bond_type = ' = '' to check for the correct representation of double bonds. Instead, use 'T3.bond_type = 'double'' or an equivalent value that correctly indicates a double bond in your database schema. Ensure you consult the schema or data dictionary to verify the accurate representation of bond types.
+
+2. Review the JOIN conditions: Ensure that the JOIN conditions between the tables are correct and inclusive for identifying atom IDs related to bond types. You might want to check if both connections (atom_id and atom_id2) are needed or if one would suffice in your context.
+
+3. Make sure that you filter for the correct molecule: The condition 'T3.molecule_id = 'TR012'' should remain, but review this against your database to confirm that the molecule ID exists and that it's formatted correctly.
+
+4. Test for edge cases: Since the execution result is 'None', consider running preliminary queries to check if there are atoms of type 'C' and corresponding double bonds in the TR012 molecule. This can help verify if the lack of results is due to missing data or query logic issues.
+
+5. Use more descriptive aliases: Improve readability by using more descriptive table aliases (e.g., atom AS a, connected AS c, bond AS b) to indicate the purpose of each join more clearly.
+
+6. Finally, validate the expected output: Ensure the final SELECT statement accurately reflects the desired output by specifically querying 'T1.atom_id'. If multiple results are expected, consider aggregating or ensuring the output comprehensively captures all double bonded carbons in the specified molecule.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To answer the question, I need to identify the atom IDs of carbon atoms that are double bonded in the molecule with ID 'TR012'. Here are the steps I'm taking: 1. First, I will filter the `molecule` table to get the `molecule_id` for 'TR012'. 2. Next, I will join the `bond` table to find the double bonds (where `bond_type` is ' = ') associated with that molecule. 3. I'll then join the `connected` table to find the atoms connected by these double bonds. 4. Finally, I need to focus on the atoms that are carbon (element = 'c') in the `atom` table, joining everything appropriately to collect the atom IDs. By carefully navigating through the data, I can accurately pull out the specific information requested in the question.", 'SQL': "SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';"}, "SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';"]
+
+Question: 
+What is the atom ID of double bonded carbon in TR012 molecule? 
+
+Hint:
+carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question about the atom ID of double bonded carbon in the TR012 molecule, I followed these steps: 1. Identify that I need to filter for the molecule with ID 'TR012'. 2. Recognize that I am looking for atom IDs related to carbon atoms that are part of double bonds. 3. Connect the necessary tables ('atom', 'connected', and 'bond') using appropriate JOIN statements based on their relationships. 4. Confirm that carbon atoms are identified by 'element = 'c'' and double bonds by 'bond_type = ' = ''. 5. Assemble the SQL query ensuring proper filtering and conditions are maintained. Based on this reasoning, the final SQL query accurately retrieves the desired atom ID.",
+    "SQL": "SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+What is the atom ID of double bonded carbon in TR012 molecule?
+
+SQL Query:
+SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';
+
+Execution Result:
+None
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the atom ID of a double bonded carbon in the TR012 molecule. The SQL query attempts to fulfill this by filtering the `atom` table for elements that are carbon ('c'), joining with the `connected` table to find connections, and then with the `bond` table to check for double bonds specifically indicated by the condition T3.bond_type = ' = '. However, the execution result returned 'None', indicating that no results were found. This implies that either there are no double bonded carbons in the specified molecule, or that the query itself might have a flaw in its logic or filtering conditions. As the query did not produce a valid result, it doesn't fully satisfy the question's intent which expects an atom ID or confirmation of its absence in the data. Therefore, the query is considered invalid.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+What is the atom ID of double bonded carbon in TR012 molecule?
+
+Predicted SQL:
+SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';
+
+Execution Result:
+None
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the atom ID of a double bonded carbon in the TR012 molecule. The SQL query attempts to fulfill this by filtering the `atom` table for elements that are carbon ('c'), joining with the `connected` table to find connections, and then with the `bond` table to check for double bonds specifically indicated by the condition T3.bond_type = ' = '. However, the execution result returned 'None', indicating that no results were found. This implies that either there are no double bonded carbons in the specified molecule, or that the query itself might have a flaw in its logic or filtering conditions. As the query did not produce a valid result, it doesn't fully satisfy the question's intent which expects an atom ID or confirmation of its absence in the data. Therefore, the query is considered invalid.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": [
+        "1. Correct the bonding condition in the WHERE clause: The current condition T3.bond_type = ' = ' seems to be incorrect. Double bonds are typically represented as 'double' or '2' in standard databases. Change this to the correct representation for double bonds in your database schema (e.g., T3.bond_type = 'double' or T3.bond_type = '2').",
+        "2. Verify molecule ID filtering: Ensure that the molecule ID 'TR012' exists in the bond table and is correctly referenced in your query. If there is a discrepancy in naming or formatting, adjust accordingly.",
+        "3. Adjust JOIN conditions for clarity: Instead of using 'OR' in the JOIN clause for connected atoms, double-check the logic to ensure that you are correctly identifying all atoms linked by connections. If a carbon atom can be connected in two distinct ways, consider joining the connected table accordingly without ambiguity.",
+        "4. Include a distinct clause: If there is a chance of duplicate atom IDs being returned due to multiple connections, you might want to add a DISTINCT clause to eliminate duplicates from the final result, if applicable.",
+        "5. Test and validate: After modifications, run a few sample queries to ensure that the logic correctly identifies double bonded carbons in the specified molecule and returns the expected atom ID correctly."
+    ]
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. 1. Update the bond_type condition: Change 'T3.bond_type = ' = '' to check for the correct representation of double bonds. Instead, use 'T3.bond_type = 'double'' or an equivalent value that correctly indicates a double bond in your database schema. Ensure you consult the schema or data dictionary to verify the accurate representation of bond types.
+
+2. Review the JOIN conditions: Ensure that the JOIN conditions between the tables are correct and inclusive for identifying atom IDs related to bond types. You might want to check if both connections (atom_id and atom_id2) are needed or if one would suffice in your context.
+
+3. Make sure that you filter for the correct molecule: The condition 'T3.molecule_id = 'TR012'' should remain, but review this against your database to confirm that the molecule ID exists and that it's formatted correctly.
+
+4. Test for edge cases: Since the execution result is 'None', consider running preliminary queries to check if there are atoms of type 'C' and corresponding double bonds in the TR012 molecule. This can help verify if the lack of results is due to missing data or query logic issues.
+
+5. Use more descriptive aliases: Improve readability by using more descriptive table aliases (e.g., atom AS a, connected AS c, bond AS b) to indicate the purpose of each join more clearly.
+
+6. Finally, validate the expected output: Ensure the final SELECT statement accurately reflects the desired output by specifically querying 'T1.atom_id'. If multiple results are expected, consider aggregating or ensuring the output comprehensively captures all double bonded carbons in the specified molecule.
+7. ["1. Correct the bonding condition in the WHERE clause: The current condition T3.bond_type = ' = ' seems to be incorrect. Double bonds are typically represented as 'double' or '2' in standard databases. Change this to the correct representation for double bonds in your database schema (e.g., T3.bond_type = 'double' or T3.bond_type = '2').", "2. Verify molecule ID filtering: Ensure that the molecule ID 'TR012' exists in the bond table and is correctly referenced in your query. If there is a discrepancy in naming or formatting, adjust accordingly.", "3. Adjust JOIN conditions for clarity: Instead of using 'OR' in the JOIN clause for connected atoms, double-check the logic to ensure that you are correctly identifying all atoms linked by connections. If a carbon atom can be connected in two distinct ways, consider joining the connected table accordingly without ambiguity.", '4. Include a distinct clause: If there is a chance of duplicate atom IDs being returned due to multiple connections, you might want to add a DISTINCT clause to eliminate duplicates from the final result, if applicable.', '5. Test and validate: After modifications, run a few sample queries to ensure that the logic correctly identifies double bonded carbons in the specified molecule and returns the expected atom ID correctly.']
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To answer the question, I need to identify the atom IDs of carbon atoms that are double bonded in the molecule with ID 'TR012'. Here are the steps I'm taking: 1. First, I will filter the `molecule` table to get the `molecule_id` for 'TR012'. 2. Next, I will join the `bond` table to find the double bonds (where `bond_type` is ' = ') associated with that molecule. 3. I'll then join the `connected` table to find the atoms connected by these double bonds. 4. Finally, I need to focus on the atoms that are carbon (element = 'c') in the `atom` table, joining everything appropriately to collect the atom IDs. By carefully navigating through the data, I can accurately pull out the specific information requested in the question.", 'SQL': "SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';"}, "SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';", "SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';", "SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = ' = ' AND T3.molecule_id = 'TR012';"]
+
+Question: 
+What is the atom ID of double bonded carbon in TR012 molecule? 
+
+Hint:
+carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question, I need to identify the atom IDs of carbon atoms that are double bonded in the molecule with ID 'TR012'. Here\u2019s the step-by-step reasoning: 1. The `atom` table contains the atom information, where I will filter for carbon atoms with `element = 'c'`. 2. The `bond` table is essential for identifying double bonds, where `bond_type` is defined as '=' (as per the hint provided, which specifies that double bond is indicated by this symbol). 3. I will then join the `connected` table, which maps atoms to their corresponding bonded connections via `bond_id`. 4. Next, I will ensure that the `molecule_id` from the `bond` table matches 'TR012' to focus exclusively on the bonds within this specific molecule. 5. Throughout this process, I will use clear table aliases for readability and maintain the constraints defined by the schema. The overall flow of data from atoms to their connections and through the bonds will help isolate the atom IDs of the carbon atoms that share a double bond in the specified molecule.",
+    "SQL": "SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = '=' AND T3.molecule_id = 'TR012';"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+What is the atom ID of double bonded carbon in TR012 molecule?
+
+SQL Query:
+SELECT T1.atom_id FROM atom T1 JOIN connected T2 ON T1.atom_id = T2.atom_id OR T1.atom_id = T2.atom_id2 JOIN bond T3 ON T2.bond_id = T3.bond_id WHERE T1.element = 'c' AND T3.bond_type = '=' AND T3.molecule_id = 'TR012';
+
+Execution Result:
+('TR012_2',)
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the atom ID of a double bonded carbon in the TR012 molecule. The SQL query aims to find atoms by joining relevant tables (`atom`, `connected`, and `bond`) and applying filters for the atom's element (should be carbon, 'c'), the type of bond (double bond, indicated by '='), and ensuring it is part of the TR012 molecule. The execution result ('TR012_2') indicates a successful return of an atom ID matching the conditions. The SQL query correctly identifies the carbon atoms connected by double bonds in the specific molecule and returns a relevant atom ID. There doesn't seem to be any missing components in the SQL query that would affect its ability to fully address the question. Therefore, since the SQL query meets the intent of the question and the result aligns with that intent, it is considered Valid.",
+    "judgment": "Valid"
+}
+

@@ -1,0 +1,82 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "chemical compounds",
+            "database",
+            "percent",
+            "triple-bond",
+            "triple bond",
+            "bond_type",
+            "#"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "atom": [
+                "atom_id",
+                "molecule_id",
+                "element"
+            ],
+            "bond": [
+                "bond_id",
+                "molecule_id",
+                "bond_type",
+                "bondtype"
+            ],
+            "connected": [
+                "atom_id",
+                "atom_id2",
+                "bond_id"
+            ],
+            "molecule": [
+                "molecule_id",
+                "label"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "bond": [
+                "bond_id",
+                "bond_type"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To find the percent of compounds that form a triple-bond, I need to determine two values: the total number of unique molecular compounds in the database and the number of those compounds that have at least one triple bond based on the bond_type. I will use the 'molecule' table to get the total number of compounds, and I will use the 'bond' table (specifically filtering by bond_type) and the 'molecule' table again to count how many of these compounds have a bond_type of '#'. Finally, I can calculate the percentage by using these two counts in my query. I'll join the 'bond' and 'molecule' tables to only include bonds for the identified compounds, and I will ensure I handle cases where there are no triple bonds to avoid division by zero.",
+        "SQL": "SELECT ROUND((COUNT(DISTINCT CASE WHEN T2.bond_type = '#' THEN T1.molecule_id END) * 100.0) / COUNT(DISTINCT T1.molecule_id), 2) AS percent_triple_bond FROM molecule T1 LEFT JOIN bond T2 ON T1.molecule_id = T2.molecule_id;",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT ROUND((COUNT(DISTINCT CASE WHEN T2.bond_type = '#' THEN T1.molecule_id END) * 100.0) / COUNT(DISTINCT T1.molecule_id), 2) AS percent_triple_bond FROM molecule T1 LEFT JOIN bond T2 ON T1.molecule_id = T2.molecule_id;",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Among all chemical compounds identified in the database, what percent of compounds form a triple-bond.",
+            "Evidence": "triple bond refers to bond_type = '#';",
+            "pred_sql": "SELECT ROUND((COUNT(DISTINCT CASE WHEN T2.bond_type = '#' THEN T1.molecule_id END) * 100.0) / COUNT(DISTINCT T1.molecule_id), 2) AS percent_triple_bond FROM molecule T1 LEFT JOIN bond T2 ON T1.molecule_id = T2.molecule_id;",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T.bond_type = '#' THEN T.bond_id ELSE NULL END) AS REAL) * 100 / COUNT(T.bond_id) FROM bond AS T"
+        },
+        "self_reflexion": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Among all chemical compounds identified in the database, what percent of compounds form a triple-bond.",
+            "Evidence": "triple bond refers to bond_type = '#';",
+            "pred_sql": "SELECT ROUND((COUNT(DISTINCT CASE WHEN T2.bond_type = '#' THEN T1.molecule_id END) * 100.0) / COUNT(DISTINCT T1.molecule_id), 2) AS percent_triple_bond FROM molecule T1 LEFT JOIN bond T2 ON T1.molecule_id = T2.molecule_id;",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T.bond_type = '#' THEN T.bond_id ELSE NULL END) AS REAL) * 100 / COUNT(T.bond_id) FROM bond AS T"
+        },
+        "status": "success"
+    }
+]

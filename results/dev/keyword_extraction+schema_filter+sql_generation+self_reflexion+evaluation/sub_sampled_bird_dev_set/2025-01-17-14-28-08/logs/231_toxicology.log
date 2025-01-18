@@ -1,0 +1,681 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic?
+Hint: TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "bond type",
+    "majority of the bonds",
+    "molecule TR018",
+    "carcinogenic",
+    "TR018",
+    "MAX(COUNT(bond_type))",
+    "label = +",
+    "label = -"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic? 
+
+Hint:
+TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "First, I need to select the bond types for the molecule TR018. To do that, I will join the 'bond', 'molecule', and the 'connected' tables. The 'bond' table will provide the bond types, and the 'molecule' table will confirm the molecule ID. Then, I will group the results by bond type and count the occurrences of each bond type for molecules matching TR018. I will use the 'COUNT' function to determine which bond type occurs most frequently. Finally, I will check if the molecule is carcinogenic by looking at the 'label' column in the 'molecule' table where '+' indicates carcinogenic and '-' indicates non-carcinogenic. To get the necessary information, I will sort by the COUNT of bond types in descending order and limit the results to get the most common bond type. Additionally, I will select the 'label' of the molecule to indicate whether it is carcinogenic or not. The final SQL will include the bond type and the carcinogenic status in the select statement, making sure to follow the constraints about what to return and how to format the query.",
+    "SQL": "SELECT T1.bond_type, T2.label FROM bond T1 JOIN molecule T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic?
+
+SQL Query:
+SELECT T1.bond_type, T2.label FROM bond T1 JOIN molecule T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;
+
+Execution Result:
+None
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the bond type that accounted for the majority presence in molecule TR018, and it also queries whether this molecule is carcinogenic. The SQL query aims to extract the bond type associated with molecule TR018 by using a JOIN between the bond and molecule tables, followed by grouping and ordering to find the most common bond type. However, the query does not include any information or checks regarding the carcinogenicity of the molecule. Furthermore, the execution result returned 'None', indicating that no data was retrieved. Since the query fails to check for the carcinogenicity and returned no results, it does not answer the question adequately.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic?
+
+Predicted SQL:
+SELECT T1.bond_type, T2.label FROM bond T1 JOIN molecule T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;
+
+Execution Result:
+None
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the bond type that accounted for the majority presence in molecule TR018, and it also queries whether this molecule is carcinogenic. The SQL query aims to extract the bond type associated with molecule TR018 by using a JOIN between the bond and molecule tables, followed by grouping and ordering to find the most common bond type. However, the query does not include any information or checks regarding the carcinogenicity of the molecule. Furthermore, the execution result returned 'None', indicating that no data was retrieved. Since the query fails to check for the carcinogenicity and returned no results, it does not answer the question adequately.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": [
+        "Modify the SQL query to include a check for the carcinogenicity of the molecule 'TR018'. This can be done by selecting the relevant field from the molecule table that indicates carcinogenicity (e.g., 'is_carcinogenic').",
+        "Ensure that both the bond type and the carcinogenicity information are included in the SELECT clause. This will make the output more comprehensive and directly address the question.",
+        "Consider adding a check to handle situations where there might be no bonds associated with the molecule. This could involve a LEFT JOIN instead of an INNER JOIN to ensure that information about the molecule's carcinogenicity is still returned even if no bonds are found.",
+        "Revising the query structure to have a clearer control flow can help: start by selecting the molecule details (including carcinogenicity), then join with bond information, and finally group and order by bond type.",
+        "Ensure to validate the existence of the molecule 'TR018' in the dataset to prevent returning 'None' results. You may also include an error handling mechanism or a default return in case of missing data."
+    ]
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. ["Modify the SQL query to include a check for the carcinogenicity of the molecule 'TR018'. This can be done by selecting the relevant field from the molecule table that indicates carcinogenicity (e.g., 'is_carcinogenic').", 'Ensure that both the bond type and the carcinogenicity information are included in the SELECT clause. This will make the output more comprehensive and directly address the question.', "Consider adding a check to handle situations where there might be no bonds associated with the molecule. This could involve a LEFT JOIN instead of an INNER JOIN to ensure that information about the molecule's carcinogenicity is still returned even if no bonds are found.", 'Revising the query structure to have a clearer control flow can help: start by selecting the molecule details (including carcinogenicity), then join with bond information, and finally group and order by bond type.', "Ensure to validate the existence of the molecule 'TR018' in the dataset to prevent returning 'None' results. You may also include an error handling mechanism or a default return in case of missing data."]
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "First, I need to select the bond types for the molecule TR018. To do that, I will join the 'bond', 'molecule', and the 'connected' tables. The 'bond' table will provide the bond types, and the 'molecule' table will confirm the molecule ID. Then, I will group the results by bond type and count the occurrences of each bond type for molecules matching TR018. I will use the 'COUNT' function to determine which bond type occurs most frequently. Finally, I will check if the molecule is carcinogenic by looking at the 'label' column in the 'molecule' table where '+' indicates carcinogenic and '-' indicates non-carcinogenic. To get the necessary information, I will sort by the COUNT of bond types in descending order and limit the results to get the most common bond type. Additionally, I will select the 'label' of the molecule to indicate whether it is carcinogenic or not. The final SQL will include the bond type and the carcinogenic status in the select statement, making sure to follow the constraints about what to return and how to format the query.", 'SQL': "SELECT T1.bond_type, T2.label FROM bond T1 JOIN molecule T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;"}, "SELECT T1.bond_type, T2.label FROM bond T1 JOIN molecule T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;"]
+
+Question: 
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic? 
+
+Hint:
+TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question, I need to determine which bond type has the majority of occurrences for the molecule TR018 while also checking the carcinogenic status of this molecule. Here's how I approached it: 1. **Select Relevant Tables**: I will be working primarily with the `bond`, `molecule`, and `connected` tables. The `bond` table will help me get the `bond_type`, and the `molecule` table will confirm the details of molecule TR018 including its carcinogenicity status. 2. **JOIN the Tables**: To connect the `bond` information for molecule TR018, I will perform a JOIN between the `bond` and `molecule` tables based on `molecule_id`. 3. **Filtering for the Target Molecule**: I will filter the results to include only entries where the `molecule_id` is 'TR018'. 4. **Group and Count Bond Types**: I will use GROUP BY to count the occurrences of each bond type, which will allow me to determine which bond type is the most frequent. 5. **Include Carcinogenic Status**: I'll be fetching the `label` from the `molecule` table which indicates the carcinogenicity of the molecule (where '+' means carcinogenic and '-' means non-carcinogenic) ensuring to include this in the SELECT clause. 6. **Sorting and Limiting**: I will ORDER the results by the COUNT of bond types in descending order and LIMIT the output to one result to get the bond type with the highest count. Additionally, to ensure that I still retrieve information even if no bonds are present, I will use a LEFT JOIN. 7. **SQL Query Construction**: The final query will construct the SELECT statement to get the bond_type alongside the carcinogenic label. I include necessary relationships and operations ensuring that I handle nulls appropriately by using the LEFT JOIN. I also consider existing entries to validate the results of molecule TR018. Overall, my aim is to provide both the most common bond type and the carcinogenic nature in an organized manner.",
+    "SQL": "SELECT T1.bond_type, T2.label FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic?
+
+SQL Query:
+SELECT T1.bond_type, T2.label FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;
+
+Execution Result:
+None
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for two pieces of information: the bond type that accounts for the majority of bonds in molecule TR018, and whether this molecule is carcinogenic. The SQL query attempts to retrieve the bond type from the 'bond' table for the molecule with ID 'TR018' by performing a left join with the 'molecule' table. It groups the results by bond type, counting how many of each bond type exists, and orders them by count in descending order to get the most frequent bond type. However, the execution result is 'None', indicating that no rows were returned. This implies that either the molecule TR018 does not exist in the database or there were no bond types associated with it. Additionally, the query does not address the carcinogenic aspect of the molecule, as it does not include any condition or field that specifies whether TR018 is carcinogenic. Therefore, the query does not correctly and fully answer the question as required. It fails to provide the necessary information about the molecule's bond type and does not answer the carcinogenicity question at all.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic?
+
+Predicted SQL:
+SELECT T1.bond_type, T2.label FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;
+
+Execution Result:
+None
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for two pieces of information: the bond type that accounts for the majority of bonds in molecule TR018, and whether this molecule is carcinogenic. The SQL query attempts to retrieve the bond type from the 'bond' table for the molecule with ID 'TR018' by performing a left join with the 'molecule' table. It groups the results by bond type, counting how many of each bond type exists, and orders them by count in descending order to get the most frequent bond type. However, the execution result is 'None', indicating that no rows were returned. This implies that either the molecule TR018 does not exist in the database or there were no bond types associated with it. Additionally, the query does not address the carcinogenic aspect of the molecule, as it does not include any condition or field that specifies whether TR018 is carcinogenic. Therefore, the query does not correctly and fully answer the question as required. It fails to provide the necessary information about the molecule's bond type and does not answer the carcinogenicity question at all.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "1. Verify the existence of the molecule TR018 in the 'molecule' table before running the query. A preliminary check can be made with a simple SELECT query to confirm it exists. \\n\\n2. Modify the current SQL query to include a field that indicates whether the molecule is carcinogenic. This can be done by including the relevant column from the 'molecule' table in the SELECT clause. For example, the carcinogenicity could be represented by a column named 'is_carcinogenic' or similar. \\n\\n3. Rewrite the query to ensure that both required outputs are captured effectively. Include the bond type with a count and the carcinogenic information in a single query. The revised query could look like this: \\n   SELECT T1.bond_type, T2.is_carcinogenic, COUNT(T1.bond_type) as bond_count \\n   FROM bond T1 \\n   JOIN molecule T2 ON T1.molecule_id = T2.molecule_id \\n   WHERE T2.molecule_id = 'TR018' \\n   GROUP BY T1.bond_type, T2.is_carcinogenic \\n   ORDER BY bond_count DESC LIMIT 1; \\n\\n4. Ensure proper handling of cases where 'TR018' might not yield results by adding error-handling or conditional logic, if supported by the database system."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. ["Modify the SQL query to include a check for the carcinogenicity of the molecule 'TR018'. This can be done by selecting the relevant field from the molecule table that indicates carcinogenicity (e.g., 'is_carcinogenic').", 'Ensure that both the bond type and the carcinogenicity information are included in the SELECT clause. This will make the output more comprehensive and directly address the question.', "Consider adding a check to handle situations where there might be no bonds associated with the molecule. This could involve a LEFT JOIN instead of an INNER JOIN to ensure that information about the molecule's carcinogenicity is still returned even if no bonds are found.", 'Revising the query structure to have a clearer control flow can help: start by selecting the molecule details (including carcinogenicity), then join with bond information, and finally group and order by bond type.', "Ensure to validate the existence of the molecule 'TR018' in the dataset to prevent returning 'None' results. You may also include an error handling mechanism or a default return in case of missing data."]
+7. 1. Verify the existence of the molecule TR018 in the 'molecule' table before running the query. A preliminary check can be made with a simple SELECT query to confirm it exists. \n\n2. Modify the current SQL query to include a field that indicates whether the molecule is carcinogenic. This can be done by including the relevant column from the 'molecule' table in the SELECT clause. For example, the carcinogenicity could be represented by a column named 'is_carcinogenic' or similar. \n\n3. Rewrite the query to ensure that both required outputs are captured effectively. Include the bond type with a count and the carcinogenic information in a single query. The revised query could look like this: \n   SELECT T1.bond_type, T2.is_carcinogenic, COUNT(T1.bond_type) as bond_count \n   FROM bond T1 \n   JOIN molecule T2 ON T1.molecule_id = T2.molecule_id \n   WHERE T2.molecule_id = 'TR018' \n   GROUP BY T1.bond_type, T2.is_carcinogenic \n   ORDER BY bond_count DESC LIMIT 1; \n\n4. Ensure proper handling of cases where 'TR018' might not yield results by adding error-handling or conditional logic, if supported by the database system.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "First, I need to select the bond types for the molecule TR018. To do that, I will join the 'bond', 'molecule', and the 'connected' tables. The 'bond' table will provide the bond types, and the 'molecule' table will confirm the molecule ID. Then, I will group the results by bond type and count the occurrences of each bond type for molecules matching TR018. I will use the 'COUNT' function to determine which bond type occurs most frequently. Finally, I will check if the molecule is carcinogenic by looking at the 'label' column in the 'molecule' table where '+' indicates carcinogenic and '-' indicates non-carcinogenic. To get the necessary information, I will sort by the COUNT of bond types in descending order and limit the results to get the most common bond type. Additionally, I will select the 'label' of the molecule to indicate whether it is carcinogenic or not. The final SQL will include the bond type and the carcinogenic status in the select statement, making sure to follow the constraints about what to return and how to format the query.", 'SQL': "SELECT T1.bond_type, T2.label FROM bond T1 JOIN molecule T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;"}, "SELECT T1.bond_type, T2.label FROM bond T1 JOIN molecule T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;", "SELECT T1.bond_type, T2.label FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;", "SELECT T1.bond_type, T2.label FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;"]
+
+Question: 
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic? 
+
+Hint:
+TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To address the question regarding the bond type associated with molecule TR018 and its carcinogenicity, I need to consider several elements in my SQL query. First, I will retrieve data concerning the bond types linked to the molecule TR018. For this, I will join the 'molecule' table to confirm the molecule's existence and its associated label indicating carcinogenicity. Since we are interested in finding out which bond type has the highest occurrence, I will group the results by bond type and count the occurrences using the COUNT function. To ensure that we include the carcinogenic information, the query will also select the label indicating carcinogenicity ('+' for carcinogenic, '-' for non-carcinogenic). To get the most frequent bond type, I will use ORDER BY with COUNT and LIMIT 1. Given the importance of ensuring the molecule is present regardless of its bond associations, a LEFT JOIN approach will be utilized. Additionally, the logic must account for instances where no bonds might be associated with TR018, allowing for a return of the carcinogenic status regardless. This ensures comprehensive coverage of the query requirements. Finally, the SQL syntax will follow these steps to ensure clarity and effectiveness in retrieving the data needed to answer the question.",
+    "SQL": "SELECT T1.bond_type, T2.label AS is_carcinogenic FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type, T2.label ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic?
+
+SQL Query:
+SELECT T1.bond_type, T2.label AS is_carcinogenic FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type, T2.label ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;
+
+Execution Result:
+None
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks which bond type is the majority type in molecule TR018 and whether this molecule is carcinogenic. The SQL query attempts to achieve this by selecting bond type and carcinogenic status for the specified molecule with appropriate joins and grouping. However, the execution result returns 'None', indicating that no rows were found or the query did not execute properly. This implies that either there is no bond data for TR018 or the molecule does not exist in the database. Since the execution result yields no data, it cannot satisfy the query's intent of both identifying the dominant bond type and the carcinogenic status. Therefore, the SQL query fails to fully answer the question, making the entire query invalid.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic?
+
+Predicted SQL:
+SELECT T1.bond_type, T2.label AS is_carcinogenic FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type, T2.label ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;
+
+Execution Result:
+None
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks which bond type is the majority type in molecule TR018 and whether this molecule is carcinogenic. The SQL query attempts to achieve this by selecting bond type and carcinogenic status for the specified molecule with appropriate joins and grouping. However, the execution result returns 'None', indicating that no rows were found or the query did not execute properly. This implies that either there is no bond data for TR018 or the molecule does not exist in the database. Since the execution result yields no data, it cannot satisfy the query's intent of both identifying the dominant bond type and the carcinogenic status. Therefore, the SQL query fails to fully answer the question, making the entire query invalid.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "1. Validate Data Existence: Before executing the SQL query, ensure that the molecule with ID 'TR018' exists in the molecule table. You can run a preliminary query like 'SELECT * FROM molecule WHERE molecule_id = 'TR018';' to check its presence.\n\n2. Correct Join Syntax: The query uses 'LEFT JOIN' but it assumes that every molecule will have associated bond data. If the molecule exists but has no bonds, a LEFT JOIN will still return a row with NULL bond types. As a result, consider using an 'INNER JOIN' if you only want to retrieve data for molecules that have at least one bond.\n\n3. Focus on Majority Bond Type: The 'GROUP BY' clause is correct, but for a clearer result, ensure that you select the count of bond types in the SELECT clause. This way, it will be clearer which bond type is predominant.\n\n4. Refine ORDER BY Clause: The current ORDER BY clause should focus on the count of bond types to determine which one is dominant. Utilize 'ORDER BY COUNT(T1.bond_type) DESC' directly in a subquery to select the top result more cleanly.\n\n5. Include Carcinogenic Check: Make sure that the query correctly retrieves the carcinogenic status irrespective of bond presence. You may need to add a subquery or adjust the SELECT to directly access carcinogenic data from the molecule table.\n\nRevised Query Example:\n\n```sql\nSELECT T1.bond_type, T2.label AS is_carcinogenic \nFROM bond T1 \nINNER JOIN molecule T2 ON T1.molecule_id = T2.molecule_id \nWHERE T2.molecule_id = 'TR018' \nGROUP BY T1.bond_type, T2.label \nORDER BY COUNT(T1.bond_type) DESC \nLIMIT 1;\n```"
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. ["Modify the SQL query to include a check for the carcinogenicity of the molecule 'TR018'. This can be done by selecting the relevant field from the molecule table that indicates carcinogenicity (e.g., 'is_carcinogenic').", 'Ensure that both the bond type and the carcinogenicity information are included in the SELECT clause. This will make the output more comprehensive and directly address the question.', "Consider adding a check to handle situations where there might be no bonds associated with the molecule. This could involve a LEFT JOIN instead of an INNER JOIN to ensure that information about the molecule's carcinogenicity is still returned even if no bonds are found.", 'Revising the query structure to have a clearer control flow can help: start by selecting the molecule details (including carcinogenicity), then join with bond information, and finally group and order by bond type.', "Ensure to validate the existence of the molecule 'TR018' in the dataset to prevent returning 'None' results. You may also include an error handling mechanism or a default return in case of missing data."]
+7. 1. Verify the existence of the molecule TR018 in the 'molecule' table before running the query. A preliminary check can be made with a simple SELECT query to confirm it exists. \n\n2. Modify the current SQL query to include a field that indicates whether the molecule is carcinogenic. This can be done by including the relevant column from the 'molecule' table in the SELECT clause. For example, the carcinogenicity could be represented by a column named 'is_carcinogenic' or similar. \n\n3. Rewrite the query to ensure that both required outputs are captured effectively. Include the bond type with a count and the carcinogenic information in a single query. The revised query could look like this: \n   SELECT T1.bond_type, T2.is_carcinogenic, COUNT(T1.bond_type) as bond_count \n   FROM bond T1 \n   JOIN molecule T2 ON T1.molecule_id = T2.molecule_id \n   WHERE T2.molecule_id = 'TR018' \n   GROUP BY T1.bond_type, T2.is_carcinogenic \n   ORDER BY bond_count DESC LIMIT 1; \n\n4. Ensure proper handling of cases where 'TR018' might not yield results by adding error-handling or conditional logic, if supported by the database system.
+8. 1. Validate Data Existence: Before executing the SQL query, ensure that the molecule with ID 'TR018' exists in the molecule table. You can run a preliminary query like 'SELECT * FROM molecule WHERE molecule_id = 'TR018';' to check its presence.
+
+2. Correct Join Syntax: The query uses 'LEFT JOIN' but it assumes that every molecule will have associated bond data. If the molecule exists but has no bonds, a LEFT JOIN will still return a row with NULL bond types. As a result, consider using an 'INNER JOIN' if you only want to retrieve data for molecules that have at least one bond.
+
+3. Focus on Majority Bond Type: The 'GROUP BY' clause is correct, but for a clearer result, ensure that you select the count of bond types in the SELECT clause. This way, it will be clearer which bond type is predominant.
+
+4. Refine ORDER BY Clause: The current ORDER BY clause should focus on the count of bond types to determine which one is dominant. Utilize 'ORDER BY COUNT(T1.bond_type) DESC' directly in a subquery to select the top result more cleanly.
+
+5. Include Carcinogenic Check: Make sure that the query correctly retrieves the carcinogenic status irrespective of bond presence. You may need to add a subquery or adjust the SELECT to directly access carcinogenic data from the molecule table.
+
+Revised Query Example:
+
+```sql
+SELECT T1.bond_type, T2.label AS is_carcinogenic 
+FROM bond T1 
+INNER JOIN molecule T2 ON T1.molecule_id = T2.molecule_id 
+WHERE T2.molecule_id = 'TR018' 
+GROUP BY T1.bond_type, T2.label 
+ORDER BY COUNT(T1.bond_type) DESC 
+LIMIT 1;
+```
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT T1.bond_type, T2.label FROM bond T1 JOIN molecule T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;", "SELECT T1.bond_type, T2.label FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;", "SELECT T1.bond_type, T2.label FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;", "SELECT T1.bond_type, T2.label AS is_carcinogenic FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type, T2.label ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;", "SELECT T1.bond_type, T2.label AS is_carcinogenic FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type, T2.label ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;"]
+
+Question: 
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic? 
+
+Hint:
+TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question, we need to determine the bond type that accounts for the majority of bonds associated with the molecule identified as 'TR018'. Additionally, we need to verify and include the carcinogenicity status of this molecule within the same query. \n\nFirst, I will check that the molecule 'TR018' exists in the 'molecule' table. Then, I will perform a LEFT JOIN between the 'molecule' table and the 'bond' table, since the question requires us to find the bond types even if some might not be present (ensuring we still get carcinogenicity status). \n\nOnce joined, I will group the results by bond type to count the occurrences of each bond type associated with 'TR018'. Next, I will include the carcinogenicity status derived from the 'label' column of the 'molecule' table, where '+' indicates the molecule is carcinogenic and '-' means it is not. \n\nFinally, I will order the results by the bond type count in descending order, so that the bond type with the highest count appears first. The use of LIMIT 1 ensures we only get the predominant bond type. In the SELECT clause, I will include both the bond type and the carcinogenicity information to fulfill the requirements of the question.",
+    "SQL": "SELECT T1.bond_type, T2.label AS is_carcinogenic FROM molecule T2 LEFT JOIN bond T1 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR018' GROUP BY T1.bond_type, T2.label ORDER BY COUNT(T1.bond_type) DESC LIMIT 1;"
+}
+

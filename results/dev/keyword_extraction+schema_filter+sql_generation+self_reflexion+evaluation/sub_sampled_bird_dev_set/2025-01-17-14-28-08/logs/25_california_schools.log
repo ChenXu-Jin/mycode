@@ -1,0 +1,1035 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+Hint: Average of average math = sum(average math scores) / count(schools).
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "schools",
+    "Riverside",
+    "average math score",
+    "SAT",
+    "greater than 400",
+    "funding type",
+    "Average of average math",
+    "sum(average math scores)",
+    "count(schools)"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE frpm (
+  CDSCode                                       TEXT not null
+        primary key,
+  `Academic Year`                               TEXT  null,
+  `County Code`                                 TEXT  null,
+  `District Code`                               INTEGER         null,
+  `School Code`                                 TEXT  null,
+  `County Name`                                 TEXT null,
+  `District Name`                               TEXT null,
+  `School Name`                                 TEXT null,
+  `District Type`                               TEXT null,
+  `School Type`                                 TEXT null,
+  `Educational Option Type`                     TEXT null,
+  `NSLP Provision Status`                       TEXT null,
+  `Charter School (Y/N)`                        INTEGER    null,
+  `Charter School Number`                       TEXT  null,
+  `Charter Funding Type`                        TEXT null,
+  IRC                                           INTEGER    null,
+  `Low Grade`                                   TEXT  null,
+  `High Grade`                                  TEXT null,
+  `Enrollment (K-12)`                           REAL      null,
+  `Free Meal Count (K-12)`                      REAL       null,
+  `Percent (%) Eligible Free (K-12)`            REAL       null,
+  `FRPM Count (K-12)`                           REAL       null,
+  `Percent (%) Eligible FRPM (K-12)`            REAL       null,
+  `Enrollment (Ages 5-17)`                      REAL       null,
+  `Free Meal Count (Ages 5-17)`                 REAL       null,
+  `Percent (%) Eligible Free (Ages 5-17)`       REAL       null,
+  `FRPM Count (Ages 5-17)`                      REAL       null,
+  `Percent (%) Eligible FRPM (Ages 5-17)`       REAL       null,
+  `2013-14 CALPADS Fall 1 Certification Status` INTEGER    null,
+  foreign key (CDSCode) references schools (CDSCode)
+);
+
+CREATE TABLE satscores (
+  cds         TEXT not null
+        primary key,
+  rtype       TEXT  not null,
+  sname       TEXT null,
+  dname       TEXT null,
+  cname       TEXT null,
+  enroll12    INTEGER         not null,
+  NumTstTakr  INTEGER          not null,
+  AvgScrRead  INTEGER          null,
+  AvgScrMath  INTEGER          null,
+  AvgScrWrite INTEGER          null,
+  NumGE1500   INTEGER          null,
+  foreign key (cds) references schools (CDSCode)
+);
+
+CREATE TABLE schools (
+  CDSCode     TEXT not null
+        primary key,
+  NCESDist    TEXT  null,
+  NCESSchool  TEXT  null,
+  StatusType  TEXT  not null,
+  County      TEXT not null,
+  District    TEXT not null,
+  School      TEXT null,
+  Street      TEXT null,
+  StreetAbr   TEXT null,
+  City        TEXT null,
+  Zip         TEXT null,
+  State       TEXT  null,
+  MailStreet  TEXT null,
+  MailStrAbr  TEXT null,
+  MailCity    TEXT null,
+  MailZip     TEXT null,
+  MailState   TEXT  null,
+  Phone       TEXT null,
+  Ext         TEXT  null,
+  Website     TEXT null,
+  OpenDate    DATE        null,
+  ClosedDate  DATE        null,
+  Charter     INTEGER    null,
+  CharterNum  TEXT  null,
+  FundingType TEXT null,
+  DOC         TEXT  not null,
+  DOCType     TEXT not null,
+  SOC         TEXT  null,
+  SOCType     TEXT null,
+  EdOpsCode   TEXT  null,
+  EdOpsName   TEXT null,
+  EILCode     TEXT  null,
+  EILName     TEXT null,
+  GSoffered   TEXT null,
+  GSserved    TEXT  null,
+  Virtual     TEXT  null,
+  Magnet      INTEGER   null,
+  Latitude    REAL      null,
+  Longitude   REAL      null,
+  AdmFName1   TEXT null,
+  AdmLName1   TEXT null,
+  AdmEmail1   TEXT null,
+  AdmFName2   TEXT null,
+  AdmLName2   TEXT null,
+  AdmEmail2   TEXT null,
+  AdmFName3   TEXT  null,
+  AdmLName3   TEXT null,
+  AdmEmail3   TEXT null,
+  LastUpdate  DATE        not null
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools? 
+
+Hint:
+Average of average math = sum(average math scores) / count(schools).
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To address the question, I first need to focus on two tables: 'schools' and 'satscores'. The question specifically asks for schools located in Riverside and for schools where the average of average math scores from the 'satscores' table is greater than 400. To achieve this, I'll need to use a JOIN operation to combine data from both tables using their foreign key relationship. First, I will filter the schools to only include those in Riverside. Next, I'll compute the average of the average math scores from the 'satscores' table, grouping by the school. Finally, I will filter out the groups where the average math score is higher than 400 and select the names of the schools along with their funding types. Using aggregate functions, I will also ensure to skip null values while calculating averages to maintain data integrity.",
+    "SQL": "SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+SQL Query:
+SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;
+
+Execution Result:
+(None, None)
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "First, the question asks for schools in Riverside with an average math SAT score greater than 400 and the funding type of these schools. The SQL query is structured to select the school name and funding type from a joined dataset of schools and SAT scores, with specific filters applied. The query uses a JOIN to link the schools and SAT scores based on CDSCode, filters the schools to only those in Riverside, groups the results by the CDSCode, and applies a HAVING clause to ensure the average math score exceeds 400. However, the execution result returned (None, None), indicating that no records matched these criteria. This suggests either there are no schools in Riverside that meet the conditions or there may be an issue with the data itself. Despite the SQL query accurately reflecting the requirements of the question, the lack of results does not fulfill the query's intent. Thus, the proper conclusion is that while the query is logically valid, the failure to retrieve any results implies it doesn't fully serve the question's requirements. Therefore, since the execution result doesn't provide any meaningful information, the SQL query, while correctly written, does not adequately answer the question.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+Predicted SQL:
+SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;
+
+Execution Result:
+(None, None)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "First, the question asks for schools in Riverside with an average math SAT score greater than 400 and the funding type of these schools. The SQL query is structured to select the school name and funding type from a joined dataset of schools and SAT scores, with specific filters applied. The query uses a JOIN to link the schools and SAT scores based on CDSCode, filters the schools to only those in Riverside, groups the results by the CDSCode, and applies a HAVING clause to ensure the average math score exceeds 400. However, the execution result returned (None, None), indicating that no records matched these criteria. This suggests either there are no schools in Riverside that meet the conditions or there may be an issue with the data itself. Despite the SQL query accurately reflecting the requirements of the question, the lack of results does not fulfill the query's intent. Thus, the proper conclusion is that while the query is logically valid, the failure to retrieve any results implies it doesn't fully serve the question's requirements. Therefore, since the execution result doesn't provide any meaningful information, the SQL query, while correctly written, does not adequately answer the question.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "1. Verify Data Availability: Before modifying the SQL query, check the underlying data in both the 'schools' and 'satscores' tables to confirm that there are, in fact, schools located in Riverside and that they have corresponding SAT scores recorded. If no schools exist in Riverside or if their scores are not recorded, the execution will naturally return no results.\n\n2. Update the GROUP BY Clause: The current query groups results by T1.CDSCode, but it doesn't ensure that the School name can be selected correctly. Modify the GROUP BY clause to include T1.School in addition to T1.CDSCode, or use T1.School alone if it\u2019s unique to the CDSCode. \n   - Change to: GROUP BY T1.School, T1.CDSCode\n\n3. Use Proper Aggregation: Ensure that both columns selected (School and FundingType) in the SELECT statement are appropriately aggregated or included in the GROUP BY clause. You may include the funding type in the SELECT statement directly, however, ensure all necessary aggregations align with SQL standards.\n\n4. Return Only Valid Schools: To align more closely with the question\u2019s intent, ensure the results filter for those schools that meet the average score criteria before selecting the retrieved schools.\n\n5. Consider Adding a WHERE Clause: If needed, introduce a WHERE clause to make certain that you are only looking at schools with valid SAT scores. For example, WHERE T2.AvgScrMath IS NOT NULL, to exclude schools that might lack scores.\n\n6. Final Query Structure: The revised SQL query could look like this:\n   ```sql\n   SELECT T1.School, T1.FundingType\n   FROM schools T1\n   JOIN satscores T2 ON T1.CDSCode = T2.cds\n   WHERE T1.City = 'Riverside'\n   AND T2.AvgScrMath IS NOT NULL\n   GROUP BY T1.School, T1.CDSCode, T1.FundingType\n   HAVING AVG(T2.AvgScrMath) > 400;\n   ```\n   This version ensures that the query is logically organized, meeting all conditions and requirements specified in the original question."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE frpm (
+  CDSCode                                       TEXT not null
+        primary key,
+  `Academic Year`                               TEXT  null,
+  `County Code`                                 TEXT  null,
+  `District Code`                               INTEGER         null,
+  `School Code`                                 TEXT  null,
+  `County Name`                                 TEXT null,
+  `District Name`                               TEXT null,
+  `School Name`                                 TEXT null,
+  `District Type`                               TEXT null,
+  `School Type`                                 TEXT null,
+  `Educational Option Type`                     TEXT null,
+  `NSLP Provision Status`                       TEXT null,
+  `Charter School (Y/N)`                        INTEGER    null,
+  `Charter School Number`                       TEXT  null,
+  `Charter Funding Type`                        TEXT null,
+  IRC                                           INTEGER    null,
+  `Low Grade`                                   TEXT  null,
+  `High Grade`                                  TEXT null,
+  `Enrollment (K-12)`                           REAL      null,
+  `Free Meal Count (K-12)`                      REAL       null,
+  `Percent (%) Eligible Free (K-12)`            REAL       null,
+  `FRPM Count (K-12)`                           REAL       null,
+  `Percent (%) Eligible FRPM (K-12)`            REAL       null,
+  `Enrollment (Ages 5-17)`                      REAL       null,
+  `Free Meal Count (Ages 5-17)`                 REAL       null,
+  `Percent (%) Eligible Free (Ages 5-17)`       REAL       null,
+  `FRPM Count (Ages 5-17)`                      REAL       null,
+  `Percent (%) Eligible FRPM (Ages 5-17)`       REAL       null,
+  `2013-14 CALPADS Fall 1 Certification Status` INTEGER    null,
+  foreign key (CDSCode) references schools (CDSCode)
+);
+
+CREATE TABLE satscores (
+  cds         TEXT not null
+        primary key,
+  rtype       TEXT  not null,
+  sname       TEXT null,
+  dname       TEXT null,
+  cname       TEXT null,
+  enroll12    INTEGER         not null,
+  NumTstTakr  INTEGER          not null,
+  AvgScrRead  INTEGER          null,
+  AvgScrMath  INTEGER          null,
+  AvgScrWrite INTEGER          null,
+  NumGE1500   INTEGER          null,
+  foreign key (cds) references schools (CDSCode)
+);
+
+CREATE TABLE schools (
+  CDSCode     TEXT not null
+        primary key,
+  NCESDist    TEXT  null,
+  NCESSchool  TEXT  null,
+  StatusType  TEXT  not null,
+  County      TEXT not null,
+  District    TEXT not null,
+  School      TEXT null,
+  Street      TEXT null,
+  StreetAbr   TEXT null,
+  City        TEXT null,
+  Zip         TEXT null,
+  State       TEXT  null,
+  MailStreet  TEXT null,
+  MailStrAbr  TEXT null,
+  MailCity    TEXT null,
+  MailZip     TEXT null,
+  MailState   TEXT  null,
+  Phone       TEXT null,
+  Ext         TEXT  null,
+  Website     TEXT null,
+  OpenDate    DATE        null,
+  ClosedDate  DATE        null,
+  Charter     INTEGER    null,
+  CharterNum  TEXT  null,
+  FundingType TEXT null,
+  DOC         TEXT  not null,
+  DOCType     TEXT not null,
+  SOC         TEXT  null,
+  SOCType     TEXT null,
+  EdOpsCode   TEXT  null,
+  EdOpsName   TEXT null,
+  EILCode     TEXT  null,
+  EILName     TEXT null,
+  GSoffered   TEXT null,
+  GSserved    TEXT  null,
+  Virtual     TEXT  null,
+  Magnet      INTEGER   null,
+  Latitude    REAL      null,
+  Longitude   REAL      null,
+  AdmFName1   TEXT null,
+  AdmLName1   TEXT null,
+  AdmEmail1   TEXT null,
+  AdmFName2   TEXT null,
+  AdmLName2   TEXT null,
+  AdmEmail2   TEXT null,
+  AdmFName3   TEXT  null,
+  AdmLName3   TEXT null,
+  AdmEmail3   TEXT null,
+  LastUpdate  DATE        not null
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. 1. Verify Data Availability: Before modifying the SQL query, check the underlying data in both the 'schools' and 'satscores' tables to confirm that there are, in fact, schools located in Riverside and that they have corresponding SAT scores recorded. If no schools exist in Riverside or if their scores are not recorded, the execution will naturally return no results.
+
+2. Update the GROUP BY Clause: The current query groups results by T1.CDSCode, but it doesn't ensure that the School name can be selected correctly. Modify the GROUP BY clause to include T1.School in addition to T1.CDSCode, or use T1.School alone if it’s unique to the CDSCode. 
+   - Change to: GROUP BY T1.School, T1.CDSCode
+
+3. Use Proper Aggregation: Ensure that both columns selected (School and FundingType) in the SELECT statement are appropriately aggregated or included in the GROUP BY clause. You may include the funding type in the SELECT statement directly, however, ensure all necessary aggregations align with SQL standards.
+
+4. Return Only Valid Schools: To align more closely with the question’s intent, ensure the results filter for those schools that meet the average score criteria before selecting the retrieved schools.
+
+5. Consider Adding a WHERE Clause: If needed, introduce a WHERE clause to make certain that you are only looking at schools with valid SAT scores. For example, WHERE T2.AvgScrMath IS NOT NULL, to exclude schools that might lack scores.
+
+6. Final Query Structure: The revised SQL query could look like this:
+   ```sql
+   SELECT T1.School, T1.FundingType
+   FROM schools T1
+   JOIN satscores T2 ON T1.CDSCode = T2.cds
+   WHERE T1.City = 'Riverside'
+   AND T2.AvgScrMath IS NOT NULL
+   GROUP BY T1.School, T1.CDSCode, T1.FundingType
+   HAVING AVG(T2.AvgScrMath) > 400;
+   ```
+   This version ensures that the query is logically organized, meeting all conditions and requirements specified in the original question.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To address the question, I first need to focus on two tables: 'schools' and 'satscores'. The question specifically asks for schools located in Riverside and for schools where the average of average math scores from the 'satscores' table is greater than 400. To achieve this, I'll need to use a JOIN operation to combine data from both tables using their foreign key relationship. First, I will filter the schools to only include those in Riverside. Next, I'll compute the average of the average math scores from the 'satscores' table, grouping by the school. Finally, I will filter out the groups where the average math score is higher than 400 and select the names of the schools along with their funding types. Using aggregate functions, I will also ensure to skip null values while calculating averages to maintain data integrity.", 'SQL': "SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;"}, "SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;"]
+
+Question: 
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools? 
+
+Hint:
+Average of average math = sum(average math scores) / count(schools).
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question about naming schools in Riverside with an average SAT math score greater than 400, I first identify the relevant tables: 'schools' and 'satscores'. The task requires retrieving the school names and their funding types while applying a filter for schools located in Riverside and ensuring their average math scores exceed 400. I\u2019ll need to join these tables on the CDSCode field since it serves as the foreign key relationship. My approach involves the following logical steps: 1) Filter the 'schools' table for those located in Riverside. 2) Join with the 'satscores' table on the CDSCode. 3) Group the results by school so I can compute the average math scores correctly. 4) Calculate the average of the average math scores, ensuring that I'm considering only valid data by filtering for non-null average math scores. 5) Finally, I will include a HAVING clause to restrict results to those schools where this average exceeds 400. By following these steps, I ensure that I retrieve the appropriate information without including null values or unnecessary columns, thereby maintaining the quality and relevance of the data retrieved.",
+    "SQL": "SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' AND T2.AvgScrMath IS NOT NULL GROUP BY T1.School, T1.CDSCode, T1.FundingType HAVING AVG(T2.AvgScrMath) > 400;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+SQL Query:
+SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' AND T2.AvgScrMath IS NOT NULL GROUP BY T1.School, T1.CDSCode, T1.FundingType HAVING AVG(T2.AvgScrMath) > 400;
+
+Execution Result:
+(None, None)
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for schools in Riverside with an average math score greater than 400 on the SAT, specifically inquiring about their names and funding types. The SQL query filters schools located in Riverside, ensures that math scores are not null, and groups by school information while calculating the average math score. The condition in the HAVING clause checks if the average math score exceeds 400. However, the execution result returns (None, None), indicating that there are no matching records found based on the criteria provided in the SQL query. This implies that either there are no schools satisfying the specified condition or an error in the logic. Since the result indicates that no schools meet the stated conditions, the SQL query does not fulfill the question's requirements. Therefore, the query is invalid because, even though it is logically structured, it fails to return any relevant schools' data.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+Predicted SQL:
+SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' AND T2.AvgScrMath IS NOT NULL GROUP BY T1.School, T1.CDSCode, T1.FundingType HAVING AVG(T2.AvgScrMath) > 400;
+
+Execution Result:
+(None, None)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for schools in Riverside with an average math score greater than 400 on the SAT, specifically inquiring about their names and funding types. The SQL query filters schools located in Riverside, ensures that math scores are not null, and groups by school information while calculating the average math score. The condition in the HAVING clause checks if the average math score exceeds 400. However, the execution result returns (None, None), indicating that there are no matching records found based on the criteria provided in the SQL query. This implies that either there are no schools satisfying the specified condition or an error in the logic. Since the result indicates that no schools meet the stated conditions, the SQL query does not fulfill the question's requirements. Therefore, the query is invalid because, even though it is logically structured, it fails to return any relevant schools' data.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query and align it with the question's intent, consider the following steps: 1. Ensure Proper Aggregation: Instead of grouping by T1.School, T1.CDSCode, and T1.FundingType, first calculate the average math score in a subquery or use the AVG() function directly without grouping by T1.School to prevent incorrect results. This allows for accurate averaging over the correct set of scores. 2. Use a Subquery: Restructure the query to first create a subquery that calculates the average math score per school, and then filter based on that result. This will help isolate the schools with an average score greater than 400. 3. Adjust SQL Query: Rewrite the query as follows: \n\n   ```sql\n   SELECT T1.School, T1.FundingType \n   FROM schools T1 \n   WHERE T1.City = 'Riverside' AND T1.CDSCode IN ( \n     SELECT T2.cds \n     FROM satscores T2 \n     WHERE T2.AvgScrMath IS NOT NULL \n     GROUP BY T2.cds \n     HAVING AVG(T2.AvgScrMath) > 400 \n   );\n   ``` \n\nThis subquery calculates the average scores per school and filters those that meet the condition, and then you select the funding types for those schools in Riverside. 4. Validate Data: Consider validating that there are indeed schools in Riverside with non-null scores before running the modified query to anticipate potential empty results again."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE frpm (
+  CDSCode                                       TEXT not null
+        primary key,
+  `Academic Year`                               TEXT  null,
+  `County Code`                                 TEXT  null,
+  `District Code`                               INTEGER         null,
+  `School Code`                                 TEXT  null,
+  `County Name`                                 TEXT null,
+  `District Name`                               TEXT null,
+  `School Name`                                 TEXT null,
+  `District Type`                               TEXT null,
+  `School Type`                                 TEXT null,
+  `Educational Option Type`                     TEXT null,
+  `NSLP Provision Status`                       TEXT null,
+  `Charter School (Y/N)`                        INTEGER    null,
+  `Charter School Number`                       TEXT  null,
+  `Charter Funding Type`                        TEXT null,
+  IRC                                           INTEGER    null,
+  `Low Grade`                                   TEXT  null,
+  `High Grade`                                  TEXT null,
+  `Enrollment (K-12)`                           REAL      null,
+  `Free Meal Count (K-12)`                      REAL       null,
+  `Percent (%) Eligible Free (K-12)`            REAL       null,
+  `FRPM Count (K-12)`                           REAL       null,
+  `Percent (%) Eligible FRPM (K-12)`            REAL       null,
+  `Enrollment (Ages 5-17)`                      REAL       null,
+  `Free Meal Count (Ages 5-17)`                 REAL       null,
+  `Percent (%) Eligible Free (Ages 5-17)`       REAL       null,
+  `FRPM Count (Ages 5-17)`                      REAL       null,
+  `Percent (%) Eligible FRPM (Ages 5-17)`       REAL       null,
+  `2013-14 CALPADS Fall 1 Certification Status` INTEGER    null,
+  foreign key (CDSCode) references schools (CDSCode)
+);
+
+CREATE TABLE satscores (
+  cds         TEXT not null
+        primary key,
+  rtype       TEXT  not null,
+  sname       TEXT null,
+  dname       TEXT null,
+  cname       TEXT null,
+  enroll12    INTEGER         not null,
+  NumTstTakr  INTEGER          not null,
+  AvgScrRead  INTEGER          null,
+  AvgScrMath  INTEGER          null,
+  AvgScrWrite INTEGER          null,
+  NumGE1500   INTEGER          null,
+  foreign key (cds) references schools (CDSCode)
+);
+
+CREATE TABLE schools (
+  CDSCode     TEXT not null
+        primary key,
+  NCESDist    TEXT  null,
+  NCESSchool  TEXT  null,
+  StatusType  TEXT  not null,
+  County      TEXT not null,
+  District    TEXT not null,
+  School      TEXT null,
+  Street      TEXT null,
+  StreetAbr   TEXT null,
+  City        TEXT null,
+  Zip         TEXT null,
+  State       TEXT  null,
+  MailStreet  TEXT null,
+  MailStrAbr  TEXT null,
+  MailCity    TEXT null,
+  MailZip     TEXT null,
+  MailState   TEXT  null,
+  Phone       TEXT null,
+  Ext         TEXT  null,
+  Website     TEXT null,
+  OpenDate    DATE        null,
+  ClosedDate  DATE        null,
+  Charter     INTEGER    null,
+  CharterNum  TEXT  null,
+  FundingType TEXT null,
+  DOC         TEXT  not null,
+  DOCType     TEXT not null,
+  SOC         TEXT  null,
+  SOCType     TEXT null,
+  EdOpsCode   TEXT  null,
+  EdOpsName   TEXT null,
+  EILCode     TEXT  null,
+  EILName     TEXT null,
+  GSoffered   TEXT null,
+  GSserved    TEXT  null,
+  Virtual     TEXT  null,
+  Magnet      INTEGER   null,
+  Latitude    REAL      null,
+  Longitude   REAL      null,
+  AdmFName1   TEXT null,
+  AdmLName1   TEXT null,
+  AdmEmail1   TEXT null,
+  AdmFName2   TEXT null,
+  AdmLName2   TEXT null,
+  AdmEmail2   TEXT null,
+  AdmFName3   TEXT  null,
+  AdmLName3   TEXT null,
+  AdmEmail3   TEXT null,
+  LastUpdate  DATE        not null
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. 1. Verify Data Availability: Before modifying the SQL query, check the underlying data in both the 'schools' and 'satscores' tables to confirm that there are, in fact, schools located in Riverside and that they have corresponding SAT scores recorded. If no schools exist in Riverside or if their scores are not recorded, the execution will naturally return no results.
+
+2. Update the GROUP BY Clause: The current query groups results by T1.CDSCode, but it doesn't ensure that the School name can be selected correctly. Modify the GROUP BY clause to include T1.School in addition to T1.CDSCode, or use T1.School alone if it’s unique to the CDSCode. 
+   - Change to: GROUP BY T1.School, T1.CDSCode
+
+3. Use Proper Aggregation: Ensure that both columns selected (School and FundingType) in the SELECT statement are appropriately aggregated or included in the GROUP BY clause. You may include the funding type in the SELECT statement directly, however, ensure all necessary aggregations align with SQL standards.
+
+4. Return Only Valid Schools: To align more closely with the question’s intent, ensure the results filter for those schools that meet the average score criteria before selecting the retrieved schools.
+
+5. Consider Adding a WHERE Clause: If needed, introduce a WHERE clause to make certain that you are only looking at schools with valid SAT scores. For example, WHERE T2.AvgScrMath IS NOT NULL, to exclude schools that might lack scores.
+
+6. Final Query Structure: The revised SQL query could look like this:
+   ```sql
+   SELECT T1.School, T1.FundingType
+   FROM schools T1
+   JOIN satscores T2 ON T1.CDSCode = T2.cds
+   WHERE T1.City = 'Riverside'
+   AND T2.AvgScrMath IS NOT NULL
+   GROUP BY T1.School, T1.CDSCode, T1.FundingType
+   HAVING AVG(T2.AvgScrMath) > 400;
+   ```
+   This version ensures that the query is logically organized, meeting all conditions and requirements specified in the original question.
+7. To modify the SQL query and align it with the question's intent, consider the following steps: 1. Ensure Proper Aggregation: Instead of grouping by T1.School, T1.CDSCode, and T1.FundingType, first calculate the average math score in a subquery or use the AVG() function directly without grouping by T1.School to prevent incorrect results. This allows for accurate averaging over the correct set of scores. 2. Use a Subquery: Restructure the query to first create a subquery that calculates the average math score per school, and then filter based on that result. This will help isolate the schools with an average score greater than 400. 3. Adjust SQL Query: Rewrite the query as follows: 
+
+   ```sql
+   SELECT T1.School, T1.FundingType 
+   FROM schools T1 
+   WHERE T1.City = 'Riverside' AND T1.CDSCode IN ( 
+     SELECT T2.cds 
+     FROM satscores T2 
+     WHERE T2.AvgScrMath IS NOT NULL 
+     GROUP BY T2.cds 
+     HAVING AVG(T2.AvgScrMath) > 400 
+   );
+   ``` 
+
+This subquery calculates the average scores per school and filters those that meet the condition, and then you select the funding types for those schools in Riverside. 4. Validate Data: Consider validating that there are indeed schools in Riverside with non-null scores before running the modified query to anticipate potential empty results again.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To address the question, I first need to focus on two tables: 'schools' and 'satscores'. The question specifically asks for schools located in Riverside and for schools where the average of average math scores from the 'satscores' table is greater than 400. To achieve this, I'll need to use a JOIN operation to combine data from both tables using their foreign key relationship. First, I will filter the schools to only include those in Riverside. Next, I'll compute the average of the average math scores from the 'satscores' table, grouping by the school. Finally, I will filter out the groups where the average math score is higher than 400 and select the names of the schools along with their funding types. Using aggregate functions, I will also ensure to skip null values while calculating averages to maintain data integrity.", 'SQL': "SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;"}, "SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;", "SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' AND T2.AvgScrMath IS NOT NULL GROUP BY T1.School, T1.CDSCode, T1.FundingType HAVING AVG(T2.AvgScrMath) > 400;", "SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' AND T2.AvgScrMath IS NOT NULL GROUP BY T1.School, T1.CDSCode, T1.FundingType HAVING AVG(T2.AvgScrMath) > 400;"]
+
+Question: 
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools? 
+
+Hint:
+Average of average math = sum(average math scores) / count(schools).
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question of identifying schools in Riverside with an average of average math scores greater than 400, I first focus on the key elements: the 'schools' and 'satscores' tables from the database schema. I start by filtering the schools that are located in Riverside. Then, I'll perform a JOIN between these two tables on their shared key (CDSCode) to access the SAT scores for those schools. I need to calculate the average of the average math scores from the 'satscores' table and confirm that this aggregated average exceeds 400. To do this, I'll group by the school and utilize the HAVING clause. Furthermore, since the prompt mentions funding type, I will select that alongside the school name. I'll ensure to account for non-null values for the scores during calculations to maintain data integrity. The revised query will use a subquery to handle the average calculation before selecting from the 'schools' table. Each step ensures I capture the necessary conditions and outputs required by the question.",
+    "SQL": "SELECT T1.School, T1.FundingType FROM schools T1 WHERE T1.City = 'Riverside' AND T1.CDSCode IN (SELECT T2.cds FROM satscores T2 WHERE T2.AvgScrMath IS NOT NULL GROUP BY T2.cds HAVING AVG(T2.AvgScrMath) > 400);"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+SQL Query:
+SELECT T1.School, T1.FundingType FROM schools T1 WHERE T1.City = 'Riverside' AND T1.CDSCode IN (SELECT T2.cds FROM satscores T2 WHERE T2.AvgScrMath IS NOT NULL GROUP BY T2.cds HAVING AVG(T2.AvgScrMath) > 400);
+
+Execution Result:
+(None, None)
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for schools located in Riverside with an average math score for the SAT greater than 400, as well as their funding types. The SQL query is structured to pull school names and funding types from the 'schools' table, filtering for schools in Riverside. It uses a subquery to ensure that only those schools where the average math score from the 'satscores' table is greater than 400 are selected. However, the execution result returned no data, implying that either there are no schools in Riverside meeting that criterion or there may be an issue with how the data is structured or the query's logic. Since the query is logically constructed but the execution result does not fulfill the expectations set by the question, I conclude that while the SQL query is an appropriate attempt, the lack of results indicates it does not effectively answer the question.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+Predicted SQL:
+SELECT T1.School, T1.FundingType FROM schools T1 WHERE T1.City = 'Riverside' AND T1.CDSCode IN (SELECT T2.cds FROM satscores T2 WHERE T2.AvgScrMath IS NOT NULL GROUP BY T2.cds HAVING AVG(T2.AvgScrMath) > 400);
+
+Execution Result:
+(None, None)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for schools located in Riverside with an average math score for the SAT greater than 400, as well as their funding types. The SQL query is structured to pull school names and funding types from the 'schools' table, filtering for schools in Riverside. It uses a subquery to ensure that only those schools where the average math score from the 'satscores' table is greater than 400 are selected. However, the execution result returned no data, implying that either there are no schools in Riverside meeting that criterion or there may be an issue with how the data is structured or the query's logic. Since the query is logically constructed but the execution result does not fulfill the expectations set by the question, I conclude that while the SQL query is an appropriate attempt, the lack of results indicates it does not effectively answer the question.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "1. Confirm that the 'satscores' table contains records for Riverside schools and check that the CDSCode corresponds to the correct identifiers for schools in the 'schools' table. Make sure that the subquery is correctly referencing the same identifier used in both tables to establish a valid relationship.\n2. Update the subquery to correctly calculate the average SAT math scores for each school instead of using the CDSCode directly. The adjusted subquery should join the 'satscores' table with the 'schools' table based on the CDSCode and then calculate the average math score per school.\n3. Modify the outer query to include the selection of the average math score along with the filtering conditions to ensure the schools selected are those with an average score greater than 400.\n4. Consider using a JOIN statement instead of a subquery for clarity and potentially better performance.\n5. Ensure to handle NULL values correctly, especially if any schools are present but do not have SAT scores, to exclude them from the results appropriately."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE frpm (
+  CDSCode                                       TEXT not null
+        primary key,
+  `Academic Year`                               TEXT  null,
+  `County Code`                                 TEXT  null,
+  `District Code`                               INTEGER         null,
+  `School Code`                                 TEXT  null,
+  `County Name`                                 TEXT null,
+  `District Name`                               TEXT null,
+  `School Name`                                 TEXT null,
+  `District Type`                               TEXT null,
+  `School Type`                                 TEXT null,
+  `Educational Option Type`                     TEXT null,
+  `NSLP Provision Status`                       TEXT null,
+  `Charter School (Y/N)`                        INTEGER    null,
+  `Charter School Number`                       TEXT  null,
+  `Charter Funding Type`                        TEXT null,
+  IRC                                           INTEGER    null,
+  `Low Grade`                                   TEXT  null,
+  `High Grade`                                  TEXT null,
+  `Enrollment (K-12)`                           REAL      null,
+  `Free Meal Count (K-12)`                      REAL       null,
+  `Percent (%) Eligible Free (K-12)`            REAL       null,
+  `FRPM Count (K-12)`                           REAL       null,
+  `Percent (%) Eligible FRPM (K-12)`            REAL       null,
+  `Enrollment (Ages 5-17)`                      REAL       null,
+  `Free Meal Count (Ages 5-17)`                 REAL       null,
+  `Percent (%) Eligible Free (Ages 5-17)`       REAL       null,
+  `FRPM Count (Ages 5-17)`                      REAL       null,
+  `Percent (%) Eligible FRPM (Ages 5-17)`       REAL       null,
+  `2013-14 CALPADS Fall 1 Certification Status` INTEGER    null,
+  foreign key (CDSCode) references schools (CDSCode)
+);
+
+CREATE TABLE satscores (
+  cds         TEXT not null
+        primary key,
+  rtype       TEXT  not null,
+  sname       TEXT null,
+  dname       TEXT null,
+  cname       TEXT null,
+  enroll12    INTEGER         not null,
+  NumTstTakr  INTEGER          not null,
+  AvgScrRead  INTEGER          null,
+  AvgScrMath  INTEGER          null,
+  AvgScrWrite INTEGER          null,
+  NumGE1500   INTEGER          null,
+  foreign key (cds) references schools (CDSCode)
+);
+
+CREATE TABLE schools (
+  CDSCode     TEXT not null
+        primary key,
+  NCESDist    TEXT  null,
+  NCESSchool  TEXT  null,
+  StatusType  TEXT  not null,
+  County      TEXT not null,
+  District    TEXT not null,
+  School      TEXT null,
+  Street      TEXT null,
+  StreetAbr   TEXT null,
+  City        TEXT null,
+  Zip         TEXT null,
+  State       TEXT  null,
+  MailStreet  TEXT null,
+  MailStrAbr  TEXT null,
+  MailCity    TEXT null,
+  MailZip     TEXT null,
+  MailState   TEXT  null,
+  Phone       TEXT null,
+  Ext         TEXT  null,
+  Website     TEXT null,
+  OpenDate    DATE        null,
+  ClosedDate  DATE        null,
+  Charter     INTEGER    null,
+  CharterNum  TEXT  null,
+  FundingType TEXT null,
+  DOC         TEXT  not null,
+  DOCType     TEXT not null,
+  SOC         TEXT  null,
+  SOCType     TEXT null,
+  EdOpsCode   TEXT  null,
+  EdOpsName   TEXT null,
+  EILCode     TEXT  null,
+  EILName     TEXT null,
+  GSoffered   TEXT null,
+  GSserved    TEXT  null,
+  Virtual     TEXT  null,
+  Magnet      INTEGER   null,
+  Latitude    REAL      null,
+  Longitude   REAL      null,
+  AdmFName1   TEXT null,
+  AdmLName1   TEXT null,
+  AdmEmail1   TEXT null,
+  AdmFName2   TEXT null,
+  AdmLName2   TEXT null,
+  AdmEmail2   TEXT null,
+  AdmFName3   TEXT  null,
+  AdmLName3   TEXT null,
+  AdmEmail3   TEXT null,
+  LastUpdate  DATE        not null
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. 1. Verify Data Availability: Before modifying the SQL query, check the underlying data in both the 'schools' and 'satscores' tables to confirm that there are, in fact, schools located in Riverside and that they have corresponding SAT scores recorded. If no schools exist in Riverside or if their scores are not recorded, the execution will naturally return no results.
+
+2. Update the GROUP BY Clause: The current query groups results by T1.CDSCode, but it doesn't ensure that the School name can be selected correctly. Modify the GROUP BY clause to include T1.School in addition to T1.CDSCode, or use T1.School alone if it’s unique to the CDSCode. 
+   - Change to: GROUP BY T1.School, T1.CDSCode
+
+3. Use Proper Aggregation: Ensure that both columns selected (School and FundingType) in the SELECT statement are appropriately aggregated or included in the GROUP BY clause. You may include the funding type in the SELECT statement directly, however, ensure all necessary aggregations align with SQL standards.
+
+4. Return Only Valid Schools: To align more closely with the question’s intent, ensure the results filter for those schools that meet the average score criteria before selecting the retrieved schools.
+
+5. Consider Adding a WHERE Clause: If needed, introduce a WHERE clause to make certain that you are only looking at schools with valid SAT scores. For example, WHERE T2.AvgScrMath IS NOT NULL, to exclude schools that might lack scores.
+
+6. Final Query Structure: The revised SQL query could look like this:
+   ```sql
+   SELECT T1.School, T1.FundingType
+   FROM schools T1
+   JOIN satscores T2 ON T1.CDSCode = T2.cds
+   WHERE T1.City = 'Riverside'
+   AND T2.AvgScrMath IS NOT NULL
+   GROUP BY T1.School, T1.CDSCode, T1.FundingType
+   HAVING AVG(T2.AvgScrMath) > 400;
+   ```
+   This version ensures that the query is logically organized, meeting all conditions and requirements specified in the original question.
+7. To modify the SQL query and align it with the question's intent, consider the following steps: 1. Ensure Proper Aggregation: Instead of grouping by T1.School, T1.CDSCode, and T1.FundingType, first calculate the average math score in a subquery or use the AVG() function directly without grouping by T1.School to prevent incorrect results. This allows for accurate averaging over the correct set of scores. 2. Use a Subquery: Restructure the query to first create a subquery that calculates the average math score per school, and then filter based on that result. This will help isolate the schools with an average score greater than 400. 3. Adjust SQL Query: Rewrite the query as follows: 
+
+   ```sql
+   SELECT T1.School, T1.FundingType 
+   FROM schools T1 
+   WHERE T1.City = 'Riverside' AND T1.CDSCode IN ( 
+     SELECT T2.cds 
+     FROM satscores T2 
+     WHERE T2.AvgScrMath IS NOT NULL 
+     GROUP BY T2.cds 
+     HAVING AVG(T2.AvgScrMath) > 400 
+   );
+   ``` 
+
+This subquery calculates the average scores per school and filters those that meet the condition, and then you select the funding types for those schools in Riverside. 4. Validate Data: Consider validating that there are indeed schools in Riverside with non-null scores before running the modified query to anticipate potential empty results again.
+8. 1. Confirm that the 'satscores' table contains records for Riverside schools and check that the CDSCode corresponds to the correct identifiers for schools in the 'schools' table. Make sure that the subquery is correctly referencing the same identifier used in both tables to establish a valid relationship.
+2. Update the subquery to correctly calculate the average SAT math scores for each school instead of using the CDSCode directly. The adjusted subquery should join the 'satscores' table with the 'schools' table based on the CDSCode and then calculate the average math score per school.
+3. Modify the outer query to include the selection of the average math score along with the filtering conditions to ensure the schools selected are those with an average score greater than 400.
+4. Consider using a JOIN statement instead of a subquery for clarity and potentially better performance.
+5. Ensure to handle NULL values correctly, especially if any schools are present but do not have SAT scores, to exclude them from the results appropriately.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;", "SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' AND T2.AvgScrMath IS NOT NULL GROUP BY T1.School, T1.CDSCode, T1.FundingType HAVING AVG(T2.AvgScrMath) > 400;", "SELECT T1.School, T1.FundingType FROM schools T1 JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' AND T2.AvgScrMath IS NOT NULL GROUP BY T1.School, T1.CDSCode, T1.FundingType HAVING AVG(T2.AvgScrMath) > 400;", "SELECT T1.School, T1.FundingType FROM schools T1 WHERE T1.City = 'Riverside' AND T1.CDSCode IN (SELECT T2.cds FROM satscores T2 WHERE T2.AvgScrMath IS NOT NULL GROUP BY T2.cds HAVING AVG(T2.AvgScrMath) > 400);", "SELECT T1.School, T1.FundingType FROM schools T1 WHERE T1.City = 'Riverside' AND T1.CDSCode IN (SELECT T2.cds FROM satscores T2 WHERE T2.AvgScrMath IS NOT NULL GROUP BY T2.cds HAVING AVG(T2.AvgScrMath) > 400);"]
+
+Question: 
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools? 
+
+Hint:
+Average of average math = sum(average math scores) / count(schools).
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question, we need to find schools located in Riverside and ensure that the average of their average SAT math scores is greater than 400. This requires calculating the average math scores for each school and then calculating the overall average from those values. I'll start by selecting the relevant details from the 'schools' table and joining it with the 'satscores' table based on the CDS codes. I'll filter for schools that belong to Riverside and check that their SAT math scores are not null. To find the average of the average math scores, I will first group by the school identifiers while calculating the average scores. Then, I'll calculate the overall average across those averages in the outer query. The funding types for these schools will be included in the final result. Additionally, I will include a condition to filter out any schools that do not meet the average score requirement. I will follow proper aggregation conventions and ensure accurate calculations are performed.",
+    "SQL": "SELECT T1.School, T1.FundingType FROM schools T1 JOIN (SELECT T2.cds, AVG(T2.AvgScrMath) AS AvgMathScore FROM satscores T2 WHERE T2.AvgScrMath IS NOT NULL GROUP BY T2.cds) AS AvgScores ON T1.CDSCode = AvgScores.cds WHERE T1.City = 'Riverside' GROUP BY T1.School, T1.FundingType HAVING AVG(AvgMathScore) > 400;"
+}
+

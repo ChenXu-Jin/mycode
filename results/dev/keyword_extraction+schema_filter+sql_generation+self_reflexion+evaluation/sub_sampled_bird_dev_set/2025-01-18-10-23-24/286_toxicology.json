@@ -1,0 +1,82 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "chemical compounds",
+            "database",
+            "percent",
+            "triple-bond",
+            "triple bond",
+            "bond_type",
+            "#"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "atom": [
+                "atom_id",
+                "molecule_id",
+                "element"
+            ],
+            "bond": [
+                "bond_id",
+                "molecule_id",
+                "bond_type",
+                "bondtype"
+            ],
+            "connected": [
+                "atom_id",
+                "atom_id2",
+                "bond_id"
+            ],
+            "molecule": [
+                "molecule_id",
+                "label"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "bond": [
+                "bond_id",
+                "bond_type"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To determine the percentage of compounds that form a triple bond, we need to first count the total number of unique compounds present in the molecule table. Then, we will count how many compounds have at least one triple bond. A triple bond is identified by bond_type = '#'. We can achieve this by joining the molecule table with the bond and connected tables to relate the bonds to the correct molecules. To compute the percentage, we need to use the formula (number of triple bond compounds / total number of compounds) * 100. As we need to display this percentage in the final result, we will use SQLite's division operation for computation and format it as a percentage. The resulting SQL query should appropriately reference the necessary tables and perform the aggregations as specified.",
+        "SQL": "SELECT (COUNT(DISTINCT T1.molecule_id) * 100.0 / (SELECT COUNT(*) FROM molecule)) AS percent_triple_bond FROM bond T2 JOIN molecule T1 ON T1.molecule_id = T2.molecule_id WHERE T2.bond_type = '#';",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "WITH TripleBondCompounds AS (\n    SELECT DISTINCT T1.molecule_id \n    FROM bond T2\n    JOIN molecule T1 ON T1.molecule_id = T2.molecule_id \n    WHERE T2.bond_type = '#' \n),\nTotalCompounds AS (\n    SELECT COUNT(DISTINCT molecule_id) AS total_count FROM molecule\n)\nSELECT (COUNT(DISTINCT T1.molecule_id) * 100.0 / NULLIF(TC.total_count, 0)) AS percent_triple_bond\nFROM TripleBondCompounds T1, TotalCompounds TC;",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Among all chemical compounds identified in the database, what percent of compounds form a triple-bond.",
+            "Evidence": "triple bond refers to bond_type = '#';",
+            "pred_sql": "SELECT (COUNT(DISTINCT T1.molecule_id) * 100.0 / (SELECT COUNT(*) FROM molecule)) AS percent_triple_bond FROM bond T2 JOIN molecule T1 ON T1.molecule_id = T2.molecule_id WHERE T2.bond_type = '#';",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T.bond_type = '#' THEN T.bond_id ELSE NULL END) AS REAL) * 100 / COUNT(T.bond_id) FROM bond AS T"
+        },
+        "self_reflexion": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Among all chemical compounds identified in the database, what percent of compounds form a triple-bond.",
+            "Evidence": "triple bond refers to bond_type = '#';",
+            "pred_sql": "WITH TripleBondCompounds AS (\n    SELECT DISTINCT T1.molecule_id \n    FROM bond T2\n    JOIN molecule T1 ON T1.molecule_id = T2.molecule_id \n    WHERE T2.bond_type = '#' \n),\nTotalCompounds AS (\n    SELECT COUNT(DISTINCT molecule_id) AS total_count FROM molecule\n)\nSELECT (COUNT(DISTINCT T1.molecule_id) * 100.0 / NULLIF(TC.total_count, 0)) AS percent_triple_bond\nFROM TripleBondCompounds T1, TotalCompounds TC;",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T.bond_type = '#' THEN T.bond_id ELSE NULL END) AS REAL) * 100 / COUNT(T.bond_id) FROM bond AS T"
+        },
+        "status": "success"
+    }
+]

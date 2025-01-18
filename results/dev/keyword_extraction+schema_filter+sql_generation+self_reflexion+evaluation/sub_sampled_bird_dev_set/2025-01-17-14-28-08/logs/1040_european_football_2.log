@@ -1,0 +1,1593 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy.
+Hint: height > 180; average heading accuracy = DIVIDE(SUM(heading_accuracy), COUNT(player_fifa_api_id));
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "top 10 players' names",
+    "heights",
+    "above 180",
+    "descending order",
+    "average heading accuracy",
+    "heading accuracy",
+    "player_fifa_api_id",
+    "DIVIDE(SUM(heading_accuracy), COUNT(player_fifa_api_id))"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE Player_Attributes (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `player_fifa_api_id`	INTEGER,
+  `player_api_id`	INTEGER,
+  `date`	TEXT,
+  `overall_rating`	INTEGER,
+  `potential`	INTEGER,
+  `preferred_foot`	TEXT,
+  `attacking_work_rate`	TEXT,
+  `defensive_work_rate`	TEXT,
+  `crossing`	INTEGER,
+  `finishing`	INTEGER,
+  `heading_accuracy`	INTEGER,
+  `short_passing`	INTEGER,
+  `volleys`	INTEGER,
+  `dribbling`	INTEGER,
+  `curve`	INTEGER,
+  `free_kick_accuracy`	INTEGER,
+  `long_passing`	INTEGER,
+  `ball_control`	INTEGER,
+  `acceleration`	INTEGER,
+  `sprint_speed`	INTEGER,
+  `agility`	INTEGER,
+  `reactions`	INTEGER,
+  `balance`	INTEGER,
+  `shot_power`	INTEGER,
+  `jumping`	INTEGER,
+  `stamina`	INTEGER,
+  `strength`	INTEGER,
+  `long_shots`	INTEGER,
+  `aggression`	INTEGER,
+  `interceptions`	INTEGER,
+  `positioning`	INTEGER,
+  `vision`	INTEGER,
+  `penalties`	INTEGER,
+  `marking`	INTEGER,
+  `standing_tackle`	INTEGER,
+  `sliding_tackle`	INTEGER,
+  `gk_diving`	INTEGER,
+  `gk_handling`	INTEGER,
+  `gk_kicking`	INTEGER,
+  `gk_positioning`	INTEGER,
+  `gk_reflexes`	INTEGER,
+  FOREIGN KEY(`player_fifa_api_id`) REFERENCES `Player`(`player_fifa_api_id`),
+  FOREIGN KEY(`player_api_id`) REFERENCES `Player`(`player_api_id`)
+);
+
+CREATE TABLE Player (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `player_api_id`	INTEGER UNIQUE,
+  `player_name`	TEXT,
+  `player_fifa_api_id`	INTEGER UNIQUE,
+  `birthday`	TEXT,
+  `height`	INTEGER,
+  `weight`	INTEGER
+);
+
+CREATE TABLE League (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `country_id`	INTEGER,
+  `name`	TEXT UNIQUE,
+  FOREIGN KEY(`country_id`) REFERENCES `country`(`id`)
+);
+
+CREATE TABLE Country (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `name`	TEXT UNIQUE
+);
+
+CREATE TABLE Team (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `team_api_id`	INTEGER UNIQUE,
+  `team_fifa_api_id`	INTEGER,
+  `team_long_name`	TEXT,
+  `team_short_name`	TEXT
+);
+
+CREATE TABLE Team_Attributes (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `team_fifa_api_id`	INTEGER,
+  `team_api_id`	INTEGER,
+  `date`	TEXT,
+  `buildUpPlaySpeed`	INTEGER,
+  `buildUpPlaySpeedClass`	TEXT,
+  `buildUpPlayDribbling`	INTEGER,
+  `buildUpPlayDribblingClass`	TEXT,
+  `buildUpPlayPassing`	INTEGER,
+  `buildUpPlayPassingClass`	TEXT,
+  `buildUpPlayPositioningClass`	TEXT,
+  `chanceCreationPassing`	INTEGER,
+  `chanceCreationPassingClass`	TEXT,
+  `chanceCreationCrossing`	INTEGER,
+  `chanceCreationCrossingClass`	TEXT,
+  `chanceCreationShooting`	INTEGER,
+  `chanceCreationShootingClass`	TEXT,
+  `chanceCreationPositioningClass`	TEXT,
+  `defencePressure`	INTEGER,
+  `defencePressureClass`	TEXT,
+  `defenceAggression`	INTEGER,
+  `defenceAggressionClass`	TEXT,
+  `defenceTeamWidth`	INTEGER,
+  `defenceTeamWidthClass`	TEXT,
+  `defenceDefenderLineClass`	TEXT,
+  FOREIGN KEY(`team_fifa_api_id`) REFERENCES `Team`(`team_fifa_api_id`),
+  FOREIGN KEY(`team_api_id`) REFERENCES `Team`(`team_api_id`)
+);
+
+CREATE TABLE Match (
+  id               INTEGER
+        primary key autoincrement,
+  country_id       INTEGER
+        references Country,
+  league_id        INTEGER
+        references League,
+  season           TEXT,
+  stage            INTEGER,
+  date             TEXT,
+  match_api_id     INTEGER
+        unique,
+  home_team_api_id INTEGER
+        references Team (team_api_id),
+  away_team_api_id INTEGER
+        references Team (team_api_id),
+  home_team_goal   INTEGER,
+  away_team_goal   INTEGER,
+  home_player_X1   INTEGER,
+  home_player_X2   INTEGER,
+  home_player_X3   INTEGER,
+  home_player_X4   INTEGER,
+  home_player_X5   INTEGER,
+  home_player_X6   INTEGER,
+  home_player_X7   INTEGER,
+  home_player_X8   INTEGER,
+  home_player_X9   INTEGER,
+  home_player_X10  INTEGER,
+  home_player_X11  INTEGER,
+  away_player_X1   INTEGER,
+  away_player_X2   INTEGER,
+  away_player_X3   INTEGER,
+  away_player_X4   INTEGER,
+  away_player_X5   INTEGER,
+  away_player_X6   INTEGER,
+  away_player_X7   INTEGER,
+  away_player_X8   INTEGER,
+  away_player_X9   INTEGER,
+  away_player_X10  INTEGER,
+  away_player_X11  INTEGER,
+  home_player_Y1   INTEGER,
+  home_player_Y2   INTEGER,
+  home_player_Y3   INTEGER,
+  home_player_Y4   INTEGER,
+  home_player_Y5   INTEGER,
+  home_player_Y6   INTEGER,
+  home_player_Y7   INTEGER,
+  home_player_Y8   INTEGER,
+  home_player_Y9   INTEGER,
+  home_player_Y10  INTEGER,
+  home_player_Y11  INTEGER,
+  away_player_Y1   INTEGER,
+  away_player_Y2   INTEGER,
+  away_player_Y3   INTEGER,
+  away_player_Y4   INTEGER,
+  away_player_Y5   INTEGER,
+  away_player_Y6   INTEGER,
+  away_player_Y7   INTEGER,
+  away_player_Y8   INTEGER,
+  away_player_Y9   INTEGER,
+  away_player_Y10  INTEGER,
+  away_player_Y11  INTEGER,
+  home_player_1    INTEGER
+        references Player (player_api_id),
+  home_player_2    INTEGER
+        references Player (player_api_id),
+  home_player_3    INTEGER
+        references Player (player_api_id),
+  home_player_4    INTEGER
+        references Player (player_api_id),
+  home_player_5    INTEGER
+        references Player (player_api_id),
+  home_player_6    INTEGER
+        references Player (player_api_id),
+  home_player_7    INTEGER
+        references Player (player_api_id),
+  home_player_8    INTEGER
+        references Player (player_api_id),
+  home_player_9    INTEGER
+        references Player (player_api_id),
+  home_player_10   INTEGER
+        references Player (player_api_id),
+  home_player_11   INTEGER
+        references Player (player_api_id),
+  away_player_1    INTEGER
+        references Player (player_api_id),
+  away_player_2    INTEGER
+        references Player (player_api_id),
+  away_player_3    INTEGER
+        references Player (player_api_id),
+  away_player_4    INTEGER
+        references Player (player_api_id),
+  away_player_5    INTEGER
+        references Player (player_api_id),
+  away_player_6    INTEGER
+        references Player (player_api_id),
+  away_player_7    INTEGER
+        references Player (player_api_id),
+  away_player_8    INTEGER
+        references Player (player_api_id),
+  away_player_9    INTEGER
+        references Player (player_api_id),
+  away_player_10   INTEGER
+        references Player (player_api_id),
+  away_player_11   INTEGER
+        references Player (player_api_id),
+  goal             TEXT,
+  shoton           TEXT,
+  shotoff          TEXT,
+  foulcommit       TEXT,
+  card             TEXT,
+  "cross"          TEXT,
+  corner           TEXT,
+  possession       TEXT,
+  B365H            REAL,
+  B365D            REAL,
+  B365A            REAL,
+  BWH              REAL,
+  BWD              REAL,
+  BWA              REAL,
+  IWH              REAL,
+  IWD              REAL,
+  IWA              REAL,
+  LBH              REAL,
+  LBD              REAL,
+  LBA              REAL,
+  PSH              REAL,
+  PSD              REAL,
+  PSA              REAL,
+  WHH              REAL,
+  WHD              REAL,
+  WHA              REAL,
+  SJH              REAL,
+  SJD              REAL,
+  SJA              REAL,
+  VCH              REAL,
+  VCD              REAL,
+  VCA              REAL,
+  GBH              REAL,
+  GBD              REAL,
+  GBA              REAL,
+  BSH              REAL,
+  BSD              REAL,
+  BSA              REAL
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy. 
+
+Hint:
+height > 180; average heading accuracy = DIVIDE(SUM(heading_accuracy), COUNT(player_fifa_api_id));
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the top 10 players whose heights are above 180 cm in descending order of their average heading accuracy, we need to: 1) Filter the players based on the height criteria (> 180). 2) Calculate the average heading accuracy from the Player_Attributes table. We need to join the Player table with the Player_Attributes table on the player_api_id. 3) Group the results by player_id to compute the average heading accuracy for each player. 4) Finally, sort the results by average heading accuracy in descending order and limit the results to the top 10. I will select only the player names as required by the instructions, while using the appropriate aliases for the tables.",
+    "SQL": "SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy.
+
+SQL Query:
+SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;
+
+Execution Result:
+('Michael Ballack',)
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the top 10 players with heights above 180 cm, ordered by their average heading accuracy in descending order. The SQL query performed a join between the Player and Player_Attributes tables, correctly filtering for players whose heights are greater than 180 cm. The query groups by player_api_id and orders by the average heading accuracy, which aligns with the intention to find players based on this metric. However, the execution result returns only one player name, 'Michael Ballack', which suggests either there are not enough players meeting the criteria or the query is not capturing all possible results. Given that we expected 10 players but only received one, the output does not fully satisfy the requirement of listing the top 10 players as requested in the question. Therefore, the SQL query is missing the ability to produce a complete result set and thus falls short of fully answering the question.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy.
+
+Predicted SQL:
+SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;
+
+Execution Result:
+('Michael Ballack',)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the top 10 players with heights above 180 cm, ordered by their average heading accuracy in descending order. The SQL query performed a join between the Player and Player_Attributes tables, correctly filtering for players whose heights are greater than 180 cm. The query groups by player_api_id and orders by the average heading accuracy, which aligns with the intention to find players based on this metric. However, the execution result returns only one player name, 'Michael Ballack', which suggests either there are not enough players meeting the criteria or the query is not capturing all possible results. Given that we expected 10 players but only received one, the output does not fully satisfy the requirement of listing the top 10 players as requested in the question. Therefore, the SQL query is missing the ability to produce a complete result set and thus falls short of fully answering the question.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": [
+        "1. Ensure Height Comparison is in Correct Units: Verify that the height attribute in the Player table is stored in centimeters. If the height is stored in a different unit (e.g., meters), adjust the condition accordingly by changing the filter to P.height > 18000 for meters.",
+        "2. Use the Correct Aggregation: Modify the GROUP BY clause to include P.player_name instead of P.player_api_id. This will allow the query to correctly aggregate the average heading accuracy by player name, ensuring each player's average is calculated properly.",
+        "3. Adjust the ORDER BY Clause: Make sure to reference the heading accuracy from the Player_Attributes table correctly. Ensure you are selecting the average heading accuracy after the aggregation instead of just listing the player names.",
+        "4. Correctly Select the TOP 10 Players: After addressing the previous points, check if the LIMIT clause correctly returns the top 10 players by using LIMIT 10 at the end of the query to achieve the correct output.",
+        "5. Confirm Data Availability: Check if there are not enough players in the database meeting the criteria. If needed, review the data in both tables to ensure there are enough players with height > 180 cm and valid heading accuracy records."
+    ]
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE Player_Attributes (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `player_fifa_api_id`	INTEGER,
+  `player_api_id`	INTEGER,
+  `date`	TEXT,
+  `overall_rating`	INTEGER,
+  `potential`	INTEGER,
+  `preferred_foot`	TEXT,
+  `attacking_work_rate`	TEXT,
+  `defensive_work_rate`	TEXT,
+  `crossing`	INTEGER,
+  `finishing`	INTEGER,
+  `heading_accuracy`	INTEGER,
+  `short_passing`	INTEGER,
+  `volleys`	INTEGER,
+  `dribbling`	INTEGER,
+  `curve`	INTEGER,
+  `free_kick_accuracy`	INTEGER,
+  `long_passing`	INTEGER,
+  `ball_control`	INTEGER,
+  `acceleration`	INTEGER,
+  `sprint_speed`	INTEGER,
+  `agility`	INTEGER,
+  `reactions`	INTEGER,
+  `balance`	INTEGER,
+  `shot_power`	INTEGER,
+  `jumping`	INTEGER,
+  `stamina`	INTEGER,
+  `strength`	INTEGER,
+  `long_shots`	INTEGER,
+  `aggression`	INTEGER,
+  `interceptions`	INTEGER,
+  `positioning`	INTEGER,
+  `vision`	INTEGER,
+  `penalties`	INTEGER,
+  `marking`	INTEGER,
+  `standing_tackle`	INTEGER,
+  `sliding_tackle`	INTEGER,
+  `gk_diving`	INTEGER,
+  `gk_handling`	INTEGER,
+  `gk_kicking`	INTEGER,
+  `gk_positioning`	INTEGER,
+  `gk_reflexes`	INTEGER,
+  FOREIGN KEY(`player_fifa_api_id`) REFERENCES `Player`(`player_fifa_api_id`),
+  FOREIGN KEY(`player_api_id`) REFERENCES `Player`(`player_api_id`)
+);
+
+CREATE TABLE Player (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `player_api_id`	INTEGER UNIQUE,
+  `player_name`	TEXT,
+  `player_fifa_api_id`	INTEGER UNIQUE,
+  `birthday`	TEXT,
+  `height`	INTEGER,
+  `weight`	INTEGER
+);
+
+CREATE TABLE League (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `country_id`	INTEGER,
+  `name`	TEXT UNIQUE,
+  FOREIGN KEY(`country_id`) REFERENCES `country`(`id`)
+);
+
+CREATE TABLE Country (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `name`	TEXT UNIQUE
+);
+
+CREATE TABLE Team (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `team_api_id`	INTEGER UNIQUE,
+  `team_fifa_api_id`	INTEGER,
+  `team_long_name`	TEXT,
+  `team_short_name`	TEXT
+);
+
+CREATE TABLE Team_Attributes (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `team_fifa_api_id`	INTEGER,
+  `team_api_id`	INTEGER,
+  `date`	TEXT,
+  `buildUpPlaySpeed`	INTEGER,
+  `buildUpPlaySpeedClass`	TEXT,
+  `buildUpPlayDribbling`	INTEGER,
+  `buildUpPlayDribblingClass`	TEXT,
+  `buildUpPlayPassing`	INTEGER,
+  `buildUpPlayPassingClass`	TEXT,
+  `buildUpPlayPositioningClass`	TEXT,
+  `chanceCreationPassing`	INTEGER,
+  `chanceCreationPassingClass`	TEXT,
+  `chanceCreationCrossing`	INTEGER,
+  `chanceCreationCrossingClass`	TEXT,
+  `chanceCreationShooting`	INTEGER,
+  `chanceCreationShootingClass`	TEXT,
+  `chanceCreationPositioningClass`	TEXT,
+  `defencePressure`	INTEGER,
+  `defencePressureClass`	TEXT,
+  `defenceAggression`	INTEGER,
+  `defenceAggressionClass`	TEXT,
+  `defenceTeamWidth`	INTEGER,
+  `defenceTeamWidthClass`	TEXT,
+  `defenceDefenderLineClass`	TEXT,
+  FOREIGN KEY(`team_fifa_api_id`) REFERENCES `Team`(`team_fifa_api_id`),
+  FOREIGN KEY(`team_api_id`) REFERENCES `Team`(`team_api_id`)
+);
+
+CREATE TABLE Match (
+  id               INTEGER
+        primary key autoincrement,
+  country_id       INTEGER
+        references Country,
+  league_id        INTEGER
+        references League,
+  season           TEXT,
+  stage            INTEGER,
+  date             TEXT,
+  match_api_id     INTEGER
+        unique,
+  home_team_api_id INTEGER
+        references Team (team_api_id),
+  away_team_api_id INTEGER
+        references Team (team_api_id),
+  home_team_goal   INTEGER,
+  away_team_goal   INTEGER,
+  home_player_X1   INTEGER,
+  home_player_X2   INTEGER,
+  home_player_X3   INTEGER,
+  home_player_X4   INTEGER,
+  home_player_X5   INTEGER,
+  home_player_X6   INTEGER,
+  home_player_X7   INTEGER,
+  home_player_X8   INTEGER,
+  home_player_X9   INTEGER,
+  home_player_X10  INTEGER,
+  home_player_X11  INTEGER,
+  away_player_X1   INTEGER,
+  away_player_X2   INTEGER,
+  away_player_X3   INTEGER,
+  away_player_X4   INTEGER,
+  away_player_X5   INTEGER,
+  away_player_X6   INTEGER,
+  away_player_X7   INTEGER,
+  away_player_X8   INTEGER,
+  away_player_X9   INTEGER,
+  away_player_X10  INTEGER,
+  away_player_X11  INTEGER,
+  home_player_Y1   INTEGER,
+  home_player_Y2   INTEGER,
+  home_player_Y3   INTEGER,
+  home_player_Y4   INTEGER,
+  home_player_Y5   INTEGER,
+  home_player_Y6   INTEGER,
+  home_player_Y7   INTEGER,
+  home_player_Y8   INTEGER,
+  home_player_Y9   INTEGER,
+  home_player_Y10  INTEGER,
+  home_player_Y11  INTEGER,
+  away_player_Y1   INTEGER,
+  away_player_Y2   INTEGER,
+  away_player_Y3   INTEGER,
+  away_player_Y4   INTEGER,
+  away_player_Y5   INTEGER,
+  away_player_Y6   INTEGER,
+  away_player_Y7   INTEGER,
+  away_player_Y8   INTEGER,
+  away_player_Y9   INTEGER,
+  away_player_Y10  INTEGER,
+  away_player_Y11  INTEGER,
+  home_player_1    INTEGER
+        references Player (player_api_id),
+  home_player_2    INTEGER
+        references Player (player_api_id),
+  home_player_3    INTEGER
+        references Player (player_api_id),
+  home_player_4    INTEGER
+        references Player (player_api_id),
+  home_player_5    INTEGER
+        references Player (player_api_id),
+  home_player_6    INTEGER
+        references Player (player_api_id),
+  home_player_7    INTEGER
+        references Player (player_api_id),
+  home_player_8    INTEGER
+        references Player (player_api_id),
+  home_player_9    INTEGER
+        references Player (player_api_id),
+  home_player_10   INTEGER
+        references Player (player_api_id),
+  home_player_11   INTEGER
+        references Player (player_api_id),
+  away_player_1    INTEGER
+        references Player (player_api_id),
+  away_player_2    INTEGER
+        references Player (player_api_id),
+  away_player_3    INTEGER
+        references Player (player_api_id),
+  away_player_4    INTEGER
+        references Player (player_api_id),
+  away_player_5    INTEGER
+        references Player (player_api_id),
+  away_player_6    INTEGER
+        references Player (player_api_id),
+  away_player_7    INTEGER
+        references Player (player_api_id),
+  away_player_8    INTEGER
+        references Player (player_api_id),
+  away_player_9    INTEGER
+        references Player (player_api_id),
+  away_player_10   INTEGER
+        references Player (player_api_id),
+  away_player_11   INTEGER
+        references Player (player_api_id),
+  goal             TEXT,
+  shoton           TEXT,
+  shotoff          TEXT,
+  foulcommit       TEXT,
+  card             TEXT,
+  "cross"          TEXT,
+  corner           TEXT,
+  possession       TEXT,
+  B365H            REAL,
+  B365D            REAL,
+  B365A            REAL,
+  BWH              REAL,
+  BWD              REAL,
+  BWA              REAL,
+  IWH              REAL,
+  IWD              REAL,
+  IWA              REAL,
+  LBH              REAL,
+  LBD              REAL,
+  LBA              REAL,
+  PSH              REAL,
+  PSD              REAL,
+  PSA              REAL,
+  WHH              REAL,
+  WHD              REAL,
+  WHA              REAL,
+  SJH              REAL,
+  SJD              REAL,
+  SJA              REAL,
+  VCH              REAL,
+  VCD              REAL,
+  VCA              REAL,
+  GBH              REAL,
+  GBD              REAL,
+  GBA              REAL,
+  BSH              REAL,
+  BSD              REAL,
+  BSA              REAL
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. ['1. Ensure Height Comparison is in Correct Units: Verify that the height attribute in the Player table is stored in centimeters. If the height is stored in a different unit (e.g., meters), adjust the condition accordingly by changing the filter to P.height > 18000 for meters.', "2. Use the Correct Aggregation: Modify the GROUP BY clause to include P.player_name instead of P.player_api_id. This will allow the query to correctly aggregate the average heading accuracy by player name, ensuring each player's average is calculated properly.", '3. Adjust the ORDER BY Clause: Make sure to reference the heading accuracy from the Player_Attributes table correctly. Ensure you are selecting the average heading accuracy after the aggregation instead of just listing the player names.', '4. Correctly Select the TOP 10 Players: After addressing the previous points, check if the LIMIT clause correctly returns the top 10 players by using LIMIT 10 at the end of the query to achieve the correct output.', '5. Confirm Data Availability: Check if there are not enough players in the database meeting the criteria. If needed, review the data in both tables to ensure there are enough players with height > 180 cm and valid heading accuracy records.']
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': 'To find the top 10 players whose heights are above 180 cm in descending order of their average heading accuracy, we need to: 1) Filter the players based on the height criteria (> 180). 2) Calculate the average heading accuracy from the Player_Attributes table. We need to join the Player table with the Player_Attributes table on the player_api_id. 3) Group the results by player_id to compute the average heading accuracy for each player. 4) Finally, sort the results by average heading accuracy in descending order and limit the results to the top 10. I will select only the player names as required by the instructions, while using the appropriate aliases for the tables.', 'SQL': 'SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;'}, 'SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;']
+
+Question: 
+List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy. 
+
+Hint:
+height > 180; average heading accuracy = DIVIDE(SUM(heading_accuracy), COUNT(player_fifa_api_id));
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To list the top 10 players whose heights are above 180 cm in descending order of their average heading accuracy, I need to follow these steps: 1) Filter players from the Player table based on the height criterion (greater than 180 cm). 2) Join the Player table with the Player_Attributes table using the player_api_id field to access heading accuracy data. 3) Calculate the average heading accuracy by aggregating SUM of heading_accuracy divided by COUNT of player_fifa_api_id. 4) Group the results by player_api_id to ensure that the aggregation works correctly for each player. 5) Finally, sort the results by the computed average heading accuracy in descending order and limit the output to the top 10 players. I'll make sure to select only the player names as required, using table aliases for clarity.",
+    "SQL": "SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy.
+
+SQL Query:
+SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;
+
+Execution Result:
+('Michael Ballack',)
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "Let's break down the components step by step. The Question asks for the names of the top 10 players whose heights exceed 180 cm and should be sorted in descending order based on their average heading accuracy. The SQL Query attempts to accomplish this by selecting player names, filtering players with heights above 180 cm, grouping by player ID, and ordering by average heading accuracy in descending order, limiting the result to 10 entries. However, the execution result only returns one player, 'Michael Ballack', which suggests that the query may not be returning the top 10 players as requested in the question. Additionally, without more context on the data, it's unclear if the 'Player' and 'Player_Attributes' tables have enough rows matching the conditions to produce 10 outputs. The Query also does not specify that the height should be compared numerically, which might be a consideration but assuming standard data types exist, we will focus on the match of requirements. Given that the execution result doesn't meet the expectation of 10 players while the Query implies it is attempting to retrieve up to 10, I conclude that the result is misaligned with the question's request for top 10 players, leading to my assessment that the SQL query does not fully answer the question as intended.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy.
+
+Predicted SQL:
+SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;
+
+Execution Result:
+('Michael Ballack',)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "Let's break down the components step by step. The Question asks for the names of the top 10 players whose heights exceed 180 cm and should be sorted in descending order based on their average heading accuracy. The SQL Query attempts to accomplish this by selecting player names, filtering players with heights above 180 cm, grouping by player ID, and ordering by average heading accuracy in descending order, limiting the result to 10 entries. However, the execution result only returns one player, 'Michael Ballack', which suggests that the query may not be returning the top 10 players as requested in the question. Additionally, without more context on the data, it's unclear if the 'Player' and 'Player_Attributes' tables have enough rows matching the conditions to produce 10 outputs. The Query also does not specify that the height should be compared numerically, which might be a consideration but assuming standard data types exist, we will focus on the match of requirements. Given that the execution result doesn't meet the expectation of 10 players while the Query implies it is attempting to retrieve up to 10, I conclude that the result is misaligned with the question's request for top 10 players, leading to my assessment that the SQL query does not fully answer the question as intended.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "1. **Ensure Player Height is Filtered Correctly**: The current SQL query uses 'P.height > 180', but confirm that 'height' is stored in centimeters and in a comparable numeric format. If it is stored as a string, consider casting it to a number for proper comparison.\n\n2. **Modify the GROUP BY Clause**: The query currently groups by 'P.player_api_id'. This can be changed to group by 'P.player_name' instead, to ensure that you retrieve the average heading accuracy for each player name individually.\n\n3. **Calculate and Use the Average Heading Accuracy**: In the SELECT clause, include the average heading accuracy using 'AVG(PA.heading_accuracy) AS avg_heading_accuracy' to ensure it can be referenced in the ORDER BY clause.\n\n4. **Change the ORDER BY Clause**: The query attempts to order the results by average heading accuracy without explicitly including this in the SELECT clause. Update the ORDER BY clause to use the calculated average heading accuracy.\n\n5. **Select Distinct Players**: To ensure you are retrieving distinct player names with their average heading accuracies, consider using a DISTINCT clause along with the player_name.\n\n6. **Final SQL Query Structure**: The modified SQL query should look like this:\n   ```sql\n   SELECT P.player_name, AVG(PA.heading_accuracy) AS avg_heading_accuracy\n   FROM Player AS P\n   JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id\n   WHERE P.height > 180\n   GROUP BY P.player_name\n   ORDER BY avg_heading_accuracy DESC\n   LIMIT 10;\n   ```\nBy implementing these changes, the query should meet the requirement of listing the top 10 players based on their average heading accuracy while ensuring that all players returned meet the height criterion."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE Player_Attributes (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `player_fifa_api_id`	INTEGER,
+  `player_api_id`	INTEGER,
+  `date`	TEXT,
+  `overall_rating`	INTEGER,
+  `potential`	INTEGER,
+  `preferred_foot`	TEXT,
+  `attacking_work_rate`	TEXT,
+  `defensive_work_rate`	TEXT,
+  `crossing`	INTEGER,
+  `finishing`	INTEGER,
+  `heading_accuracy`	INTEGER,
+  `short_passing`	INTEGER,
+  `volleys`	INTEGER,
+  `dribbling`	INTEGER,
+  `curve`	INTEGER,
+  `free_kick_accuracy`	INTEGER,
+  `long_passing`	INTEGER,
+  `ball_control`	INTEGER,
+  `acceleration`	INTEGER,
+  `sprint_speed`	INTEGER,
+  `agility`	INTEGER,
+  `reactions`	INTEGER,
+  `balance`	INTEGER,
+  `shot_power`	INTEGER,
+  `jumping`	INTEGER,
+  `stamina`	INTEGER,
+  `strength`	INTEGER,
+  `long_shots`	INTEGER,
+  `aggression`	INTEGER,
+  `interceptions`	INTEGER,
+  `positioning`	INTEGER,
+  `vision`	INTEGER,
+  `penalties`	INTEGER,
+  `marking`	INTEGER,
+  `standing_tackle`	INTEGER,
+  `sliding_tackle`	INTEGER,
+  `gk_diving`	INTEGER,
+  `gk_handling`	INTEGER,
+  `gk_kicking`	INTEGER,
+  `gk_positioning`	INTEGER,
+  `gk_reflexes`	INTEGER,
+  FOREIGN KEY(`player_fifa_api_id`) REFERENCES `Player`(`player_fifa_api_id`),
+  FOREIGN KEY(`player_api_id`) REFERENCES `Player`(`player_api_id`)
+);
+
+CREATE TABLE Player (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `player_api_id`	INTEGER UNIQUE,
+  `player_name`	TEXT,
+  `player_fifa_api_id`	INTEGER UNIQUE,
+  `birthday`	TEXT,
+  `height`	INTEGER,
+  `weight`	INTEGER
+);
+
+CREATE TABLE League (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `country_id`	INTEGER,
+  `name`	TEXT UNIQUE,
+  FOREIGN KEY(`country_id`) REFERENCES `country`(`id`)
+);
+
+CREATE TABLE Country (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `name`	TEXT UNIQUE
+);
+
+CREATE TABLE Team (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `team_api_id`	INTEGER UNIQUE,
+  `team_fifa_api_id`	INTEGER,
+  `team_long_name`	TEXT,
+  `team_short_name`	TEXT
+);
+
+CREATE TABLE Team_Attributes (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `team_fifa_api_id`	INTEGER,
+  `team_api_id`	INTEGER,
+  `date`	TEXT,
+  `buildUpPlaySpeed`	INTEGER,
+  `buildUpPlaySpeedClass`	TEXT,
+  `buildUpPlayDribbling`	INTEGER,
+  `buildUpPlayDribblingClass`	TEXT,
+  `buildUpPlayPassing`	INTEGER,
+  `buildUpPlayPassingClass`	TEXT,
+  `buildUpPlayPositioningClass`	TEXT,
+  `chanceCreationPassing`	INTEGER,
+  `chanceCreationPassingClass`	TEXT,
+  `chanceCreationCrossing`	INTEGER,
+  `chanceCreationCrossingClass`	TEXT,
+  `chanceCreationShooting`	INTEGER,
+  `chanceCreationShootingClass`	TEXT,
+  `chanceCreationPositioningClass`	TEXT,
+  `defencePressure`	INTEGER,
+  `defencePressureClass`	TEXT,
+  `defenceAggression`	INTEGER,
+  `defenceAggressionClass`	TEXT,
+  `defenceTeamWidth`	INTEGER,
+  `defenceTeamWidthClass`	TEXT,
+  `defenceDefenderLineClass`	TEXT,
+  FOREIGN KEY(`team_fifa_api_id`) REFERENCES `Team`(`team_fifa_api_id`),
+  FOREIGN KEY(`team_api_id`) REFERENCES `Team`(`team_api_id`)
+);
+
+CREATE TABLE Match (
+  id               INTEGER
+        primary key autoincrement,
+  country_id       INTEGER
+        references Country,
+  league_id        INTEGER
+        references League,
+  season           TEXT,
+  stage            INTEGER,
+  date             TEXT,
+  match_api_id     INTEGER
+        unique,
+  home_team_api_id INTEGER
+        references Team (team_api_id),
+  away_team_api_id INTEGER
+        references Team (team_api_id),
+  home_team_goal   INTEGER,
+  away_team_goal   INTEGER,
+  home_player_X1   INTEGER,
+  home_player_X2   INTEGER,
+  home_player_X3   INTEGER,
+  home_player_X4   INTEGER,
+  home_player_X5   INTEGER,
+  home_player_X6   INTEGER,
+  home_player_X7   INTEGER,
+  home_player_X8   INTEGER,
+  home_player_X9   INTEGER,
+  home_player_X10  INTEGER,
+  home_player_X11  INTEGER,
+  away_player_X1   INTEGER,
+  away_player_X2   INTEGER,
+  away_player_X3   INTEGER,
+  away_player_X4   INTEGER,
+  away_player_X5   INTEGER,
+  away_player_X6   INTEGER,
+  away_player_X7   INTEGER,
+  away_player_X8   INTEGER,
+  away_player_X9   INTEGER,
+  away_player_X10  INTEGER,
+  away_player_X11  INTEGER,
+  home_player_Y1   INTEGER,
+  home_player_Y2   INTEGER,
+  home_player_Y3   INTEGER,
+  home_player_Y4   INTEGER,
+  home_player_Y5   INTEGER,
+  home_player_Y6   INTEGER,
+  home_player_Y7   INTEGER,
+  home_player_Y8   INTEGER,
+  home_player_Y9   INTEGER,
+  home_player_Y10  INTEGER,
+  home_player_Y11  INTEGER,
+  away_player_Y1   INTEGER,
+  away_player_Y2   INTEGER,
+  away_player_Y3   INTEGER,
+  away_player_Y4   INTEGER,
+  away_player_Y5   INTEGER,
+  away_player_Y6   INTEGER,
+  away_player_Y7   INTEGER,
+  away_player_Y8   INTEGER,
+  away_player_Y9   INTEGER,
+  away_player_Y10  INTEGER,
+  away_player_Y11  INTEGER,
+  home_player_1    INTEGER
+        references Player (player_api_id),
+  home_player_2    INTEGER
+        references Player (player_api_id),
+  home_player_3    INTEGER
+        references Player (player_api_id),
+  home_player_4    INTEGER
+        references Player (player_api_id),
+  home_player_5    INTEGER
+        references Player (player_api_id),
+  home_player_6    INTEGER
+        references Player (player_api_id),
+  home_player_7    INTEGER
+        references Player (player_api_id),
+  home_player_8    INTEGER
+        references Player (player_api_id),
+  home_player_9    INTEGER
+        references Player (player_api_id),
+  home_player_10   INTEGER
+        references Player (player_api_id),
+  home_player_11   INTEGER
+        references Player (player_api_id),
+  away_player_1    INTEGER
+        references Player (player_api_id),
+  away_player_2    INTEGER
+        references Player (player_api_id),
+  away_player_3    INTEGER
+        references Player (player_api_id),
+  away_player_4    INTEGER
+        references Player (player_api_id),
+  away_player_5    INTEGER
+        references Player (player_api_id),
+  away_player_6    INTEGER
+        references Player (player_api_id),
+  away_player_7    INTEGER
+        references Player (player_api_id),
+  away_player_8    INTEGER
+        references Player (player_api_id),
+  away_player_9    INTEGER
+        references Player (player_api_id),
+  away_player_10   INTEGER
+        references Player (player_api_id),
+  away_player_11   INTEGER
+        references Player (player_api_id),
+  goal             TEXT,
+  shoton           TEXT,
+  shotoff          TEXT,
+  foulcommit       TEXT,
+  card             TEXT,
+  "cross"          TEXT,
+  corner           TEXT,
+  possession       TEXT,
+  B365H            REAL,
+  B365D            REAL,
+  B365A            REAL,
+  BWH              REAL,
+  BWD              REAL,
+  BWA              REAL,
+  IWH              REAL,
+  IWD              REAL,
+  IWA              REAL,
+  LBH              REAL,
+  LBD              REAL,
+  LBA              REAL,
+  PSH              REAL,
+  PSD              REAL,
+  PSA              REAL,
+  WHH              REAL,
+  WHD              REAL,
+  WHA              REAL,
+  SJH              REAL,
+  SJD              REAL,
+  SJA              REAL,
+  VCH              REAL,
+  VCD              REAL,
+  VCA              REAL,
+  GBH              REAL,
+  GBD              REAL,
+  GBA              REAL,
+  BSH              REAL,
+  BSD              REAL,
+  BSA              REAL
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. ['1. Ensure Height Comparison is in Correct Units: Verify that the height attribute in the Player table is stored in centimeters. If the height is stored in a different unit (e.g., meters), adjust the condition accordingly by changing the filter to P.height > 18000 for meters.', "2. Use the Correct Aggregation: Modify the GROUP BY clause to include P.player_name instead of P.player_api_id. This will allow the query to correctly aggregate the average heading accuracy by player name, ensuring each player's average is calculated properly.", '3. Adjust the ORDER BY Clause: Make sure to reference the heading accuracy from the Player_Attributes table correctly. Ensure you are selecting the average heading accuracy after the aggregation instead of just listing the player names.', '4. Correctly Select the TOP 10 Players: After addressing the previous points, check if the LIMIT clause correctly returns the top 10 players by using LIMIT 10 at the end of the query to achieve the correct output.', '5. Confirm Data Availability: Check if there are not enough players in the database meeting the criteria. If needed, review the data in both tables to ensure there are enough players with height > 180 cm and valid heading accuracy records.']
+7. 1. **Ensure Player Height is Filtered Correctly**: The current SQL query uses 'P.height > 180', but confirm that 'height' is stored in centimeters and in a comparable numeric format. If it is stored as a string, consider casting it to a number for proper comparison.
+
+2. **Modify the GROUP BY Clause**: The query currently groups by 'P.player_api_id'. This can be changed to group by 'P.player_name' instead, to ensure that you retrieve the average heading accuracy for each player name individually.
+
+3. **Calculate and Use the Average Heading Accuracy**: In the SELECT clause, include the average heading accuracy using 'AVG(PA.heading_accuracy) AS avg_heading_accuracy' to ensure it can be referenced in the ORDER BY clause.
+
+4. **Change the ORDER BY Clause**: The query attempts to order the results by average heading accuracy without explicitly including this in the SELECT clause. Update the ORDER BY clause to use the calculated average heading accuracy.
+
+5. **Select Distinct Players**: To ensure you are retrieving distinct player names with their average heading accuracies, consider using a DISTINCT clause along with the player_name.
+
+6. **Final SQL Query Structure**: The modified SQL query should look like this:
+   ```sql
+   SELECT P.player_name, AVG(PA.heading_accuracy) AS avg_heading_accuracy
+   FROM Player AS P
+   JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id
+   WHERE P.height > 180
+   GROUP BY P.player_name
+   ORDER BY avg_heading_accuracy DESC
+   LIMIT 10;
+   ```
+By implementing these changes, the query should meet the requirement of listing the top 10 players based on their average heading accuracy while ensuring that all players returned meet the height criterion.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': 'To find the top 10 players whose heights are above 180 cm in descending order of their average heading accuracy, we need to: 1) Filter the players based on the height criteria (> 180). 2) Calculate the average heading accuracy from the Player_Attributes table. We need to join the Player table with the Player_Attributes table on the player_api_id. 3) Group the results by player_id to compute the average heading accuracy for each player. 4) Finally, sort the results by average heading accuracy in descending order and limit the results to the top 10. I will select only the player names as required by the instructions, while using the appropriate aliases for the tables.', 'SQL': 'SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;'}, 'SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;', 'SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;', 'SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;']
+
+Question: 
+List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy. 
+
+Hint:
+height > 180; average heading accuracy = DIVIDE(SUM(heading_accuracy), COUNT(player_fifa_api_id));
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To generate the SQL query to list the top 10 players' names whose heights are above 180 cm in descending order of their average heading accuracy, I will take the following steps: 1) Identify the relevant columns from the tables, specifically 'player_name' from the Player table and 'heading_accuracy' from the Player_Attributes table. 2) Join the Player table (P) with the Player_Attributes table (PA) on the 'player_api_id' since both tables share this column. 3) Apply the filter on the height column from the Player table to ensure we only consider players taller than 180 cm. 4) Calculate the average heading accuracy using the aggregate function AVG() on 'heading_accuracy'. This will be computed by grouping the results by 'player_name' to ensure I obtain the average for each player. 5) Order the results by the calculated average heading accuracy in descending order. 6) Use LIMIT 10 to restrict the output to the top 10 players only. These steps align with the guiding principles of selecting necessary columns, filtering properly, and using aggregate functions correctly.",
+    "SQL": "SELECT P.player_name, AVG(PA.heading_accuracy) AS avg_heading_accuracy FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_name ORDER BY avg_heading_accuracy DESC LIMIT 10;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are an SQL validation expert.
+Below, you are presented with a natural language question, an SQL query, and its execution result.
+Your task is to determine if the provided SQL query correctly and fully answers the given question based on the result.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy.
+
+SQL Query:
+SELECT P.player_name, AVG(PA.heading_accuracy) AS avg_heading_accuracy FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_name ORDER BY avg_heading_accuracy DESC LIMIT 10;
+
+Execution Result:
+('Michael Ballack', 91.8)
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the top 10 players' names with heights greater than 180 cm, ordered by their average heading accuracy in descending order. The SQL query appropriately filters players with height > 180 cm and attempts to compute the average heading accuracy by joining the Player and Player_Attributes tables. It also correctly groups the results by player_name and orders them by the calculated average heading accuracy in descending order, limiting the output to the top 10 players. The execution result shows one player, Michael Ballack, with an average heading accuracy of 91.8. This result does not provide the complete answer to the question, as it only lists one player instead of the top 10 as requested. The SQL query itself is structured correctly, but it is possible that there are either no additional qualifying players beyond Michael Ballack with heights above 180, or the underlying data in the tables does not support finding more. Therefore, while the SQL query is valid in terms of structure, the execution result fails to fully answer the question because it does not output the top 10 players, which is a key requirement.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy.
+
+Predicted SQL:
+SELECT P.player_name, AVG(PA.heading_accuracy) AS avg_heading_accuracy FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_name ORDER BY avg_heading_accuracy DESC LIMIT 10;
+
+Execution Result:
+('Michael Ballack', 91.8)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the top 10 players' names with heights greater than 180 cm, ordered by their average heading accuracy in descending order. The SQL query appropriately filters players with height > 180 cm and attempts to compute the average heading accuracy by joining the Player and Player_Attributes tables. It also correctly groups the results by player_name and orders them by the calculated average heading accuracy in descending order, limiting the output to the top 10 players. The execution result shows one player, Michael Ballack, with an average heading accuracy of 91.8. This result does not provide the complete answer to the question, as it only lists one player instead of the top 10 as requested. The SQL query itself is structured correctly, but it is possible that there are either no additional qualifying players beyond Michael Ballack with heights above 180, or the underlying data in the tables does not support finding more. Therefore, while the SQL query is valid in terms of structure, the execution result fails to fully answer the question because it does not output the top 10 players, which is a key requirement.", 'judgment': 'Invalid'}
+
+Instructions:
+1. Understand the Issue:
+Analyze the Execution Result to identify how it deviates from what the Question requires.
+Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
+2. Focus on the Intent:
+Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
+Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
+3. Generate Feedback:
+Provide clear and actionable steps to modify the SQL query to address its shortcomings.
+Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query to better align with the question's intent, consider the following steps:\n1. **Verify Data Availability**: Before modifying the query, check the underlying tables for players that meet the height requirement (above 180 cm). It may be that the dataset lacks sufficient players who meet this condition.\n2. **Review Height Column Format**: Ensure that the height column in the database is stored in a compatible format (e.g., integer or decimal). If heights are stored in a different unit (like inches), convert the comparison accordingly.\n3. **Check for Filtering Logic**: Ensure that the filtering for heights greater than 180 cm is implemented correctly. This is done correctly in your current query, but ensure that there's no unexpected filtering happening elsewhere in the data processing pipeline.\n4. **Consider Other Attributes**: If the dataset has more attributes related to heading accuracy that can distinguish more players, consider processing them as well.\n5. **Ensure accurate aggregation**: Confirm that averages are calculated correctly. It's possible that if there are players with heights above 180 cm but no recorded heading accuracy, those won't appear in your results.\n6. **Test and Validate**: After adjusting the logic or verifying the data conditions, run a preliminary query to get a list of players with heights above 180 without any aggregation to ensure that there are indeed players meeting this criterion before running the average calculation again.\n\nWith these actions, you can better understand why only one player was returned and ensure that your SQL query captures all relevant players.'"
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE Player_Attributes (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `player_fifa_api_id`	INTEGER,
+  `player_api_id`	INTEGER,
+  `date`	TEXT,
+  `overall_rating`	INTEGER,
+  `potential`	INTEGER,
+  `preferred_foot`	TEXT,
+  `attacking_work_rate`	TEXT,
+  `defensive_work_rate`	TEXT,
+  `crossing`	INTEGER,
+  `finishing`	INTEGER,
+  `heading_accuracy`	INTEGER,
+  `short_passing`	INTEGER,
+  `volleys`	INTEGER,
+  `dribbling`	INTEGER,
+  `curve`	INTEGER,
+  `free_kick_accuracy`	INTEGER,
+  `long_passing`	INTEGER,
+  `ball_control`	INTEGER,
+  `acceleration`	INTEGER,
+  `sprint_speed`	INTEGER,
+  `agility`	INTEGER,
+  `reactions`	INTEGER,
+  `balance`	INTEGER,
+  `shot_power`	INTEGER,
+  `jumping`	INTEGER,
+  `stamina`	INTEGER,
+  `strength`	INTEGER,
+  `long_shots`	INTEGER,
+  `aggression`	INTEGER,
+  `interceptions`	INTEGER,
+  `positioning`	INTEGER,
+  `vision`	INTEGER,
+  `penalties`	INTEGER,
+  `marking`	INTEGER,
+  `standing_tackle`	INTEGER,
+  `sliding_tackle`	INTEGER,
+  `gk_diving`	INTEGER,
+  `gk_handling`	INTEGER,
+  `gk_kicking`	INTEGER,
+  `gk_positioning`	INTEGER,
+  `gk_reflexes`	INTEGER,
+  FOREIGN KEY(`player_fifa_api_id`) REFERENCES `Player`(`player_fifa_api_id`),
+  FOREIGN KEY(`player_api_id`) REFERENCES `Player`(`player_api_id`)
+);
+
+CREATE TABLE Player (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `player_api_id`	INTEGER UNIQUE,
+  `player_name`	TEXT,
+  `player_fifa_api_id`	INTEGER UNIQUE,
+  `birthday`	TEXT,
+  `height`	INTEGER,
+  `weight`	INTEGER
+);
+
+CREATE TABLE League (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `country_id`	INTEGER,
+  `name`	TEXT UNIQUE,
+  FOREIGN KEY(`country_id`) REFERENCES `country`(`id`)
+);
+
+CREATE TABLE Country (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `name`	TEXT UNIQUE
+);
+
+CREATE TABLE Team (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `team_api_id`	INTEGER UNIQUE,
+  `team_fifa_api_id`	INTEGER,
+  `team_long_name`	TEXT,
+  `team_short_name`	TEXT
+);
+
+CREATE TABLE Team_Attributes (
+  `id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+  `team_fifa_api_id`	INTEGER,
+  `team_api_id`	INTEGER,
+  `date`	TEXT,
+  `buildUpPlaySpeed`	INTEGER,
+  `buildUpPlaySpeedClass`	TEXT,
+  `buildUpPlayDribbling`	INTEGER,
+  `buildUpPlayDribblingClass`	TEXT,
+  `buildUpPlayPassing`	INTEGER,
+  `buildUpPlayPassingClass`	TEXT,
+  `buildUpPlayPositioningClass`	TEXT,
+  `chanceCreationPassing`	INTEGER,
+  `chanceCreationPassingClass`	TEXT,
+  `chanceCreationCrossing`	INTEGER,
+  `chanceCreationCrossingClass`	TEXT,
+  `chanceCreationShooting`	INTEGER,
+  `chanceCreationShootingClass`	TEXT,
+  `chanceCreationPositioningClass`	TEXT,
+  `defencePressure`	INTEGER,
+  `defencePressureClass`	TEXT,
+  `defenceAggression`	INTEGER,
+  `defenceAggressionClass`	TEXT,
+  `defenceTeamWidth`	INTEGER,
+  `defenceTeamWidthClass`	TEXT,
+  `defenceDefenderLineClass`	TEXT,
+  FOREIGN KEY(`team_fifa_api_id`) REFERENCES `Team`(`team_fifa_api_id`),
+  FOREIGN KEY(`team_api_id`) REFERENCES `Team`(`team_api_id`)
+);
+
+CREATE TABLE Match (
+  id               INTEGER
+        primary key autoincrement,
+  country_id       INTEGER
+        references Country,
+  league_id        INTEGER
+        references League,
+  season           TEXT,
+  stage            INTEGER,
+  date             TEXT,
+  match_api_id     INTEGER
+        unique,
+  home_team_api_id INTEGER
+        references Team (team_api_id),
+  away_team_api_id INTEGER
+        references Team (team_api_id),
+  home_team_goal   INTEGER,
+  away_team_goal   INTEGER,
+  home_player_X1   INTEGER,
+  home_player_X2   INTEGER,
+  home_player_X3   INTEGER,
+  home_player_X4   INTEGER,
+  home_player_X5   INTEGER,
+  home_player_X6   INTEGER,
+  home_player_X7   INTEGER,
+  home_player_X8   INTEGER,
+  home_player_X9   INTEGER,
+  home_player_X10  INTEGER,
+  home_player_X11  INTEGER,
+  away_player_X1   INTEGER,
+  away_player_X2   INTEGER,
+  away_player_X3   INTEGER,
+  away_player_X4   INTEGER,
+  away_player_X5   INTEGER,
+  away_player_X6   INTEGER,
+  away_player_X7   INTEGER,
+  away_player_X8   INTEGER,
+  away_player_X9   INTEGER,
+  away_player_X10  INTEGER,
+  away_player_X11  INTEGER,
+  home_player_Y1   INTEGER,
+  home_player_Y2   INTEGER,
+  home_player_Y3   INTEGER,
+  home_player_Y4   INTEGER,
+  home_player_Y5   INTEGER,
+  home_player_Y6   INTEGER,
+  home_player_Y7   INTEGER,
+  home_player_Y8   INTEGER,
+  home_player_Y9   INTEGER,
+  home_player_Y10  INTEGER,
+  home_player_Y11  INTEGER,
+  away_player_Y1   INTEGER,
+  away_player_Y2   INTEGER,
+  away_player_Y3   INTEGER,
+  away_player_Y4   INTEGER,
+  away_player_Y5   INTEGER,
+  away_player_Y6   INTEGER,
+  away_player_Y7   INTEGER,
+  away_player_Y8   INTEGER,
+  away_player_Y9   INTEGER,
+  away_player_Y10  INTEGER,
+  away_player_Y11  INTEGER,
+  home_player_1    INTEGER
+        references Player (player_api_id),
+  home_player_2    INTEGER
+        references Player (player_api_id),
+  home_player_3    INTEGER
+        references Player (player_api_id),
+  home_player_4    INTEGER
+        references Player (player_api_id),
+  home_player_5    INTEGER
+        references Player (player_api_id),
+  home_player_6    INTEGER
+        references Player (player_api_id),
+  home_player_7    INTEGER
+        references Player (player_api_id),
+  home_player_8    INTEGER
+        references Player (player_api_id),
+  home_player_9    INTEGER
+        references Player (player_api_id),
+  home_player_10   INTEGER
+        references Player (player_api_id),
+  home_player_11   INTEGER
+        references Player (player_api_id),
+  away_player_1    INTEGER
+        references Player (player_api_id),
+  away_player_2    INTEGER
+        references Player (player_api_id),
+  away_player_3    INTEGER
+        references Player (player_api_id),
+  away_player_4    INTEGER
+        references Player (player_api_id),
+  away_player_5    INTEGER
+        references Player (player_api_id),
+  away_player_6    INTEGER
+        references Player (player_api_id),
+  away_player_7    INTEGER
+        references Player (player_api_id),
+  away_player_8    INTEGER
+        references Player (player_api_id),
+  away_player_9    INTEGER
+        references Player (player_api_id),
+  away_player_10   INTEGER
+        references Player (player_api_id),
+  away_player_11   INTEGER
+        references Player (player_api_id),
+  goal             TEXT,
+  shoton           TEXT,
+  shotoff          TEXT,
+  foulcommit       TEXT,
+  card             TEXT,
+  "cross"          TEXT,
+  corner           TEXT,
+  possession       TEXT,
+  B365H            REAL,
+  B365D            REAL,
+  B365A            REAL,
+  BWH              REAL,
+  BWD              REAL,
+  BWA              REAL,
+  IWH              REAL,
+  IWD              REAL,
+  IWA              REAL,
+  LBH              REAL,
+  LBD              REAL,
+  LBA              REAL,
+  PSH              REAL,
+  PSD              REAL,
+  PSA              REAL,
+  WHH              REAL,
+  WHD              REAL,
+  WHA              REAL,
+  SJH              REAL,
+  SJD              REAL,
+  SJA              REAL,
+  VCH              REAL,
+  VCD              REAL,
+  VCA              REAL,
+  GBH              REAL,
+  GBD              REAL,
+  GBA              REAL,
+  BSH              REAL,
+  BSD              REAL,
+  BSA              REAL
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. ['1. Ensure Height Comparison is in Correct Units: Verify that the height attribute in the Player table is stored in centimeters. If the height is stored in a different unit (e.g., meters), adjust the condition accordingly by changing the filter to P.height > 18000 for meters.', "2. Use the Correct Aggregation: Modify the GROUP BY clause to include P.player_name instead of P.player_api_id. This will allow the query to correctly aggregate the average heading accuracy by player name, ensuring each player's average is calculated properly.", '3. Adjust the ORDER BY Clause: Make sure to reference the heading accuracy from the Player_Attributes table correctly. Ensure you are selecting the average heading accuracy after the aggregation instead of just listing the player names.', '4. Correctly Select the TOP 10 Players: After addressing the previous points, check if the LIMIT clause correctly returns the top 10 players by using LIMIT 10 at the end of the query to achieve the correct output.', '5. Confirm Data Availability: Check if there are not enough players in the database meeting the criteria. If needed, review the data in both tables to ensure there are enough players with height > 180 cm and valid heading accuracy records.']
+7. 1. **Ensure Player Height is Filtered Correctly**: The current SQL query uses 'P.height > 180', but confirm that 'height' is stored in centimeters and in a comparable numeric format. If it is stored as a string, consider casting it to a number for proper comparison.
+
+2. **Modify the GROUP BY Clause**: The query currently groups by 'P.player_api_id'. This can be changed to group by 'P.player_name' instead, to ensure that you retrieve the average heading accuracy for each player name individually.
+
+3. **Calculate and Use the Average Heading Accuracy**: In the SELECT clause, include the average heading accuracy using 'AVG(PA.heading_accuracy) AS avg_heading_accuracy' to ensure it can be referenced in the ORDER BY clause.
+
+4. **Change the ORDER BY Clause**: The query attempts to order the results by average heading accuracy without explicitly including this in the SELECT clause. Update the ORDER BY clause to use the calculated average heading accuracy.
+
+5. **Select Distinct Players**: To ensure you are retrieving distinct player names with their average heading accuracies, consider using a DISTINCT clause along with the player_name.
+
+6. **Final SQL Query Structure**: The modified SQL query should look like this:
+   ```sql
+   SELECT P.player_name, AVG(PA.heading_accuracy) AS avg_heading_accuracy
+   FROM Player AS P
+   JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id
+   WHERE P.height > 180
+   GROUP BY P.player_name
+   ORDER BY avg_heading_accuracy DESC
+   LIMIT 10;
+   ```
+By implementing these changes, the query should meet the requirement of listing the top 10 players based on their average heading accuracy while ensuring that all players returned meet the height criterion.
+8. To modify the SQL query to better align with the question's intent, consider the following steps:
+1. **Verify Data Availability**: Before modifying the query, check the underlying tables for players that meet the height requirement (above 180 cm). It may be that the dataset lacks sufficient players who meet this condition.
+2. **Review Height Column Format**: Ensure that the height column in the database is stored in a compatible format (e.g., integer or decimal). If heights are stored in a different unit (like inches), convert the comparison accordingly.
+3. **Check for Filtering Logic**: Ensure that the filtering for heights greater than 180 cm is implemented correctly. This is done correctly in your current query, but ensure that there's no unexpected filtering happening elsewhere in the data processing pipeline.
+4. **Consider Other Attributes**: If the dataset has more attributes related to heading accuracy that can distinguish more players, consider processing them as well.
+5. **Ensure accurate aggregation**: Confirm that averages are calculated correctly. It's possible that if there are players with heights above 180 cm but no recorded heading accuracy, those won't appear in your results.
+6. **Test and Validate**: After adjusting the logic or verifying the data conditions, run a preliminary query to get a list of players with heights above 180 without any aggregation to ensure that there are indeed players meeting this criterion before running the average calculation again.
+
+With these actions, you can better understand why only one player was returned and ensure that your SQL query captures all relevant players.'
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+['SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;', 'SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;', 'SELECT P.player_name FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_api_id ORDER BY AVG(PA.heading_accuracy) DESC LIMIT 10;', 'SELECT P.player_name, AVG(PA.heading_accuracy) AS avg_heading_accuracy FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_name ORDER BY avg_heading_accuracy DESC LIMIT 10;', 'SELECT P.player_name, AVG(PA.heading_accuracy) AS avg_heading_accuracy FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_name ORDER BY avg_heading_accuracy DESC LIMIT 10;']
+
+Question: 
+List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy. 
+
+Hint:
+height > 180; average heading accuracy = DIVIDE(SUM(heading_accuracy), COUNT(player_fifa_api_id));
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To construct the SQL query that meets the user's request, I start by identifying the key components needed to fulfill the requirements outlined in the question. The objective is to list the top 10 players based on average heading accuracy, specifically filtering for players whose heights are greater than 180 centimeters. I will gather this information from two tables: 'Player' for player details (including height and name) and 'Player_Attributes' for performance metrics, specifically heading accuracy. \n\n1. **JOIN the Tables**: I will use an INNER JOIN between 'Player' and 'Player_Attributes' based on the 'player_api_id' to connect a player's attributes to their profile. \n\n2. **HEIGHT Filter**: The height condition (greater than 180 cm) will be applied in the WHERE clause. \n\n3. **Aggregating Heading Accuracy**: To calculate the average heading accuracy, I will use AVG() in the SELECT statement. According to the prompt, I need to ensure the calculation involves 'SUM(heading_accuracy) / COUNT(player_fifa_api_id)' to accurately divide total heading accuracy sum by the number of entries. However, since AVG() already internally manages this, I can directly use it for clarity. \n\n4. **GROUP BY Clause**: GROUP BY will be used on 'player_name' to ensure we get distinct names with their corresponding average heading accuracy. \n\n5. **ORDER BY and LIMIT**: The results will be ordered in descending order of average heading accuracy, and I will limit the output to the top 10 players using LIMIT 10.  \n\nOverall, the focus is on ensuring only the necessary fields are selected and that the query is efficient and properly formatted according to the guiding principles. \nFinally, I\u2019ve double-checked that there are no redundant columns being selected or unnecessary operations performed to keep the query clean and direct.",
+    "SQL": "SELECT P.player_name, AVG(PA.heading_accuracy) AS avg_heading_accuracy FROM Player AS P JOIN Player_Attributes AS PA ON P.player_api_id = PA.player_api_id WHERE P.height > 180 GROUP BY P.player_name ORDER BY avg_heading_accuracy DESC LIMIT 10;"
+}
+

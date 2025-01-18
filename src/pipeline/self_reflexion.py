@@ -44,7 +44,7 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
         iteration_count += 1
         logging.info(f"Iteration {iteration_count}: Evaluating SQL")
 
-        evaluation_result = evaluator.evaluate()
+        evaluation_result = evaluator.evaluate(tentative_schema)
 
         if evaluation_result["judgment"] == "Valid":
             logging.info("SQL passed evaluation")
@@ -65,7 +65,7 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
         evaluator.sql = current_sql
     
     logging.error("Max iterations reached. Could not generate a valid SQL query.")
-    return {"SQL": "error"}
+    return {"SQL": current_sql}
 
 class Actor:
     def __init__(self, task: Any, tentative_schema: Dict[str, Any]) -> None:
@@ -121,7 +121,7 @@ class Evaluator:
         self.task = task
         self.sql = current_sql
     
-    def evaluate(self) -> Dict[str, Any]:
+    def evaluate(self, tentative_schema: Dict[str, Any]) -> Dict[str, Any]:
         logging.info(f"Evaluator start working for task: {self.task.question_id}")
         sql_execute_result = self.execute_current_sql()["result"]
 
@@ -130,7 +130,7 @@ class Evaluator:
             "SQL": self.sql
         }
 
-        engine, prompt, parser = PipelineManager().get_engine_prompt_parser(execute_result=sql_execute_result)
+        engine, prompt, parser = PipelineManager().get_engine_prompt_parser(schema_string=tentative_schema)
         sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
         response = async_llm_chain_call(
             engine=engine, 
