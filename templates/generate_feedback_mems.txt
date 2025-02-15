@@ -16,16 +16,6 @@ Execution Result:
 Evaluation Result:
 {EVALUATE_RESULT}
 
-Instructions:
-1. Understand the Issue:
-Analyze the Execution Result to identify how it deviates from what the Question requires.
-Use the Evaluation Result for specific insights into missing conditions, incorrect logic, or extraneous outputs in the SQL query.
-2. Focus on the Intent:
-Break down the Question into its key requirements (e.g., target columns, conditions, expected outputs).
-Cross-check these requirements against the current SQL query's behavior as described in the Execution Result and Evaluation Result.
-3. Generate Feedback:
-Provide clear and actionable steps to modify the SQL query to address its shortcomings.
-Focus on aligning the SQL query with the Question’s intent while adhering to the Hint instructions for best practices.
 
 Please respond with a JSON object structured as follows:
 

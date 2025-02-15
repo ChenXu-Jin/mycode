@@ -1,0 +1,993 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: Name the account numbers of female clients who are oldest and have lowest average salary?
+Hint: Female refers to 'F' in the gender; A11 contains information about average salary
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "account numbers",
+    "female clients",
+    "oldest",
+    "lowest average salary",
+    "F",
+    "gender",
+    "A11"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE account (
+  account_id  INTEGER default 0 not null
+        primary key,
+  district_id INTEGER default 0 not null,
+  frequency   TEXT   not null,
+  date        DATE          not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE card (
+  card_id INTEGER default 0 not null
+        primary key,
+  disp_id INTEGER           not null,
+  type    TEXT    not null,
+  issued  DATE          not null,
+  foreign key (disp_id) references disp (disp_id)
+);
+
+CREATE TABLE client (
+  client_id   INTEGER        not null
+        primary key,
+  gender      TEXT not null,
+  birth_date  DATE       not null,
+  district_id INTEGER        not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE disp (
+  disp_id    INTEGER        not null
+        primary key,
+  client_id  INTEGER        not null,
+  account_id INTEGER        not null,
+  type      TEXT not null,
+  foreign key (account_id) references account (account_id),
+  foreign key (client_id) references client (client_id)
+);
+
+CREATE TABLE district (
+  district_id INTEGER default 0 not null
+        primary key,
+  A2          TEXT   not null,
+  A3          TEXT   not null,
+  A4          TEXT       not null,
+  A5          TEXT           not null,
+  A6          TEXT           not null,
+  A7          TEXT           not null,
+  A8          INTEGER        not null,
+  A9          INTEGER           not null,
+  A10         REAL not null,
+  A11         INTEGER           not null,
+  A12         REAL null,
+  A13         REAL not null,
+  A14         INTEGER           not null,
+  A15         INTEGER        null,
+  A16         INTEGER          not null
+);
+
+CREATE TABLE loan (
+  loan_id    INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  date       DATE          not null,
+  amount     INTEGER           not null,
+  duration   INTEGER           not null,
+  payments   REAL not null,
+  status     TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE order (
+  order_id   INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  bank_to    TEXT    not null,
+  account_to INTEGER           not null,
+  amount     REAL not null,
+  k_symbol   TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE trans (
+  trans_id   INTEGER default 0    not null
+        primary key,
+  account_id INTEGER default 0    not null,
+  date       DATE             not null,
+  type       TEXT       not null,
+  operation  TEXT      null,
+  amount     INTEGER              not null,
+  balance    INTEGER             not null,
+  k_symbol   TEXT      null,
+  bank       TEXT       null,
+  account    INTEGER          null,
+  foreign key (account_id) references account (account_id)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+Name the account numbers of female clients who are oldest and have lowest average salary? 
+
+Hint:
+Female refers to 'F' in the gender; A11 contains information about average salary
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the account numbers of female clients who are oldest and have the lowest average salary, we need to follow these steps: First, we will filter the female clients from the 'client' table by selecting rows where gender is 'F'. Next, we will find their birth dates to determine the age, ensuring to get the oldest clients. We will then join the 'district' table to access the average salary data from column A11. After that, we will group the results by account_id to calculate average salaries and filter for the lowest average salary. Finally, we'll select the account numbers from the 'account' table using the joined data. Given that we need specific columns without extraneous information, we will only include the account_id in the SELECT clause.",
+    "SQL": "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(D3.A11) FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F') ORDER BY C.birth_date ASC LIMIT 1"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Name the account numbers of female clients who are oldest and have lowest average salary?
+
+SQL Query:
+SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(D3.A11) FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F') ORDER BY C.birth_date ASC LIMIT 1
+
+Database Content:
+{'account': ['account_id', 'district_id', 'frequency', 'date'], 'card': ['card_id', 'disp_id', 'type', 'issued'], 'client': ['client_id', 'gender', 'birth_date', 'district_id'], 'disp': ['disp_id', 'client_id', 'account_id', 'type'], 'district': ['district_id', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16'], 'loan': ['loan_id', 'account_id', 'date', 'amount', 'duration', 'payments', 'status'], 'order': ['order_id', 'account_id', 'bank_to', 'account_to', 'amount', 'k_symbol'], 'trans': ['trans_id', 'account_id', 'date', 'type', 'operation', 'amount', 'balance', 'k_symbol', 'bank', 'account']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the account numbers of female clients who are the oldest and have the lowest average salary. However, the provided SQL query does not address the condition of 'lowest average salary' at all; it only filters based on gender and age ('oldest' as implied by the 'birth_date'). The query tries to determine the oldest female clients based on their birth date by ordering the results and limiting to the first record, but it fails to incorporate any condition that relates to salary, which is crucial for fulfilling the question's requirements. Therefore, the query is incomplete and does not correctly answer the question.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Name the account numbers of female clients who are oldest and have lowest average salary?
+
+Predicted SQL:
+SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(D3.A11) FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F') ORDER BY C.birth_date ASC LIMIT 1
+
+Execution Result:
+(3214,)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the account numbers of female clients who are the oldest and have the lowest average salary. However, the provided SQL query does not address the condition of 'lowest average salary' at all; it only filters based on gender and age ('oldest' as implied by the 'birth_date'). The query tries to determine the oldest female clients based on their birth date by ordering the results and limiting to the first record, but it fails to incorporate any condition that relates to salary, which is crucial for fulfilling the question's requirements. Therefore, the query is incomplete and does not correctly answer the question.", 'judgment': 'Invalid'}
+
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query to correctly answer the question regarding the oldest female clients with the lowest average salary, follow these steps: 1. Calculate the average salary for female clients and determine the minimum average salary using a subquery. 2. Ensure that you are filtering the results based on both the age (oldest client) and the average salary conditions. 3. Use a Group By clause to aggregate the salaries correctly and join it with the main query. Here is a modified version of the SQL query: \n\n```sql\nSELECT A.account_id \nFROM account A \nJOIN disp D ON A.account_id = D.account_id \nJOIN client C ON D.client_id = C.client_id \nJOIN district D2 ON C.district_id = D2.district_id \nWHERE C.gender = 'F' \nAND C.salary = (\n    SELECT MIN(avg_sal) \n    FROM ( \n        SELECT AVG(salary) as avg_sal \n        FROM client \n        WHERE gender = 'F' \n        GROUP BY district_id \n    ) AS avg_salaries \n) \nAND C.birth_date = ( \n    SELECT MIN(birth_date) \n    FROM client \n    WHERE gender = 'F' \n) \nORDER BY C.birth_date ASC; \n``` 4. Ensure you check the appropriate logic for retrieving the oldest female clients with the identified lowest average salary. This new query includes logic to find both the oldest age and the lowest average salary among female clients."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE account (
+  account_id  INTEGER default 0 not null
+        primary key,
+  district_id INTEGER default 0 not null,
+  frequency   TEXT   not null,
+  date        DATE          not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE card (
+  card_id INTEGER default 0 not null
+        primary key,
+  disp_id INTEGER           not null,
+  type    TEXT    not null,
+  issued  DATE          not null,
+  foreign key (disp_id) references disp (disp_id)
+);
+
+CREATE TABLE client (
+  client_id   INTEGER        not null
+        primary key,
+  gender      TEXT not null,
+  birth_date  DATE       not null,
+  district_id INTEGER        not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE disp (
+  disp_id    INTEGER        not null
+        primary key,
+  client_id  INTEGER        not null,
+  account_id INTEGER        not null,
+  type      TEXT not null,
+  foreign key (account_id) references account (account_id),
+  foreign key (client_id) references client (client_id)
+);
+
+CREATE TABLE district (
+  district_id INTEGER default 0 not null
+        primary key,
+  A2          TEXT   not null,
+  A3          TEXT   not null,
+  A4          TEXT       not null,
+  A5          TEXT           not null,
+  A6          TEXT           not null,
+  A7          TEXT           not null,
+  A8          INTEGER        not null,
+  A9          INTEGER           not null,
+  A10         REAL not null,
+  A11         INTEGER           not null,
+  A12         REAL null,
+  A13         REAL not null,
+  A14         INTEGER           not null,
+  A15         INTEGER        null,
+  A16         INTEGER          not null
+);
+
+CREATE TABLE loan (
+  loan_id    INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  date       DATE          not null,
+  amount     INTEGER           not null,
+  duration   INTEGER           not null,
+  payments   REAL not null,
+  status     TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE order (
+  order_id   INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  bank_to    TEXT    not null,
+  account_to INTEGER           not null,
+  amount     REAL not null,
+  k_symbol   TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE trans (
+  trans_id   INTEGER default 0    not null
+        primary key,
+  account_id INTEGER default 0    not null,
+  date       DATE             not null,
+  type       TEXT       not null,
+  operation  TEXT      null,
+  amount     INTEGER              not null,
+  balance    INTEGER             not null,
+  k_symbol   TEXT      null,
+  bank       TEXT       null,
+  account    INTEGER          null,
+  foreign key (account_id) references account (account_id)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To modify the SQL query to correctly answer the question regarding the oldest female clients with the lowest average salary, follow these steps: 1. Calculate the average salary for female clients and determine the minimum average salary using a subquery. 2. Ensure that you are filtering the results based on both the age (oldest client) and the average salary conditions. 3. Use a Group By clause to aggregate the salaries correctly and join it with the main query. Here is a modified version of the SQL query: 
+
+```sql
+SELECT A.account_id 
+FROM account A 
+JOIN disp D ON A.account_id = D.account_id 
+JOIN client C ON D.client_id = C.client_id 
+JOIN district D2 ON C.district_id = D2.district_id 
+WHERE C.gender = 'F' 
+AND C.salary = (
+    SELECT MIN(avg_sal) 
+    FROM ( 
+        SELECT AVG(salary) as avg_sal 
+        FROM client 
+        WHERE gender = 'F' 
+        GROUP BY district_id 
+    ) AS avg_salaries 
+) 
+AND C.birth_date = ( 
+    SELECT MIN(birth_date) 
+    FROM client 
+    WHERE gender = 'F' 
+) 
+ORDER BY C.birth_date ASC; 
+``` 4. Ensure you check the appropriate logic for retrieving the oldest female clients with the identified lowest average salary. This new query includes logic to find both the oldest age and the lowest average salary among female clients.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To find the account numbers of female clients who are oldest and have the lowest average salary, we need to follow these steps: First, we will filter the female clients from the 'client' table by selecting rows where gender is 'F'. Next, we will find their birth dates to determine the age, ensuring to get the oldest clients. We will then join the 'district' table to access the average salary data from column A11. After that, we will group the results by account_id to calculate average salaries and filter for the lowest average salary. Finally, we'll select the account numbers from the 'account' table using the joined data. Given that we need specific columns without extraneous information, we will only include the account_id in the SELECT clause.", 'SQL': "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(D3.A11) FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F') ORDER BY C.birth_date ASC LIMIT 1"}, "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(D3.A11) FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F') ORDER BY C.birth_date ASC LIMIT 1"]
+
+Question: 
+Name the account numbers of female clients who are oldest and have lowest average salary? 
+
+Hint:
+Female refers to 'F' in the gender; A11 contains information about average salary
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the account numbers of female clients who are the oldest and have the lowest average salary, I will follow these steps: First, I need to filter the clients based on gender, ensuring they are female ('F'). Next, I will use the birth dates of the clients to determine their ages, specifically identifying those who are the oldest. To compute the average salary, I will look at the A11 column from the district table, which holds the relevant salary data. I'll aggregate the salary information for female clients grouped by district, and then identify the lowest average salary among these averages. After calculating the minimum average salary, I will use it to filter the previous results. Finally, since the question asks only for account numbers, I'll select the account_id from the account table after performing the necessary joins and filtering. I will use ORDER BY to sort by birth_date to retrieve the oldest clients, and employ LIMIT 1 to ensure I get only the account_id of the oldest female client who meets the salary criteria. The chosen query is optimized to match the requirements directly without including unnecessary columns.",
+    "SQL": "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC LIMIT 1"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Name the account numbers of female clients who are oldest and have lowest average salary?
+
+SQL Query:
+SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC LIMIT 1
+
+Database Content:
+{'account': ['account_id', 'district_id', 'frequency', 'date'], 'card': ['card_id', 'disp_id', 'type', 'issued'], 'client': ['client_id', 'gender', 'birth_date', 'district_id'], 'disp': ['disp_id', 'client_id', 'account_id', 'type'], 'district': ['district_id', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16'], 'loan': ['loan_id', 'account_id', 'date', 'amount', 'duration', 'payments', 'status'], 'order': ['order_id', 'account_id', 'bank_to', 'account_to', 'amount', 'k_symbol'], 'trans': ['trans_id', 'account_id', 'date', 'type', 'operation', 'amount', 'balance', 'k_symbol', 'bank', 'account']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the account numbers of female clients who are both the oldest and have the lowest average salary. The SQL query attempts to join multiple tables to retrieve this information, filtering clients by gender and the minimum average salary derived from a sub-query that groups by district and averages the salary. However, there are flaws: the query does not filter clients who are the oldest; it lacks a proper selection based on age or birth date which is critical to meet the 'oldest' requirement. While it tries to filter based on the minimum average salary, it fails to directly correlate the oldest clients within that filter. Therefore, the query does not fully satisfy the question and is deemed invalid.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Name the account numbers of female clients who are oldest and have lowest average salary?
+
+Predicted SQL:
+SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC LIMIT 1
+
+Execution Result:
+(3214,)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the account numbers of female clients who are both the oldest and have the lowest average salary. The SQL query attempts to join multiple tables to retrieve this information, filtering clients by gender and the minimum average salary derived from a sub-query that groups by district and averages the salary. However, there are flaws: the query does not filter clients who are the oldest; it lacks a proper selection based on age or birth date which is critical to meet the 'oldest' requirement. While it tries to filter based on the minimum average salary, it fails to directly correlate the oldest clients within that filter. Therefore, the query does not fully satisfy the question and is deemed invalid.", 'judgment': 'Invalid'}
+
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query to properly answer the question, follow these steps: 1. Add a selection criterion for the oldest female clients by including a condition that filters based on 'birth_date' to find the oldest client. 2. Instead of just using the minimum average salary criteria, combine this with the oldest selection using a proper JOIN or a subquery. 3. Create a subquery that isolates the oldest birth_date from the female clients, then join that result to find those female clients who also meet the lowest average salary condition. The modified query may look something like this: \n\nSELECT A.account_id \nFROM account A \nJOIN disp D ON A.account_id = D.account_id \nJOIN client C ON D.client_id = C.client_id \nWHERE C.gender = 'F' \nAND C.birth_date = (SELECT MIN(birth_date) FROM client WHERE gender = 'F') \nAND D.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) \nORDER BY C.birth_date ASC;"
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE account (
+  account_id  INTEGER default 0 not null
+        primary key,
+  district_id INTEGER default 0 not null,
+  frequency   TEXT   not null,
+  date        DATE          not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE card (
+  card_id INTEGER default 0 not null
+        primary key,
+  disp_id INTEGER           not null,
+  type    TEXT    not null,
+  issued  DATE          not null,
+  foreign key (disp_id) references disp (disp_id)
+);
+
+CREATE TABLE client (
+  client_id   INTEGER        not null
+        primary key,
+  gender      TEXT not null,
+  birth_date  DATE       not null,
+  district_id INTEGER        not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE disp (
+  disp_id    INTEGER        not null
+        primary key,
+  client_id  INTEGER        not null,
+  account_id INTEGER        not null,
+  type      TEXT not null,
+  foreign key (account_id) references account (account_id),
+  foreign key (client_id) references client (client_id)
+);
+
+CREATE TABLE district (
+  district_id INTEGER default 0 not null
+        primary key,
+  A2          TEXT   not null,
+  A3          TEXT   not null,
+  A4          TEXT       not null,
+  A5          TEXT           not null,
+  A6          TEXT           not null,
+  A7          TEXT           not null,
+  A8          INTEGER        not null,
+  A9          INTEGER           not null,
+  A10         REAL not null,
+  A11         INTEGER           not null,
+  A12         REAL null,
+  A13         REAL not null,
+  A14         INTEGER           not null,
+  A15         INTEGER        null,
+  A16         INTEGER          not null
+);
+
+CREATE TABLE loan (
+  loan_id    INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  date       DATE          not null,
+  amount     INTEGER           not null,
+  duration   INTEGER           not null,
+  payments   REAL not null,
+  status     TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE order (
+  order_id   INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  bank_to    TEXT    not null,
+  account_to INTEGER           not null,
+  amount     REAL not null,
+  k_symbol   TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE trans (
+  trans_id   INTEGER default 0    not null
+        primary key,
+  account_id INTEGER default 0    not null,
+  date       DATE             not null,
+  type       TEXT       not null,
+  operation  TEXT      null,
+  amount     INTEGER              not null,
+  balance    INTEGER             not null,
+  k_symbol   TEXT      null,
+  bank       TEXT       null,
+  account    INTEGER          null,
+  foreign key (account_id) references account (account_id)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To modify the SQL query to correctly answer the question regarding the oldest female clients with the lowest average salary, follow these steps: 1. Calculate the average salary for female clients and determine the minimum average salary using a subquery. 2. Ensure that you are filtering the results based on both the age (oldest client) and the average salary conditions. 3. Use a Group By clause to aggregate the salaries correctly and join it with the main query. Here is a modified version of the SQL query: 
+
+```sql
+SELECT A.account_id 
+FROM account A 
+JOIN disp D ON A.account_id = D.account_id 
+JOIN client C ON D.client_id = C.client_id 
+JOIN district D2 ON C.district_id = D2.district_id 
+WHERE C.gender = 'F' 
+AND C.salary = (
+    SELECT MIN(avg_sal) 
+    FROM ( 
+        SELECT AVG(salary) as avg_sal 
+        FROM client 
+        WHERE gender = 'F' 
+        GROUP BY district_id 
+    ) AS avg_salaries 
+) 
+AND C.birth_date = ( 
+    SELECT MIN(birth_date) 
+    FROM client 
+    WHERE gender = 'F' 
+) 
+ORDER BY C.birth_date ASC; 
+``` 4. Ensure you check the appropriate logic for retrieving the oldest female clients with the identified lowest average salary. This new query includes logic to find both the oldest age and the lowest average salary among female clients.
+7. To modify the SQL query to properly answer the question, follow these steps: 1. Add a selection criterion for the oldest female clients by including a condition that filters based on 'birth_date' to find the oldest client. 2. Instead of just using the minimum average salary criteria, combine this with the oldest selection using a proper JOIN or a subquery. 3. Create a subquery that isolates the oldest birth_date from the female clients, then join that result to find those female clients who also meet the lowest average salary condition. The modified query may look something like this: 
+
+SELECT A.account_id 
+FROM account A 
+JOIN disp D ON A.account_id = D.account_id 
+JOIN client C ON D.client_id = C.client_id 
+WHERE C.gender = 'F' 
+AND C.birth_date = (SELECT MIN(birth_date) FROM client WHERE gender = 'F') 
+AND D.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) 
+ORDER BY C.birth_date ASC;
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To find the account numbers of female clients who are oldest and have the lowest average salary, we need to follow these steps: First, we will filter the female clients from the 'client' table by selecting rows where gender is 'F'. Next, we will find their birth dates to determine the age, ensuring to get the oldest clients. We will then join the 'district' table to access the average salary data from column A11. After that, we will group the results by account_id to calculate average salaries and filter for the lowest average salary. Finally, we'll select the account numbers from the 'account' table using the joined data. Given that we need specific columns without extraneous information, we will only include the account_id in the SELECT clause.", 'SQL': "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(D3.A11) FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F') ORDER BY C.birth_date ASC LIMIT 1"}, "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(D3.A11) FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F') ORDER BY C.birth_date ASC LIMIT 1", "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC LIMIT 1", "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC LIMIT 1"]
+
+Question: 
+Name the account numbers of female clients who are oldest and have lowest average salary? 
+
+Hint:
+Female refers to 'F' in the gender; A11 contains information about average salary
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the account numbers of the oldest female clients who also have the lowest average salary, we need to follow these steps: First, we filter the relevant female clients from the 'client' table where gender is 'F'. Next, we need to determine the oldest clients; for this, we will find the minimum birth date among female clients. We will also gather the salary information from the 'district' table corresponding to those clients by joining with the 'district' based on 'district_id'. We will then need to compute the average salary for female clients in each district and identify the minimum of these averages. Finally, we will combine these filters, collecting the account IDs from the 'account' table based on both the oldest birth date condition and the minimum average salary condition. This will require us to carefully create subqueries to isolate these values before using them in our main query. The final query will include distinct account IDs, and we will order by the birth date to ensure we are considering the oldest clients efficiently. The process aligns with the principles of using subqueries and proper joins.",
+    "SQL": "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND C.birth_date = (SELECT MIN(birth_date) FROM client WHERE gender = 'F') AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Name the account numbers of female clients who are oldest and have lowest average salary?
+
+SQL Query:
+SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND C.birth_date = (SELECT MIN(birth_date) FROM client WHERE gender = 'F') AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC;
+
+Database Content:
+{'account': ['account_id', 'district_id', 'frequency', 'date'], 'card': ['card_id', 'disp_id', 'type', 'issued'], 'client': ['client_id', 'gender', 'birth_date', 'district_id'], 'disp': ['disp_id', 'client_id', 'account_id', 'type'], 'district': ['district_id', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16'], 'loan': ['loan_id', 'account_id', 'date', 'amount', 'duration', 'payments', 'status'], 'order': ['order_id', 'account_id', 'bank_to', 'account_to', 'amount', 'k_symbol'], 'trans': ['trans_id', 'account_id', 'date', 'type', 'operation', 'amount', 'balance', 'k_symbol', 'bank', 'account']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks specifically for the account numbers of female clients who are the oldest and have the lowest average salary. The SQL query attempts to fulfill this by joining multiple tables, filtering for female clients, determining the minimum birth date of female clients, and the minimum average salary across districts for those clients. However, there are issues present in the query. The use of 'MIN(birth_date)' will identify the oldest female client correctly, but the calculation of lowest average salary is incorrectly handled as it checks against district averages rather than determining the specific client's average salary. Additionally, it takes the second condition incorrectly by using 'D2.A11' which presumably is where average salary is stored, without ensuring that it ties back properly for individual clients. Thus, while the SQL attempts to cover the requirements, it fails to accurately filter for the lowest average salary of the specific oldest clients. Hence, it does not align completely with the question's intent, resulting in an Invalid outcome.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Name the account numbers of female clients who are oldest and have lowest average salary?
+
+Predicted SQL:
+SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND C.birth_date = (SELECT MIN(birth_date) FROM client WHERE gender = 'F') AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC;
+
+Execution Result:
+None
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks specifically for the account numbers of female clients who are the oldest and have the lowest average salary. The SQL query attempts to fulfill this by joining multiple tables, filtering for female clients, determining the minimum birth date of female clients, and the minimum average salary across districts for those clients. However, there are issues present in the query. The use of 'MIN(birth_date)' will identify the oldest female client correctly, but the calculation of lowest average salary is incorrectly handled as it checks against district averages rather than determining the specific client's average salary. Additionally, it takes the second condition incorrectly by using 'D2.A11' which presumably is where average salary is stored, without ensuring that it ties back properly for individual clients. Thus, while the SQL attempts to cover the requirements, it fails to accurately filter for the lowest average salary of the specific oldest clients. Hence, it does not align completely with the question's intent, resulting in an Invalid outcome.", 'judgment': 'Invalid'}
+
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query to align with the question's intent, follow these steps: 1. **Identify Oldest Female Client(s)**: Instead of just finding the minimum birth date, you should first retrieve the oldest female clients. Use a Common Table Expression (CTE) or a subquery to identify the oldest female client's birth date and then filter for clients that match this birth date. 2. **Calculate Average Salary for Each Client**: The SQL query incorrectly attempts to find the lowest average salary across districts. Instead, you need to compute the average salary for each specific female client instead. Use a `GROUP BY` clause on `client_id` or an aggregated subquery to obtain the average salary for these identified clients. 3. **Filter by Lowest Average Salary**: After obtaining the oldest female clients and their respective average salaries, filter to find those with the lowest average salary among them. 4. **Construct Final Query**: Join the required tables, ensuring that when filtering, you join back to the derived table of oldest clients and their average salaries. Integrate the conditions to obtain account numbers correctly. Here's a high-level modified structure of the SQL query: \n  \n```sql\nWITH OldestFemales AS (\n    SELECT client_id, MIN(birth_date) AS oldest_birth_date\n    FROM client\n    WHERE gender = 'F'\n    GROUP BY client_id\n),\nClientAvgSalaries AS (\n    SELECT client_id, AVG(salary) AS avg_salary\n    FROM account A JOIN disp D ON A.account_id = D.account_id\n    JOIN client C ON D.client_id = C.client_id\n    WHERE C.gender = 'F'\n    GROUP BY client_id\n)\nSELECT A.account_id\nFROM account A\nJOIN disp D ON A.account_id = D.account_id\nJOIN ClientAvgSalaries CAS ON D.client_id = CAS.client_id\nJOIN OldestFemales OF ON CAS.client_id = OF.client_id\nWHERE OF.oldest_birth_date = (SELECT MIN(birth_date) FROM OldestFemales)\nAND CAS.avg_salary = (SELECT MIN(avg_salary) FROM ClientAvgSalaries)\n;  \n```"
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE account (
+  account_id  INTEGER default 0 not null
+        primary key,
+  district_id INTEGER default 0 not null,
+  frequency   TEXT   not null,
+  date        DATE          not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE card (
+  card_id INTEGER default 0 not null
+        primary key,
+  disp_id INTEGER           not null,
+  type    TEXT    not null,
+  issued  DATE          not null,
+  foreign key (disp_id) references disp (disp_id)
+);
+
+CREATE TABLE client (
+  client_id   INTEGER        not null
+        primary key,
+  gender      TEXT not null,
+  birth_date  DATE       not null,
+  district_id INTEGER        not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE disp (
+  disp_id    INTEGER        not null
+        primary key,
+  client_id  INTEGER        not null,
+  account_id INTEGER        not null,
+  type      TEXT not null,
+  foreign key (account_id) references account (account_id),
+  foreign key (client_id) references client (client_id)
+);
+
+CREATE TABLE district (
+  district_id INTEGER default 0 not null
+        primary key,
+  A2          TEXT   not null,
+  A3          TEXT   not null,
+  A4          TEXT       not null,
+  A5          TEXT           not null,
+  A6          TEXT           not null,
+  A7          TEXT           not null,
+  A8          INTEGER        not null,
+  A9          INTEGER           not null,
+  A10         REAL not null,
+  A11         INTEGER           not null,
+  A12         REAL null,
+  A13         REAL not null,
+  A14         INTEGER           not null,
+  A15         INTEGER        null,
+  A16         INTEGER          not null
+);
+
+CREATE TABLE loan (
+  loan_id    INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  date       DATE          not null,
+  amount     INTEGER           not null,
+  duration   INTEGER           not null,
+  payments   REAL not null,
+  status     TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE order (
+  order_id   INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  bank_to    TEXT    not null,
+  account_to INTEGER           not null,
+  amount     REAL not null,
+  k_symbol   TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE trans (
+  trans_id   INTEGER default 0    not null
+        primary key,
+  account_id INTEGER default 0    not null,
+  date       DATE             not null,
+  type       TEXT       not null,
+  operation  TEXT      null,
+  amount     INTEGER              not null,
+  balance    INTEGER             not null,
+  k_symbol   TEXT      null,
+  bank       TEXT       null,
+  account    INTEGER          null,
+  foreign key (account_id) references account (account_id)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To modify the SQL query to correctly answer the question regarding the oldest female clients with the lowest average salary, follow these steps: 1. Calculate the average salary for female clients and determine the minimum average salary using a subquery. 2. Ensure that you are filtering the results based on both the age (oldest client) and the average salary conditions. 3. Use a Group By clause to aggregate the salaries correctly and join it with the main query. Here is a modified version of the SQL query: 
+
+```sql
+SELECT A.account_id 
+FROM account A 
+JOIN disp D ON A.account_id = D.account_id 
+JOIN client C ON D.client_id = C.client_id 
+JOIN district D2 ON C.district_id = D2.district_id 
+WHERE C.gender = 'F' 
+AND C.salary = (
+    SELECT MIN(avg_sal) 
+    FROM ( 
+        SELECT AVG(salary) as avg_sal 
+        FROM client 
+        WHERE gender = 'F' 
+        GROUP BY district_id 
+    ) AS avg_salaries 
+) 
+AND C.birth_date = ( 
+    SELECT MIN(birth_date) 
+    FROM client 
+    WHERE gender = 'F' 
+) 
+ORDER BY C.birth_date ASC; 
+``` 4. Ensure you check the appropriate logic for retrieving the oldest female clients with the identified lowest average salary. This new query includes logic to find both the oldest age and the lowest average salary among female clients.
+7. To modify the SQL query to properly answer the question, follow these steps: 1. Add a selection criterion for the oldest female clients by including a condition that filters based on 'birth_date' to find the oldest client. 2. Instead of just using the minimum average salary criteria, combine this with the oldest selection using a proper JOIN or a subquery. 3. Create a subquery that isolates the oldest birth_date from the female clients, then join that result to find those female clients who also meet the lowest average salary condition. The modified query may look something like this: 
+
+SELECT A.account_id 
+FROM account A 
+JOIN disp D ON A.account_id = D.account_id 
+JOIN client C ON D.client_id = C.client_id 
+WHERE C.gender = 'F' 
+AND C.birth_date = (SELECT MIN(birth_date) FROM client WHERE gender = 'F') 
+AND D.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) 
+ORDER BY C.birth_date ASC;
+8. To modify the SQL query to align with the question's intent, follow these steps: 1. **Identify Oldest Female Client(s)**: Instead of just finding the minimum birth date, you should first retrieve the oldest female clients. Use a Common Table Expression (CTE) or a subquery to identify the oldest female client's birth date and then filter for clients that match this birth date. 2. **Calculate Average Salary for Each Client**: The SQL query incorrectly attempts to find the lowest average salary across districts. Instead, you need to compute the average salary for each specific female client instead. Use a `GROUP BY` clause on `client_id` or an aggregated subquery to obtain the average salary for these identified clients. 3. **Filter by Lowest Average Salary**: After obtaining the oldest female clients and their respective average salaries, filter to find those with the lowest average salary among them. 4. **Construct Final Query**: Join the required tables, ensuring that when filtering, you join back to the derived table of oldest clients and their average salaries. Integrate the conditions to obtain account numbers correctly. Here's a high-level modified structure of the SQL query: 
+  
+```sql
+WITH OldestFemales AS (
+    SELECT client_id, MIN(birth_date) AS oldest_birth_date
+    FROM client
+    WHERE gender = 'F'
+    GROUP BY client_id
+),
+ClientAvgSalaries AS (
+    SELECT client_id, AVG(salary) AS avg_salary
+    FROM account A JOIN disp D ON A.account_id = D.account_id
+    JOIN client C ON D.client_id = C.client_id
+    WHERE C.gender = 'F'
+    GROUP BY client_id
+)
+SELECT A.account_id
+FROM account A
+JOIN disp D ON A.account_id = D.account_id
+JOIN ClientAvgSalaries CAS ON D.client_id = CAS.client_id
+JOIN OldestFemales OF ON CAS.client_id = OF.client_id
+WHERE OF.oldest_birth_date = (SELECT MIN(birth_date) FROM OldestFemales)
+AND CAS.avg_salary = (SELECT MIN(avg_salary) FROM ClientAvgSalaries)
+;  
+```
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(D3.A11) FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F') ORDER BY C.birth_date ASC LIMIT 1", "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC LIMIT 1", "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC LIMIT 1", "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND C.birth_date = (SELECT MIN(birth_date) FROM client WHERE gender = 'F') AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC;", "SELECT DISTINCT A.account_id FROM account A JOIN disp D ON A.account_id = D.account_id JOIN client C ON D.client_id = C.client_id JOIN district D2 ON C.district_id = D2.district_id WHERE C.gender = 'F' AND C.birth_date = (SELECT MIN(birth_date) FROM client WHERE gender = 'F') AND D2.A11 = (SELECT MIN(avg_salary) FROM (SELECT AVG(D3.A11) AS avg_salary FROM district D3 JOIN client C2 ON D3.district_id = C2.district_id WHERE C2.gender = 'F' GROUP BY C2.district_id)) ORDER BY C.birth_date ASC;"]
+
+Question: 
+Name the account numbers of female clients who are oldest and have lowest average salary? 
+
+Hint:
+Female refers to 'F' in the gender; A11 contains information about average salary
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question of naming the account numbers of female clients who are the oldest and have the lowest average salary, I need to follow these steps systematically:\n\n1. **Identify Oldest Female Clients**: The goal is to find the oldest female clients by identifying the minimum birth date among female clients. This entails selecting from the client table where gender is 'F'. \n\n2. **Calculate Lowest Average Salary**: Next, I need to calculate the average salary for these female clients. The schema indicates that the relevant salary information is stored in the district table (column A11), which is linked to clients through the district_id.\n\n3. **Filtering Clients**: After identifying the oldest female clients and determining the average salary across districts, I need to filter down to those clients who not only have the oldest birth date but also have the lowest computed average salary.\n\n4. **Construct Query with Joins**: I will use Common Table Expressions (CTEs) to structure the queries for readability and efficiency. I will first create a CTE to find the oldest female clients, and another CTE to compute the average salaries based on their district affiliations.\n\n5. **Final Selection of Account Numbers**: Lastly, I will select the unique account_id from the account table that corresponds to those clients who meet both the conditions\u2014being the oldest and having the lowest average salary among the female clients. I will use appropriate joins to link all necessary tables together.\n\nBy systematically applying these steps, I can construct a clear SQL query that meets the requirements of the original question.",
+    "SQL": "WITH OldestFemales AS (\n    SELECT MIN(birth_date) AS oldest_birth_date\n    FROM client\n    WHERE gender = 'F'\n),\nClientAvgSalaries AS (\n    SELECT C.client_id, AVG(D.A11) AS avg_salary\n    FROM client C\n    JOIN district D ON C.district_id = D.district_id\n    WHERE C.gender = 'F'\n    GROUP BY C.client_id\n)\nSELECT DISTINCT A.account_id\nFROM account A\nJOIN disp D ON A.account_id = D.account_id\nJOIN client C ON D.client_id = C.client_id\nJOIN ClientAvgSalaries CAS ON C.client_id = CAS.client_id\nWHERE C.birth_date = (SELECT oldest_birth_date FROM OldestFemales)\nAND CAS.avg_salary = (SELECT MIN(avg_salary) FROM ClientAvgSalaries);"
+}
+

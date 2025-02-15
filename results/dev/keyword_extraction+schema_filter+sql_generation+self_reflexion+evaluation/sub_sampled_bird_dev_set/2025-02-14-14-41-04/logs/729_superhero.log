@@ -1,0 +1,227 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: What is the average height of the superheroes from Marvel Comics?
+Hint: superheroes from Marvel Comics refers to publisher_name = 'Marvel Comics'; average height of the superheroes refers to AVG(height_cm)
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "average height",
+    "superheroes",
+    "Marvel Comics",
+    "publisher_name",
+    "AVG(height_cm)"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE alignment (
+  id        INTEGER not null
+            primary key,
+  alignment TEXT default NULL
+);
+
+CREATE TABLE attribute (
+  id             INTEGER not null
+            primary key,
+  attribute_name TEXT default NULL
+);
+
+CREATE TABLE colour (
+  id     INTEGER not null
+            primary key,
+  colour TEXT default NULL
+);
+
+CREATE TABLE gender (
+  id     INTEGER not null
+            primary key,
+  gender TEXT default NULL
+);
+
+CREATE TABLE publisher (
+  id             INTEGER not null
+            primary key,
+  publisher_name TEXT default NULL
+);
+
+CREATE TABLE race (
+  id   INTEGER not null
+            primary key,
+  race TEXT default NULL
+);
+
+CREATE TABLE superhero (
+  id             INTEGER not null
+            primary key,
+  superhero_name TEXT default NULL,
+  full_name      TEXT default NULL,
+  gender_id      INTEGER          default NULL,
+  eye_colour_id  INTEGER          default NULL,
+  hair_colour_id INTEGER          default NULL,
+  skin_colour_id INTEGER          default NULL,
+  race_id        INTEGER          default NULL,
+  publisher_id   INTEGER          default NULL,
+  alignment_id   INTEGER          default NULL,
+  height_cm      INTEGER          default NULL,
+  weight_kg      INTEGER          default NULL,
+  foreign key (alignment_id) references alignment(id),
+  foreign key (eye_colour_id) references colour(id),
+  foreign key (gender_id) references gender(id),
+  foreign key (hair_colour_id) references colour(id),
+  foreign key (publisher_id) references publisher(id),
+  foreign key (race_id) references race(id),
+  foreign key (skin_colour_id) references colour(id)
+);
+
+CREATE TABLE hero_attribute (
+  hero_id         INTEGER default NULL,
+  attribute_id    INTEGER default NULL,
+  attribute_value INTEGER default NULL,
+  foreign key (attribute_id) references attribute(id),
+  foreign key (hero_id) references superhero(id)
+);
+
+CREATE TABLE superpower (
+  id         INTEGER not null
+            primary key,
+  power_name TEXT default NULL
+);
+
+CREATE TABLE hero_power (
+  hero_id  INTEGER default NULL,
+  power_id INTEGER default NULL,
+  foreign key (hero_id) references superhero(id),
+  foreign key (power_id) references superpower(id)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+What is the average height of the superheroes from Marvel Comics? 
+
+Hint:
+superheroes from Marvel Comics refers to publisher_name = 'Marvel Comics'; average height of the superheroes refers to AVG(height_cm)
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To calculate the average height of superheroes from 'Marvel Comics', I need to focus on the 'superhero' table, which contains the height information, and the 'publisher' table to filter by 'Marvel Comics'. The two tables are linked through the 'publisher_id' in the 'superhero' table to the 'id' in the 'publisher' table. I will join these tables on the publisher_id and id respectively. After that, I will use the AVG function to calculate the average height (height_cm) of superheroes where the publisher_name is 'Marvel Comics'. Since the question does not require any additional columns, I only need to select the average value of height.",
+    "SQL": "SELECT AVG(height_cm) FROM superhero AS T1 JOIN publisher AS T2 ON T1.publisher_id = T2.id WHERE T2.publisher_name = 'Marvel Comics' AND T1.height_cm IS NOT NULL;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+What is the average height of the superheroes from Marvel Comics?
+
+SQL Query:
+SELECT AVG(height_cm) FROM superhero AS T1 JOIN publisher AS T2 ON T1.publisher_id = T2.id WHERE T2.publisher_name = 'Marvel Comics' AND T1.height_cm IS NOT NULL;
+
+Database Content:
+{'alignment': ['id', 'alignment'], 'attribute': ['id', 'attribute_name'], 'colour': ['id', 'colour'], 'gender': ['id', 'gender'], 'publisher': ['id', 'publisher_name', 'publishername'], 'race': ['id', 'race'], 'superhero': ['id', 'superhero_name', 'full_name', 'gender_id', 'eye_colour_id', 'hair_colour_id', 'skin_colour_id', 'race_id', 'publisher_id', 'alignment_id', 'height_cm', 'weight_kg'], 'hero_attribute': ['hero_id', 'attribute_id', 'attribute_value'], 'superpower': ['id', 'power_name'], 'hero_power': ['hero_id', 'power_id']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the average height of superheroes from Marvel Comics. The provided SQL query aims to calculate this average by selecting the average of the 'height_cm' column from the 'superhero' table, while joining with the 'publisher' table to filter for 'Marvel Comics'. It also checks that 'height_cm' is not null. The SQL query correctly matches the requirement of calculating an average height specifically for superheroes published by Marvel Comics. Further, the tables and their relationships in the database content allow us to confirm that 'publisher_id' from the superhero table connects to 'id' in the publisher table appropriately. Therefore, upon analyzing the query, it is in alignment with the requested information in the question, as it should produce an accurate average height of Marvel superheroes, given there are no other undisclosed issues in the execution context. Thus, the SQL query is valid for the given question.",
+    "judgment": "Valid"
+}
+

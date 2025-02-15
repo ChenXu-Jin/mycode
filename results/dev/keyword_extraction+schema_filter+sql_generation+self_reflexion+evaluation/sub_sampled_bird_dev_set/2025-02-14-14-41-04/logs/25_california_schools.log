@@ -1,0 +1,911 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+Hint: Average of average math = sum(average math scores) / count(schools).
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "schools in Riverside",
+    "average math score for SAT",
+    "greater than 400",
+    "funding type",
+    "Average of average math",
+    "sum(average math scores)",
+    "count(schools)"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE frpm (
+  CDSCode                                       TEXT not null
+        primary key,
+  `Academic Year`                               TEXT  null,
+  `County Code`                                 TEXT  null,
+  `District Code`                               INTEGER         null,
+  `School Code`                                 TEXT  null,
+  `County Name`                                 TEXT null,
+  `District Name`                               TEXT null,
+  `School Name`                                 TEXT null,
+  `District Type`                               TEXT null,
+  `School Type`                                 TEXT null,
+  `Educational Option Type`                     TEXT null,
+  `NSLP Provision Status`                       TEXT null,
+  `Charter School (Y/N)`                        INTEGER    null,
+  `Charter School Number`                       TEXT  null,
+  `Charter Funding Type`                        TEXT null,
+  IRC                                           INTEGER    null,
+  `Low Grade`                                   TEXT  null,
+  `High Grade`                                  TEXT null,
+  `Enrollment (K-12)`                           REAL      null,
+  `Free Meal Count (K-12)`                      REAL       null,
+  `Percent (%) Eligible Free (K-12)`            REAL       null,
+  `FRPM Count (K-12)`                           REAL       null,
+  `Percent (%) Eligible FRPM (K-12)`            REAL       null,
+  `Enrollment (Ages 5-17)`                      REAL       null,
+  `Free Meal Count (Ages 5-17)`                 REAL       null,
+  `Percent (%) Eligible Free (Ages 5-17)`       REAL       null,
+  `FRPM Count (Ages 5-17)`                      REAL       null,
+  `Percent (%) Eligible FRPM (Ages 5-17)`       REAL       null,
+  `2013-14 CALPADS Fall 1 Certification Status` INTEGER    null,
+  foreign key (CDSCode) references schools (CDSCode)
+);
+
+CREATE TABLE satscores (
+  cds         TEXT not null
+        primary key,
+  rtype       TEXT  not null,
+  sname       TEXT null,
+  dname       TEXT null,
+  cname       TEXT null,
+  enroll12    INTEGER         not null,
+  NumTstTakr  INTEGER          not null,
+  AvgScrRead  INTEGER          null,
+  AvgScrMath  INTEGER          null,
+  AvgScrWrite INTEGER          null,
+  NumGE1500   INTEGER          null,
+  foreign key (cds) references schools (CDSCode)
+);
+
+CREATE TABLE schools (
+  CDSCode     TEXT not null
+        primary key,
+  NCESDist    TEXT  null,
+  NCESSchool  TEXT  null,
+  StatusType  TEXT  not null,
+  County      TEXT not null,
+  District    TEXT not null,
+  School      TEXT null,
+  Street      TEXT null,
+  StreetAbr   TEXT null,
+  City        TEXT null,
+  Zip         TEXT null,
+  State       TEXT  null,
+  MailStreet  TEXT null,
+  MailStrAbr  TEXT null,
+  MailCity    TEXT null,
+  MailZip     TEXT null,
+  MailState   TEXT  null,
+  Phone       TEXT null,
+  Ext         TEXT  null,
+  Website     TEXT null,
+  OpenDate    DATE        null,
+  ClosedDate  DATE        null,
+  Charter     INTEGER    null,
+  CharterNum  TEXT  null,
+  FundingType TEXT null,
+  DOC         TEXT  not null,
+  DOCType     TEXT not null,
+  SOC         TEXT  null,
+  SOCType     TEXT null,
+  EdOpsCode   TEXT  null,
+  EdOpsName   TEXT null,
+  EILCode     TEXT  null,
+  EILName     TEXT null,
+  GSoffered   TEXT null,
+  GSserved    TEXT  null,
+  Virtual     TEXT  null,
+  Magnet      INTEGER   null,
+  Latitude    REAL      null,
+  Longitude   REAL      null,
+  AdmFName1   TEXT null,
+  AdmLName1   TEXT null,
+  AdmEmail1   TEXT null,
+  AdmFName2   TEXT null,
+  AdmLName2   TEXT null,
+  AdmEmail2   TEXT null,
+  AdmFName3   TEXT  null,
+  AdmLName3   TEXT null,
+  AdmEmail3   TEXT null,
+  LastUpdate  DATE        not null
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools? 
+
+Hint:
+Average of average math = sum(average math scores) / count(schools).
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question, we first need to find schools located in Riverside. We will look into the 'schools' table which contains the relevant information about the school, such as its funding type and location. Next, we need to compute the average of the average math scores from the 'satscores' table, filtering for schools located in Riverside. The average math score must exceed 400. We can join the 'schools' and 'satscores' tables using the 'CDSCode' field, which serves as the primary key in the 'schools' table and foreign key in the 'satscores' table. We will perform the necessary filtering and aggregation to meet the condition specified. The final output should include only the funding type of these schools. We will retrieve the average math score and the funding type, applying the necessary filtering before grouping and calculating averages.",
+    "SQL": "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+SQL Query:
+SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;
+
+Database Content:
+{'frpm': ['CDSCode', 'Academic Year', 'County Code', 'District Code', 'School Code', 'County Name', 'District Name', 'School Name', 'District Type', 'School Type', 'Educational Option Type', 'NSLP Provision Status', 'Charter School (Y/N)', 'Charter School Number', 'Charter Funding Type', 'IRC', 'Low Grade', 'High Grade', 'Enrollment (K-12)', 'Free Meal Count (K-12)', 'Percent (%) Eligible Free (K-12)', 'FRPM Count (K-12)', 'Percent (%) Eligible FRPM (K-12)', 'Enrollment (Ages 5-17)', 'Free Meal Count (Ages 5-17)', 'Percent (%) Eligible Free (Ages 5-17)', 'FRPM Count (Ages 5-17)', 'Percent (%) Eligible FRPM (Ages 5-17)', '2013-14 CALPADS Fall 1 Certification Status'], 'satscores': ['cds', 'rtype', 'sname', 'dname', 'cname', 'enroll12', 'NumTstTakr', 'AvgScrRead', 'AvgScrMath', 'AvgScrWrite', 'NumGE1500'], 'schools': ['CDSCode', 'NCESDist', 'NCESSchool', 'StatusType', 'County', 'District', 'School', 'Street', 'StreetAbr', 'City', 'Zip', 'State', 'MailStreet', 'MailStrAbr', 'MailCity', 'MailZip', 'MailState', 'Phone', 'Ext', 'Website', 'OpenDate', 'ClosedDate', 'Charter', 'CharterNum', 'FundingType', 'DOC', 'DOCType', 'SOC', 'SOCType', 'EdOpsCode', 'EdOpsName', 'EILCode', 'EILName', 'GSoffered', 'GSserved', 'Virtual', 'Magnet', 'Latitude', 'Longitude', 'AdmFName1', 'AdmLName1', 'AdmEmail1', 'AdmFName2', 'AdmLName2', 'AdmEmail2', 'AdmFName3', 'AdmLName3', 'AdmEmail3', 'LastUpdate']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "To analyze the given question, we need to extract schools in Riverside where the average math score for the SAT is greater than 400 and also find the funding type of these schools. The SQL query attempts to accomplish this by joining the 'schools' and 'satscores' tables, filtering for schools in 'Riverside', grouping by 'FundingType', and using a HAVING clause to check if the average math score exceeds 400. However, the SQL query does not directly select or display any information about the schools themselves (like their names), only their funding types. This lack of information about the school names, as posed in the question, means the SQL query fails to fully address the question's requirements. While it may correctly filter records based on the average score, it ultimately falls short by not including a selection of school identifiers or names alongside the funding types. Therefore, the SQL query does not effectively answer the given question as it omits critical data (school names) needed to fulfill the query's intent.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+Predicted SQL:
+SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;
+
+Execution Result:
+(None,)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "To analyze the given question, we need to extract schools in Riverside where the average math score for the SAT is greater than 400 and also find the funding type of these schools. The SQL query attempts to accomplish this by joining the 'schools' and 'satscores' tables, filtering for schools in 'Riverside', grouping by 'FundingType', and using a HAVING clause to check if the average math score exceeds 400. However, the SQL query does not directly select or display any information about the schools themselves (like their names), only their funding types. This lack of information about the school names, as posed in the question, means the SQL query fails to fully address the question's requirements. While it may correctly filter records based on the average score, it ultimately falls short by not including a selection of school identifiers or names alongside the funding types. Therefore, the SQL query does not effectively answer the given question as it omits critical data (school names) needed to fulfill the query's intent.", 'judgment': 'Invalid'}
+
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query to better align with the question's intent, follow these actionable steps: 1. Include the school names in the SELECT clause by adding s.SchoolName to the fields being selected. 2. Ensure that you are selecting relevant identifiers alongside the funding type to provide a comprehensive output. The modified query should look like this: SELECT s.SchoolName, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.SchoolName, s.FundingType HAVING AVG(sc.AvgScrMath) > 400. This way, the query will retrieve both the names of the schools and their corresponding funding types while meeting the average score criteria."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE frpm (
+  CDSCode                                       TEXT not null
+        primary key,
+  `Academic Year`                               TEXT  null,
+  `County Code`                                 TEXT  null,
+  `District Code`                               INTEGER         null,
+  `School Code`                                 TEXT  null,
+  `County Name`                                 TEXT null,
+  `District Name`                               TEXT null,
+  `School Name`                                 TEXT null,
+  `District Type`                               TEXT null,
+  `School Type`                                 TEXT null,
+  `Educational Option Type`                     TEXT null,
+  `NSLP Provision Status`                       TEXT null,
+  `Charter School (Y/N)`                        INTEGER    null,
+  `Charter School Number`                       TEXT  null,
+  `Charter Funding Type`                        TEXT null,
+  IRC                                           INTEGER    null,
+  `Low Grade`                                   TEXT  null,
+  `High Grade`                                  TEXT null,
+  `Enrollment (K-12)`                           REAL      null,
+  `Free Meal Count (K-12)`                      REAL       null,
+  `Percent (%) Eligible Free (K-12)`            REAL       null,
+  `FRPM Count (K-12)`                           REAL       null,
+  `Percent (%) Eligible FRPM (K-12)`            REAL       null,
+  `Enrollment (Ages 5-17)`                      REAL       null,
+  `Free Meal Count (Ages 5-17)`                 REAL       null,
+  `Percent (%) Eligible Free (Ages 5-17)`       REAL       null,
+  `FRPM Count (Ages 5-17)`                      REAL       null,
+  `Percent (%) Eligible FRPM (Ages 5-17)`       REAL       null,
+  `2013-14 CALPADS Fall 1 Certification Status` INTEGER    null,
+  foreign key (CDSCode) references schools (CDSCode)
+);
+
+CREATE TABLE satscores (
+  cds         TEXT not null
+        primary key,
+  rtype       TEXT  not null,
+  sname       TEXT null,
+  dname       TEXT null,
+  cname       TEXT null,
+  enroll12    INTEGER         not null,
+  NumTstTakr  INTEGER          not null,
+  AvgScrRead  INTEGER          null,
+  AvgScrMath  INTEGER          null,
+  AvgScrWrite INTEGER          null,
+  NumGE1500   INTEGER          null,
+  foreign key (cds) references schools (CDSCode)
+);
+
+CREATE TABLE schools (
+  CDSCode     TEXT not null
+        primary key,
+  NCESDist    TEXT  null,
+  NCESSchool  TEXT  null,
+  StatusType  TEXT  not null,
+  County      TEXT not null,
+  District    TEXT not null,
+  School      TEXT null,
+  Street      TEXT null,
+  StreetAbr   TEXT null,
+  City        TEXT null,
+  Zip         TEXT null,
+  State       TEXT  null,
+  MailStreet  TEXT null,
+  MailStrAbr  TEXT null,
+  MailCity    TEXT null,
+  MailZip     TEXT null,
+  MailState   TEXT  null,
+  Phone       TEXT null,
+  Ext         TEXT  null,
+  Website     TEXT null,
+  OpenDate    DATE        null,
+  ClosedDate  DATE        null,
+  Charter     INTEGER    null,
+  CharterNum  TEXT  null,
+  FundingType TEXT null,
+  DOC         TEXT  not null,
+  DOCType     TEXT not null,
+  SOC         TEXT  null,
+  SOCType     TEXT null,
+  EdOpsCode   TEXT  null,
+  EdOpsName   TEXT null,
+  EILCode     TEXT  null,
+  EILName     TEXT null,
+  GSoffered   TEXT null,
+  GSserved    TEXT  null,
+  Virtual     TEXT  null,
+  Magnet      INTEGER   null,
+  Latitude    REAL      null,
+  Longitude   REAL      null,
+  AdmFName1   TEXT null,
+  AdmLName1   TEXT null,
+  AdmEmail1   TEXT null,
+  AdmFName2   TEXT null,
+  AdmLName2   TEXT null,
+  AdmEmail2   TEXT null,
+  AdmFName3   TEXT  null,
+  AdmLName3   TEXT null,
+  AdmEmail3   TEXT null,
+  LastUpdate  DATE        not null
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To modify the SQL query to better align with the question's intent, follow these actionable steps: 1. Include the school names in the SELECT clause by adding s.SchoolName to the fields being selected. 2. Ensure that you are selecting relevant identifiers alongside the funding type to provide a comprehensive output. The modified query should look like this: SELECT s.SchoolName, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.SchoolName, s.FundingType HAVING AVG(sc.AvgScrMath) > 400. This way, the query will retrieve both the names of the schools and their corresponding funding types while meeting the average score criteria.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To answer the question, we first need to find schools located in Riverside. We will look into the 'schools' table which contains the relevant information about the school, such as its funding type and location. Next, we need to compute the average of the average math scores from the 'satscores' table, filtering for schools located in Riverside. The average math score must exceed 400. We can join the 'schools' and 'satscores' tables using the 'CDSCode' field, which serves as the primary key in the 'schools' table and foreign key in the 'satscores' table. We will perform the necessary filtering and aggregation to meet the condition specified. The final output should include only the funding type of these schools. We will retrieve the average math score and the funding type, applying the necessary filtering before grouping and calculating averages.", 'SQL': "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;"}, "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;"]
+
+Question: 
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools? 
+
+Hint:
+Average of average math = sum(average math scores) / count(schools).
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question, we need to identify schools located in Riverside. We'll start by querying the 'schools' table to extract the relevant school information, particularly focusing on the schools' funding types and their county. The key aspect here is to calculate the average of average math scores from the 'satscores' table. The query requires us to compute the average math scores (AvgScrMath) for each school, and then filter those schools whose average exceeds 400 as specified in the question. To achieve this, we will perform a join between the 'schools' and 'satscores' tables on the 'CDSCode' fields. Since we need to consider the aggregated average math scores, we'll need to apply a HAVING clause after group by the necessary fields. The final output requested is specifically the funding type of these schools. Thus, the complete SQL query will reflect these steps, ensuring we are extracting only the necessary fields to meet the requirements.",
+    "SQL": "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.CDSCode HAVING AVG(sc.AvgScrMath) > 400;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+SQL Query:
+SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.CDSCode HAVING AVG(sc.AvgScrMath) > 400;
+
+Database Content:
+{'frpm': ['CDSCode', 'Academic Year', 'County Code', 'District Code', 'School Code', 'County Name', 'District Name', 'School Name', 'District Type', 'School Type', 'Educational Option Type', 'NSLP Provision Status', 'Charter School (Y/N)', 'Charter School Number', 'Charter Funding Type', 'IRC', 'Low Grade', 'High Grade', 'Enrollment (K-12)', 'Free Meal Count (K-12)', 'Percent (%) Eligible Free (K-12)', 'FRPM Count (K-12)', 'Percent (%) Eligible FRPM (K-12)', 'Enrollment (Ages 5-17)', 'Free Meal Count (Ages 5-17)', 'Percent (%) Eligible Free (Ages 5-17)', 'FRPM Count (Ages 5-17)', 'Percent (%) Eligible FRPM (Ages 5-17)', '2013-14 CALPADS Fall 1 Certification Status'], 'satscores': ['cds', 'rtype', 'sname', 'dname', 'cname', 'enroll12', 'NumTstTakr', 'AvgScrRead', 'AvgScrMath', 'AvgScrWrite', 'NumGE1500'], 'schools': ['CDSCode', 'NCESDist', 'NCESSchool', 'StatusType', 'County', 'District', 'School', 'Street', 'StreetAbr', 'City', 'Zip', 'State', 'MailStreet', 'MailStrAbr', 'MailCity', 'MailZip', 'MailState', 'Phone', 'Ext', 'Website', 'OpenDate', 'ClosedDate', 'Charter', 'CharterNum', 'FundingType', 'DOC', 'DOCType', 'SOC', 'SOCType', 'EdOpsCode', 'EdOpsName', 'EILCode', 'EILName', 'GSoffered', 'GSserved', 'Virtual', 'Magnet', 'Latitude', 'Longitude', 'AdmFName1', 'AdmLName1', 'AdmEmail1', 'AdmFName2', 'AdmLName2', 'AdmEmail2', 'AdmFName3', 'AdmLName3', 'AdmEmail3', 'LastUpdate']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the names of schools in Riverside where the average math score for SAT is greater than 400, specifically focusing on the funding type of these schools. The SQL query joins the schools and SAT scores based on their CDS codes, filtering for schools in Riverside and applying a grouping while checking the average math score condition. However, the output of the query only selects funding types without capturing or presenting the school names, which are crucial to fulfill the question's intent. Thus, while the query correctly identifies schools based on SAT average scores and retrieves funding types, it fails to include the school names as explicitly requested in the question, making it incomplete. Therefore, the SQL query does not validly address the question in its entirety.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+Predicted SQL:
+SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.CDSCode HAVING AVG(sc.AvgScrMath) > 400;
+
+Execution Result:
+(None,)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the names of schools in Riverside where the average math score for SAT is greater than 400, specifically focusing on the funding type of these schools. The SQL query joins the schools and SAT scores based on their CDS codes, filtering for schools in Riverside and applying a grouping while checking the average math score condition. However, the output of the query only selects funding types without capturing or presenting the school names, which are crucial to fulfill the question's intent. Thus, while the query correctly identifies schools based on SAT average scores and retrieves funding types, it fails to include the school names as explicitly requested in the question, making it incomplete. Therefore, the SQL query does not validly address the question in its entirety.", 'judgment': 'Invalid'}
+
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query to align with the question's intent, you need to include the school names in the SELECT statement. Additionally, instead of grouping by the CDSCode alone, consider grouping by both the CDSCode and the school name to ensure that you accurately capture the corresponding funding types for each school. The revised query should look like this: 'SELECT s.Name, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.CDSCode, s.Name, s.FundingType HAVING AVG(sc.AvgScrMath) > 400;'. This ensures that you retrieve both the names and funding types of schools that meet the average math score criteria."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE frpm (
+  CDSCode                                       TEXT not null
+        primary key,
+  `Academic Year`                               TEXT  null,
+  `County Code`                                 TEXT  null,
+  `District Code`                               INTEGER         null,
+  `School Code`                                 TEXT  null,
+  `County Name`                                 TEXT null,
+  `District Name`                               TEXT null,
+  `School Name`                                 TEXT null,
+  `District Type`                               TEXT null,
+  `School Type`                                 TEXT null,
+  `Educational Option Type`                     TEXT null,
+  `NSLP Provision Status`                       TEXT null,
+  `Charter School (Y/N)`                        INTEGER    null,
+  `Charter School Number`                       TEXT  null,
+  `Charter Funding Type`                        TEXT null,
+  IRC                                           INTEGER    null,
+  `Low Grade`                                   TEXT  null,
+  `High Grade`                                  TEXT null,
+  `Enrollment (K-12)`                           REAL      null,
+  `Free Meal Count (K-12)`                      REAL       null,
+  `Percent (%) Eligible Free (K-12)`            REAL       null,
+  `FRPM Count (K-12)`                           REAL       null,
+  `Percent (%) Eligible FRPM (K-12)`            REAL       null,
+  `Enrollment (Ages 5-17)`                      REAL       null,
+  `Free Meal Count (Ages 5-17)`                 REAL       null,
+  `Percent (%) Eligible Free (Ages 5-17)`       REAL       null,
+  `FRPM Count (Ages 5-17)`                      REAL       null,
+  `Percent (%) Eligible FRPM (Ages 5-17)`       REAL       null,
+  `2013-14 CALPADS Fall 1 Certification Status` INTEGER    null,
+  foreign key (CDSCode) references schools (CDSCode)
+);
+
+CREATE TABLE satscores (
+  cds         TEXT not null
+        primary key,
+  rtype       TEXT  not null,
+  sname       TEXT null,
+  dname       TEXT null,
+  cname       TEXT null,
+  enroll12    INTEGER         not null,
+  NumTstTakr  INTEGER          not null,
+  AvgScrRead  INTEGER          null,
+  AvgScrMath  INTEGER          null,
+  AvgScrWrite INTEGER          null,
+  NumGE1500   INTEGER          null,
+  foreign key (cds) references schools (CDSCode)
+);
+
+CREATE TABLE schools (
+  CDSCode     TEXT not null
+        primary key,
+  NCESDist    TEXT  null,
+  NCESSchool  TEXT  null,
+  StatusType  TEXT  not null,
+  County      TEXT not null,
+  District    TEXT not null,
+  School      TEXT null,
+  Street      TEXT null,
+  StreetAbr   TEXT null,
+  City        TEXT null,
+  Zip         TEXT null,
+  State       TEXT  null,
+  MailStreet  TEXT null,
+  MailStrAbr  TEXT null,
+  MailCity    TEXT null,
+  MailZip     TEXT null,
+  MailState   TEXT  null,
+  Phone       TEXT null,
+  Ext         TEXT  null,
+  Website     TEXT null,
+  OpenDate    DATE        null,
+  ClosedDate  DATE        null,
+  Charter     INTEGER    null,
+  CharterNum  TEXT  null,
+  FundingType TEXT null,
+  DOC         TEXT  not null,
+  DOCType     TEXT not null,
+  SOC         TEXT  null,
+  SOCType     TEXT null,
+  EdOpsCode   TEXT  null,
+  EdOpsName   TEXT null,
+  EILCode     TEXT  null,
+  EILName     TEXT null,
+  GSoffered   TEXT null,
+  GSserved    TEXT  null,
+  Virtual     TEXT  null,
+  Magnet      INTEGER   null,
+  Latitude    REAL      null,
+  Longitude   REAL      null,
+  AdmFName1   TEXT null,
+  AdmLName1   TEXT null,
+  AdmEmail1   TEXT null,
+  AdmFName2   TEXT null,
+  AdmLName2   TEXT null,
+  AdmEmail2   TEXT null,
+  AdmFName3   TEXT  null,
+  AdmLName3   TEXT null,
+  AdmEmail3   TEXT null,
+  LastUpdate  DATE        not null
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To modify the SQL query to better align with the question's intent, follow these actionable steps: 1. Include the school names in the SELECT clause by adding s.SchoolName to the fields being selected. 2. Ensure that you are selecting relevant identifiers alongside the funding type to provide a comprehensive output. The modified query should look like this: SELECT s.SchoolName, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.SchoolName, s.FundingType HAVING AVG(sc.AvgScrMath) > 400. This way, the query will retrieve both the names of the schools and their corresponding funding types while meeting the average score criteria.
+7. To modify the SQL query to align with the question's intent, you need to include the school names in the SELECT statement. Additionally, instead of grouping by the CDSCode alone, consider grouping by both the CDSCode and the school name to ensure that you accurately capture the corresponding funding types for each school. The revised query should look like this: 'SELECT s.Name, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.CDSCode, s.Name, s.FundingType HAVING AVG(sc.AvgScrMath) > 400;'. This ensures that you retrieve both the names and funding types of schools that meet the average math score criteria.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+[{'chain_of_thought': "To answer the question, we first need to find schools located in Riverside. We will look into the 'schools' table which contains the relevant information about the school, such as its funding type and location. Next, we need to compute the average of the average math scores from the 'satscores' table, filtering for schools located in Riverside. The average math score must exceed 400. We can join the 'schools' and 'satscores' tables using the 'CDSCode' field, which serves as the primary key in the 'schools' table and foreign key in the 'satscores' table. We will perform the necessary filtering and aggregation to meet the condition specified. The final output should include only the funding type of these schools. We will retrieve the average math score and the funding type, applying the necessary filtering before grouping and calculating averages.", 'SQL': "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;"}, "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;", "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.CDSCode HAVING AVG(sc.AvgScrMath) > 400;", "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.CDSCode HAVING AVG(sc.AvgScrMath) > 400;"]
+
+Question: 
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools? 
+
+Hint:
+Average of average math = sum(average math scores) / count(schools).
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question, we need to first identify schools located in Riverside. We will look at the 'schools' table, which contains information about each school, such as its funding type and location. Next, we need to compute the average of average math scores from the 'satscores' table for schools in Riverside. The average math score must exceed 400. Since 'satscores' contains average scores for each school identified by 'cds', we will join the 'schools' and 'satscores' tables using 'CDSCode' from the 'schools' table and 'cds' from the 'satscores' table. We will compute the total of the average scores and divide that by the number of schools to get the overall average lying above the specified threshold. Lastly, we need to retrieve the funding type of those schools. To ensure we meet the requirements, we will include both the school names and funding types and group by the funding types to check the average score condition. The complete query should correctly structure these elements and ensure accurate retrieval of the desired data.",
+    "SQL": "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+SQL Query:
+SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;
+
+Database Content:
+{'frpm': ['CDSCode', 'Academic Year', 'County Code', 'District Code', 'School Code', 'County Name', 'District Name', 'School Name', 'District Type', 'School Type', 'Educational Option Type', 'NSLP Provision Status', 'Charter School (Y/N)', 'Charter School Number', 'Charter Funding Type', 'IRC', 'Low Grade', 'High Grade', 'Enrollment (K-12)', 'Free Meal Count (K-12)', 'Percent (%) Eligible Free (K-12)', 'FRPM Count (K-12)', 'Percent (%) Eligible FRPM (K-12)', 'Enrollment (Ages 5-17)', 'Free Meal Count (Ages 5-17)', 'Percent (%) Eligible Free (Ages 5-17)', 'FRPM Count (Ages 5-17)', 'Percent (%) Eligible FRPM (Ages 5-17)', '2013-14 CALPADS Fall 1 Certification Status'], 'satscores': ['cds', 'rtype', 'sname', 'dname', 'cname', 'enroll12', 'NumTstTakr', 'AvgScrRead', 'AvgScrMath', 'AvgScrWrite', 'NumGE1500'], 'schools': ['CDSCode', 'NCESDist', 'NCESSchool', 'StatusType', 'County', 'District', 'School', 'Street', 'StreetAbr', 'City', 'Zip', 'State', 'MailStreet', 'MailStrAbr', 'MailCity', 'MailZip', 'MailState', 'Phone', 'Ext', 'Website', 'OpenDate', 'ClosedDate', 'Charter', 'CharterNum', 'FundingType', 'DOC', 'DOCType', 'SOC', 'SOCType', 'EdOpsCode', 'EdOpsName', 'EILCode', 'EILName', 'GSoffered', 'GSserved', 'Virtual', 'Magnet', 'Latitude', 'Longitude', 'AdmFName1', 'AdmLName1', 'AdmEmail1', 'AdmFName2', 'AdmLName2', 'AdmEmail2', 'AdmFName3', 'AdmLName3', 'AdmEmail3', 'LastUpdate']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for schools in Riverside with an average SAT math score greater than 400 and requests the funding type of these schools. The SQL query filters schools by County (Riverside), groups results by FundingType, and has a condition that averages the math scores from another table (satscores) and checks if they exceed 400. However, the SQL query only selects the funding type without providing the average math score condition in the result. This means it might not directly fulfill the question since it does not produce a list of school names, which was part of the original query intention. Furthermore, there is no indication of how the funding type relates to the average math performance in the results, leading to uncertainty about whether all relevant data is displayed. Therefore, this query fails to provide a comprehensive answer to the question. Hence, it is concluded to be Invalid.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+
+Question:
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?
+
+Predicted SQL:
+SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;
+
+Execution Result:
+(None,)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': 'The question asks for schools in Riverside with an average SAT math score greater than 400 and requests the funding type of these schools. The SQL query filters schools by County (Riverside), groups results by FundingType, and has a condition that averages the math scores from another table (satscores) and checks if they exceed 400. However, the SQL query only selects the funding type without providing the average math score condition in the result. This means it might not directly fulfill the question since it does not produce a list of school names, which was part of the original query intention. Furthermore, there is no indication of how the funding type relates to the average math performance in the results, leading to uncertainty about whether all relevant data is displayed. Therefore, this query fails to provide a comprehensive answer to the question. Hence, it is concluded to be Invalid.', 'judgment': 'Invalid'}
+
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query to align it with the intent of the question, you can take the following specific steps: 1. Change the SELECT statement to include the school name, by using 'SELECT s.Name' instead of just 's.FundingType'. 2. Ensure that the GROUP BY clause includes both the 'FundingType' and any other necessary identifiers to distinctly group the school names while allowing their math scores to be aggregated. This way, you'll still be able to group and average the math scores appropriately. 3. Also, modify the HAVING clause to filter schools based on the average math score, ensuring that the average is calculated correctly for selected schools. 4. As a last touch, verify that joins are correctly established between the 'schools' table and the 'satscores' table to accurately reflect relationships and improve query performance. The revised query would look something like: 'SELECT s.Name, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.Name, s.FundingType HAVING AVG(sc.AvgScrMath) > 400;'."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE frpm (
+  CDSCode                                       TEXT not null
+        primary key,
+  `Academic Year`                               TEXT  null,
+  `County Code`                                 TEXT  null,
+  `District Code`                               INTEGER         null,
+  `School Code`                                 TEXT  null,
+  `County Name`                                 TEXT null,
+  `District Name`                               TEXT null,
+  `School Name`                                 TEXT null,
+  `District Type`                               TEXT null,
+  `School Type`                                 TEXT null,
+  `Educational Option Type`                     TEXT null,
+  `NSLP Provision Status`                       TEXT null,
+  `Charter School (Y/N)`                        INTEGER    null,
+  `Charter School Number`                       TEXT  null,
+  `Charter Funding Type`                        TEXT null,
+  IRC                                           INTEGER    null,
+  `Low Grade`                                   TEXT  null,
+  `High Grade`                                  TEXT null,
+  `Enrollment (K-12)`                           REAL      null,
+  `Free Meal Count (K-12)`                      REAL       null,
+  `Percent (%) Eligible Free (K-12)`            REAL       null,
+  `FRPM Count (K-12)`                           REAL       null,
+  `Percent (%) Eligible FRPM (K-12)`            REAL       null,
+  `Enrollment (Ages 5-17)`                      REAL       null,
+  `Free Meal Count (Ages 5-17)`                 REAL       null,
+  `Percent (%) Eligible Free (Ages 5-17)`       REAL       null,
+  `FRPM Count (Ages 5-17)`                      REAL       null,
+  `Percent (%) Eligible FRPM (Ages 5-17)`       REAL       null,
+  `2013-14 CALPADS Fall 1 Certification Status` INTEGER    null,
+  foreign key (CDSCode) references schools (CDSCode)
+);
+
+CREATE TABLE satscores (
+  cds         TEXT not null
+        primary key,
+  rtype       TEXT  not null,
+  sname       TEXT null,
+  dname       TEXT null,
+  cname       TEXT null,
+  enroll12    INTEGER         not null,
+  NumTstTakr  INTEGER          not null,
+  AvgScrRead  INTEGER          null,
+  AvgScrMath  INTEGER          null,
+  AvgScrWrite INTEGER          null,
+  NumGE1500   INTEGER          null,
+  foreign key (cds) references schools (CDSCode)
+);
+
+CREATE TABLE schools (
+  CDSCode     TEXT not null
+        primary key,
+  NCESDist    TEXT  null,
+  NCESSchool  TEXT  null,
+  StatusType  TEXT  not null,
+  County      TEXT not null,
+  District    TEXT not null,
+  School      TEXT null,
+  Street      TEXT null,
+  StreetAbr   TEXT null,
+  City        TEXT null,
+  Zip         TEXT null,
+  State       TEXT  null,
+  MailStreet  TEXT null,
+  MailStrAbr  TEXT null,
+  MailCity    TEXT null,
+  MailZip     TEXT null,
+  MailState   TEXT  null,
+  Phone       TEXT null,
+  Ext         TEXT  null,
+  Website     TEXT null,
+  OpenDate    DATE        null,
+  ClosedDate  DATE        null,
+  Charter     INTEGER    null,
+  CharterNum  TEXT  null,
+  FundingType TEXT null,
+  DOC         TEXT  not null,
+  DOCType     TEXT not null,
+  SOC         TEXT  null,
+  SOCType     TEXT null,
+  EdOpsCode   TEXT  null,
+  EdOpsName   TEXT null,
+  EILCode     TEXT  null,
+  EILName     TEXT null,
+  GSoffered   TEXT null,
+  GSserved    TEXT  null,
+  Virtual     TEXT  null,
+  Magnet      INTEGER   null,
+  Latitude    REAL      null,
+  Longitude   REAL      null,
+  AdmFName1   TEXT null,
+  AdmLName1   TEXT null,
+  AdmEmail1   TEXT null,
+  AdmFName2   TEXT null,
+  AdmLName2   TEXT null,
+  AdmEmail2   TEXT null,
+  AdmFName3   TEXT  null,
+  AdmLName3   TEXT null,
+  AdmEmail3   TEXT null,
+  LastUpdate  DATE        not null
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To modify the SQL query to better align with the question's intent, follow these actionable steps: 1. Include the school names in the SELECT clause by adding s.SchoolName to the fields being selected. 2. Ensure that you are selecting relevant identifiers alongside the funding type to provide a comprehensive output. The modified query should look like this: SELECT s.SchoolName, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.SchoolName, s.FundingType HAVING AVG(sc.AvgScrMath) > 400. This way, the query will retrieve both the names of the schools and their corresponding funding types while meeting the average score criteria.
+7. To modify the SQL query to align with the question's intent, you need to include the school names in the SELECT statement. Additionally, instead of grouping by the CDSCode alone, consider grouping by both the CDSCode and the school name to ensure that you accurately capture the corresponding funding types for each school. The revised query should look like this: 'SELECT s.Name, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.CDSCode, s.Name, s.FundingType HAVING AVG(sc.AvgScrMath) > 400;'. This ensures that you retrieve both the names and funding types of schools that meet the average math score criteria.
+8. To modify the SQL query to align it with the intent of the question, you can take the following specific steps: 1. Change the SELECT statement to include the school name, by using 'SELECT s.Name' instead of just 's.FundingType'. 2. Ensure that the GROUP BY clause includes both the 'FundingType' and any other necessary identifiers to distinctly group the school names while allowing their math scores to be aggregated. This way, you'll still be able to group and average the math scores appropriately. 3. Also, modify the HAVING clause to filter schools based on the average math score, ensuring that the average is calculated correctly for selected schools. 4. As a last touch, verify that joins are correctly established between the 'schools' table and the 'satscores' table to accurately reflect relationships and improve query performance. The revised query would look something like: 'SELECT s.Name, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.Name, s.FundingType HAVING AVG(sc.AvgScrMath) > 400;'.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;", "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.CDSCode HAVING AVG(sc.AvgScrMath) > 400;", "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.CDSCode HAVING AVG(sc.AvgScrMath) > 400;", "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;", "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;"]
+
+Question: 
+Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools? 
+
+Hint:
+Average of average math = sum(average math scores) / count(schools).
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To generate the SQL query that answers the question, I first identified that we need to retrieve the names of schools located in Riverside along with their funding types, provided that the average of their average SAT math scores exceeds 400. I considered the `schools` and `satscores` tables for the necessary information. The logic being requested involves calculating the average math score per school, aggregating this data accordingly, and then determining which schools meet the condition set by the question. To achieve this, I would need to join the two tables using the `CDSCode`, which is the common field that links both tables. By grouping the results by school name and funding type, I can then use a HAVING clause to filter out schools that do not meet the average score requirement. It's essential to ensure the selected fields reflect the requirements as closely as possible, including the school name and funding type. After considering all these points and past query structures, I have constructed the following query.",
+    "SQL": "SELECT s.School, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.School, s.FundingType HAVING AVG(sc.AvgScrMath) > 400;"
+}
+

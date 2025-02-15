@@ -1,0 +1,163 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "schools in Riverside",
+            "average math score for SAT",
+            "greater than 400",
+            "funding type",
+            "Average of average math",
+            "sum(average math scores)",
+            "count(schools)"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "frpm": [
+                "CDSCode",
+                "Academic Year",
+                "County Code",
+                "District Code",
+                "School Code",
+                "County Name",
+                "District Name",
+                "School Name",
+                "District Type",
+                "School Type",
+                "Educational Option Type",
+                "NSLP Provision Status",
+                "Charter School (Y/N)",
+                "Charter School Number",
+                "Charter Funding Type",
+                "IRC",
+                "Low Grade",
+                "High Grade",
+                "Enrollment (K-12)",
+                "Free Meal Count (K-12)",
+                "Percent (%) Eligible Free (K-12)",
+                "FRPM Count (K-12)",
+                "Percent (%) Eligible FRPM (K-12)",
+                "Enrollment (Ages 5-17)",
+                "Free Meal Count (Ages 5-17)",
+                "Percent (%) Eligible Free (Ages 5-17)",
+                "FRPM Count (Ages 5-17)",
+                "Percent (%) Eligible FRPM (Ages 5-17)",
+                "2013-14 CALPADS Fall 1 Certification Status"
+            ],
+            "satscores": [
+                "cds",
+                "rtype",
+                "sname",
+                "dname",
+                "cname",
+                "enroll12",
+                "NumTstTakr",
+                "AvgScrRead",
+                "AvgScrMath",
+                "AvgScrWrite",
+                "NumGE1500"
+            ],
+            "schools": [
+                "CDSCode",
+                "NCESDist",
+                "NCESSchool",
+                "StatusType",
+                "County",
+                "District",
+                "School",
+                "Street",
+                "StreetAbr",
+                "City",
+                "Zip",
+                "State",
+                "MailStreet",
+                "MailStrAbr",
+                "MailCity",
+                "MailZip",
+                "MailState",
+                "Phone",
+                "Ext",
+                "Website",
+                "OpenDate",
+                "ClosedDate",
+                "Charter",
+                "CharterNum",
+                "FundingType",
+                "DOC",
+                "DOCType",
+                "SOC",
+                "SOCType",
+                "EdOpsCode",
+                "EdOpsName",
+                "EILCode",
+                "EILName",
+                "GSoffered",
+                "GSserved",
+                "Virtual",
+                "Magnet",
+                "Latitude",
+                "Longitude",
+                "AdmFName1",
+                "AdmLName1",
+                "AdmEmail1",
+                "AdmFName2",
+                "AdmLName2",
+                "AdmEmail2",
+                "AdmFName3",
+                "AdmLName3",
+                "AdmEmail3",
+                "LastUpdate"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "satscores": [
+                "sname",
+                "cds",
+                "avgscrmath"
+            ],
+            "frpm": [
+                "Charter Funding Type",
+                "cdscode",
+                "District Name"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To answer the question, we first need to find schools located in Riverside. We will look into the 'schools' table which contains the relevant information about the school, such as its funding type and location. Next, we need to compute the average of the average math scores from the 'satscores' table, filtering for schools located in Riverside. The average math score must exceed 400. We can join the 'schools' and 'satscores' tables using the 'CDSCode' field, which serves as the primary key in the 'schools' table and foreign key in the 'satscores' table. We will perform the necessary filtering and aggregation to meet the condition specified. The final output should include only the funding type of these schools. We will retrieve the average math score and the funding type, applying the necessary filtering before grouping and calculating averages.",
+        "SQL": "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT s.School, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.School, s.FundingType HAVING AVG(sc.AvgScrMath) > 400;",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?",
+            "Evidence": "Average of average math = sum(average math scores) / count(schools).",
+            "pred_sql": "SELECT s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.FundingType HAVING AVG(sc.AvgScrMath) > 400;",
+            "gold_sql": "SELECT T1.sname, T2.`Charter Funding Type` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T2.`District Name` LIKE 'Riverside%' GROUP BY T1.sname, T2.`Charter Funding Type` HAVING CAST(SUM(T1.AvgScrMath) AS REAL) / COUNT(T1.cds) > 400"
+        },
+        "self_reflexion": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?",
+            "Evidence": "Average of average math = sum(average math scores) / count(schools).",
+            "pred_sql": "SELECT s.School, s.FundingType FROM schools AS s JOIN satscores AS sc ON s.CDSCode = sc.cds WHERE s.County = 'Riverside' GROUP BY s.School, s.FundingType HAVING AVG(sc.AvgScrMath) > 400;",
+            "gold_sql": "SELECT T1.sname, T2.`Charter Funding Type` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T2.`District Name` LIKE 'Riverside%' GROUP BY T1.sname, T2.`Charter Funding Type` HAVING CAST(SUM(T1.AvgScrMath) AS REAL) / COUNT(T1.cds) > 400"
+        },
+        "status": "success"
+    }
+]

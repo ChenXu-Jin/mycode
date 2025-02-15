@@ -1,0 +1,136 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "in-patient",
+            "Admission",
+            "age 50 and above",
+            "SUBTRACT(year(current_timestamp), year(Birthday)) >= '50'",
+            "average anti-cardiolipin antibody (IgG) concentration",
+            "AVG(aCL IgG)"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "Examination": [
+                "ID",
+                "Examination Date",
+                "aCL IgG",
+                "aCL IgM",
+                "ANA",
+                "ANA Pattern",
+                "aCL IgA",
+                "Diagnosis",
+                "KCT",
+                "RVVT",
+                "LAC",
+                "Symptoms",
+                "Thrombosis"
+            ],
+            "Patient": [
+                "ID",
+                "SEX",
+                "Birthday",
+                "Description",
+                "First Date",
+                "Admission",
+                "Diagnosis"
+            ],
+            "Laboratory": [
+                "ID",
+                "Date",
+                "GOT",
+                "GPT",
+                "LDH",
+                "ALP",
+                "TP",
+                "ALB",
+                "UA",
+                "UN",
+                "CRE",
+                "T-BIL",
+                "T-CHO",
+                "TG",
+                "CPK",
+                "GLU",
+                "WBC",
+                "RBC",
+                "HGB",
+                "HCT",
+                "PLT",
+                "PT",
+                "APTT",
+                "FG",
+                "PIC",
+                "TAT",
+                "TAT2",
+                "U-PRO",
+                "IGG",
+                "IGA",
+                "IGM",
+                "CRP",
+                "RA",
+                "RF",
+                "C3",
+                "C4",
+                "RNP",
+                "SM",
+                "SC170",
+                "SSA",
+                "SSB",
+                "CENTROMEA",
+                "DNA",
+                "DNA-II"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "examination": [
+                "aCL IgG",
+                "id"
+            ],
+            "patient": [
+                "id",
+                "admission",
+                "birthday"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "First, I need to identify the conditions for selecting the patients: they must be in-patients (Admission = '+') and age 50 or above (calculated by subtracting the year of their birthday from the current year and checking if it is greater than or equal to 50). Next, I need to calculate the average concentration of anti-cardiolipin antibody (IgG), which corresponds to the column 'aCL IgG' from the 'Examination' table. To join the tables, I will use the foreign key relationship between 'Patient' and 'Examination', ensuring I filter out any NULL values for 'aCL IgG' during the AVG calculation. Finally, I will construct the SQL query to reflect these requirements, while making sure to comply with the guidelines provided.",
+        "SQL": "SELECT AVG(T2.`aCL IgG`) FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE T1.Admission = '+' AND (STRFTIME('%Y', 'now') - STRFTIME('%Y', T1.Birthday)) >= 50 AND T2.`aCL IgG` IS NOT NULL;",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "status": "error",
+        "error": "<class 'ValueError'>: <Response from LLM does not contain 'feedback'.>"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 1,
+            "error": "--",
+            "Question": "For in-patient age 50 and above, what is their average anti-cardiolipin antibody (IgG) concentration?",
+            "Evidence": "in-patient refers to Admission = '+'; age 50 and above refers to SUBTRACT(year(current_timestamp), year(Birthday)) >= '50'; average anti-cardiolipin antibody (IgG) concentration refers to AVG(aCL IgG)",
+            "pred_sql": "SELECT AVG(T2.`aCL IgG`) FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE T1.Admission = '+' AND (STRFTIME('%Y', 'now') - STRFTIME('%Y', T1.Birthday)) >= 50 AND T2.`aCL IgG` IS NOT NULL;",
+            "gold_sql": "SELECT AVG(T2.`aCL IgG`) FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE STRFTIME('%Y', CURRENT_TIMESTAMP) - STRFTIME('%Y', T1.Birthday) >= 50 AND T1.Admission = '+'"
+        },
+        "self_reflexion": {
+            "result": "error happends during generation or revision",
+            "error": "<class 'ValueError'>: <Response from LLM does not contain 'feedback'.>",
+            "Question": "For in-patient age 50 and above, what is their average anti-cardiolipin antibody (IgG) concentration?",
+            "Evidence": "in-patient refers to Admission = '+'; age 50 and above refers to SUBTRACT(year(current_timestamp), year(Birthday)) >= '50'; average anti-cardiolipin antibody (IgG) concentration refers to AVG(aCL IgG)",
+            "pred_sql": "--",
+            "gold_sql": "SELECT AVG(T2.`aCL IgG`) FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE STRFTIME('%Y', CURRENT_TIMESTAMP) - STRFTIME('%Y', T1.Birthday) >= 50 AND T1.Admission = '+'"
+        },
+        "status": "success"
+    }
+]
