@@ -154,63 +154,6 @@ class Evaluator:
         except Exception as e:
             logging.error(f"Error executing SQL '{self.sql}': {e}")
             return {"result": str(e), "STATS": "ERROR"}
-    
-    def extract_sql_skeleton_and_schema(self) -> Dict[str, Any]:
-        """
-        Parses a SQL query to extract its skeleton and schema-related elements.
-
-        Args:
-            sql (str): The SQL query to parse.
-
-        Returns:
-            dict: A dictionary containing the SQL skeleton and schema elements.
-        """
-        # Parse the SQL query into an AST
-        parsed = parse_one(self.sql, read='sqlite')
-
-        skeleton_parts = []
-        tables = set()
-        columns = set()
-        conditions = []
-
-        def traverse_expression(expr):
-            if expr is None:
-                return
-
-            if isinstance(expr, exp.Table):
-                tables.add(expr.sql(dialect="sqlite"))
-
-            elif isinstance(expr, exp.Column):
-                columns.add(expr.sql(dialect="sqlite"))
-
-            elif isinstance(expr, exp.Condition):
-                condition_str = expr.sql(dialect="sqlite")
-                for literal in expr.find_all(exp.Literal):
-                    condition_str = condition_str.replace(literal.sql(dialect="sqlite"), "?")
-                conditions.append(condition_str)
-
-            if isinstance(expr, exp.Literal):
-                skeleton_parts.append("?")
-            else:
-                skeleton_parts.append(expr.sql(dialect="sqlite"))
-
-            for child in expr.args.values():
-                if isinstance(child, list):
-                    for item in child:
-                        traverse_expression(item)
-                elif isinstance(child, exp.Expression):
-                    traverse_expression(child)
-
-        traverse_expression(parsed)
-
-        skeleton = " ".join(skeleton_parts)
-
-        return {
-            "skeleton": skeleton,
-            "tables": list(tables),
-            "columns": list(columns),
-            "conditions": conditions
-        }
 
 class SelfReflection:
     def __init__(self, task: Any) -> None:
