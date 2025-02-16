@@ -1,10 +1,9 @@
 import os
-import pickle
 from threading import Lock
 from pathlib import Path
 from dotenv import load_dotenv
 from database_utils.execution import *
-from database_utils.utils import query_lsh, get_db_schema, get_database_schema_string, get_sql_columns_dict
+from database_utils.utils import get_db_schema, get_database_schema_string, get_sql_columns_dict
 from typing import Dict, List, Any, Callable
 
 load_dotenv(override=True)
@@ -39,32 +38,6 @@ class DatabaseManager:
     def _set_paths(self):
         self.db_path = DB_ROOT_PATH / f"{self.db_mode}_databases" / self.db_id / f"{self.db_id}.sqlite"
         self.db_directory_path = DB_ROOT_PATH / f"{self.db_mode}_databases" / self.db_id
-    
-    def set_lsh(self) -> str:
-        with self._lock:
-            if self.lsh is None:
-                try:
-                    with (self.db_directory_path / "preprocessed" / f"{self.db_id}_lsh.pkl").open("rb") as file:
-                        self.lsh = pickle.load(file)
-                    with (self.db_directory_path / "preprocessed" / f"{self.db_id}_minhashes.pkl").open("rb") as file:
-                        self.minhashes = pickle.load(file)
-                    return "success"
-                except Exception as e:
-                    self.lsh = "error"
-                    self.minhashes = "error"
-                    print(f"Error loading LSH for {self.db_id}: {e}")
-                    return "error"
-            elif self.lsh == "error":
-                return "error"
-            else:
-                return "success"
-            
-    def query_lsh(self, keyword:str, signature_size:int=20, n_gram:int=3, top_n:int=10) -> Dict[str, List[str]]:
-        lsh_status = self.set_lsh()
-        if lsh_status == "success":
-            return query_lsh(self.lsh, self.minhashes, keyword, signature_size, n_gram, top_n)
-        else:
-            raise Exception(f"Error loading LSH for {self.db_id}")
     
     @classmethod
     def add_methods_to_class(cls, funcs: List[Callable]):
