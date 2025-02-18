@@ -33,6 +33,11 @@ pipeline_setup='{
         "temperature": 0,
         "base_uri": "",
         "sampling_count": 1
+    },
+    "feedback_summarize": {
+        "engine": "'${engine4}'",
+        "temperature": 0,
+        "base_uri": "",
     }
 }'
 

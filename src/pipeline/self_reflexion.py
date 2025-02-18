@@ -1,5 +1,4 @@
 import logging
-from sqlglot import parse_one, exp
 from run_manager.memory import Memory
 from llm.llm_models import async_llm_chain_call
 from database_utils.database_manager import DatabaseManager
@@ -7,7 +6,7 @@ from pipeline.pipeline_manager import PipelineManager
 from pipeline.utils import node_decorator, get_last_node_result
 from typing import Dict, List, Any
 
-MAX_REFLEXION_TIMES = 3
+MAX_REFLEXION_TIMES = 5
 
 @node_decorator(check_schema_status=False)
 def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_history: Dict[str, Any]) -> str:
@@ -25,18 +24,12 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
     logging.info(f"LLM self reflexion start for question: {task.question_id}")
 
     first_time_sql = get_last_node_result(execution_history, "sql_generation")["SQL"]
-    first_time_cot = get_last_node_result(execution_history, "sql_generation")["chain_of_thought_reasoning"]
-    first_time_result = {
-        "chain_of_thought": first_time_cot,
-        "SQL": first_time_sql
-    }
     if first_time_sql is None:
         raise ValueError(f"Initial SQL generation is incomplete for task {task.question_id}. Self-reflexion cannot begin.")
 
     actor = Actor(task=task, tentative_schema=tentative_schema)
     evaluator = Evaluator(task=task, current_sql=first_time_sql)
     self_reflection = SelfReflection(task=task)
-    actor.short_term_mems.append(first_time_result)
 
     current_sql = first_time_sql
     iteration_count = 0

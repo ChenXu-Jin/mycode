@@ -37,6 +37,8 @@ def get_llm_prompt(
         partial_variables["EXECUTE_RESULT"] = kwargs["execute_result"]
     if "evaluate_result" in kwargs:
         partial_variables["EVALUATE_RESULT"] = kwargs["evaluate_result"]
+    if "feedback_str" in kwargs:
+        partial_variables['CANDIDATE_FEEDBACK'] = kwargs["feedback_str"]
 
     template_content = load_template(template_name)
 
