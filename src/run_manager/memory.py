@@ -28,7 +28,7 @@ class Memory:
     
     def _init(self, max_memory_count: int):
         self.max_memory_count = max_memory_count
-        self.candidate_feedback = List[str]
+        # 长期记忆存储
         self.long_term_memory = self.initialize_long_term_memory()
 
     def initialize_long_term_memory(self) -> Dict[str, List[str]]:
@@ -44,18 +44,20 @@ class Memory:
         
         return init_memory
 
-    def update_memory(self) -> None:
+    def update_memory(self, incorrect_sql: List[str], correct_sql: str, question: str) -> None:
         '''
         接收新的长期记忆进行整合
         '''
         logging.info("Update long term memory")
-        new_long_term_memory = self.feedback_summarize()
+
+        new_long_term_memory = self.feedback_summarize(incorrect_sql, correct_sql, question)
+
         if new_long_term_memory is not None:
             if len(self.long_term_memory) > self.max_memory_count:
                 self.long_term_memory['dynamic'].pop()
             self.long_term_memory['dynamic'].append(new_long_term_memory)
 
-    def get_exist_memory(self) -> str:
+    def get_exist_memory(self, current_sql_feedback: str) -> str:
         '''
         将长期记忆列表拼接成字符串并输出
         '''
@@ -67,23 +69,21 @@ class Memory:
         for index, memory_item in enumerate(self.long_term_memory['dynamic'], start=len(self.long_term_memory['static'])+1):
             result.append(f"{index}. {memory_item}")
 
+        result.append(f"{len(result)+1}. {current_sql_feedback}")
+
         return "\n".join(result)
     
-    def feedback_summarize(self) -> str:
+    def feedback_summarize(self, incorrect_sql: List[str], correct_sql: str, question: str) -> str:
         print("Summerizing candidate memories for LONG TERM MEMORY")
-        if self.candidate_feedback is None:
-            print("No candidate memory has been store")
-            return None
-        
+        incorrect_sql_str = "\n".join(incorrect_sql)
+
         request_kwargs = {
-            "QUESTION": "",
+            "QUESTION": question,
+            "INCORRECT_SQL": incorrect_sql_str,
+            "CORRECT_SQL": correct_sql
         }
 
-        feedback_str = "\n".join(self.candidate_feedback)
-
-        engine, prompt, parser = PipelineManager().get_engine_prompt_parser(
-            feedback_str = feedback_str
-        )
+        engine, prompt, parser = PipelineManager().get_engine_prompt_parser()
         sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
         response = async_llm_chain_call(
             engine=engine,
@@ -95,20 +95,20 @@ class Memory:
         )[0]
 
         result_dict = response[0]
-        new_long_term_memory = result_dict[0]
+        new_long_term_memory = result_dict["step"]
 
         return new_long_term_memory
         
-    def handle_candidate_feedback(self, operator: str, **kwargs: Any) -> Any:
-        if operator is None:
-            raise ValueError("The operator cannot be empty; it should be ins, del, or sum.")
+    # def handle_candidate_feedback(self, operator: str, **kwargs: Any) -> Any:
+    #     if operator is None:
+    #         raise ValueError("The operator cannot be empty; it should be ins, del, or sum.")
         
-        if operator == "ins":
-            if kwargs["new_memory"] is None:
-                raise ValueError("No new candidate memory input")
-            self.candidate_feedback.append(kwargs["new_memory"])
-        if operator == "del":
-            self.candidate_feedback.clear()
-        if operator == "sum":
-            new_long_term_memory = self.feedback_summarize()
-            return new_long_term_memory
+    #     if operator == "ins":
+    #         if kwargs["new_memory"] is None:
+    #             raise ValueError("No new candidate memory input")
+    #         self.candidate_feedback.append(kwargs["new_memory"])
+    #     if operator == "del":
+    #         self.candidate_feedback.clear()
+    #     if operator == "sum":
+    #         new_long_term_memory = self.feedback_summarize()
+    #         return new_long_term_memory

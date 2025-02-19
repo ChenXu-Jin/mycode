@@ -40,15 +40,16 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
         evaluation_result = evaluator.evaluate(tentative_schema)
 
         if evaluation_result["judgment"] == "Valid":
+            if iteration_count > 1:
+                Memory().update_memory(incorrect_sql=actor.short_term_mems, correct_sql=current_sql, question=task.question)
             logging.info("SQL passed evaluation")
             return {"SQL": current_sql}
         
         logging.info("SQL failed evaluation. Generating feedback.")
         execute_result = evaluator.execute_current_sql()["result"]
-        new_memory = self_reflection.generate_feedback_mems(execute_result, evaluation_result, current_sql)
+        current_sql_feedback = self_reflection.generate_feedback_mems(execute_result, evaluation_result, current_sql)
 
-        Memory().update_memory(new_long_term_memory=new_memory)
-        long_term_mems = Memory().get_exist_memory()
+        long_term_mems = Memory().get_exist_memory(current_sql_feedback)
 
         logging.info("Generating new SQL using actor.")
         actor.short_term_mems.append(current_sql)
@@ -62,7 +63,7 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
 
 class Actor:
     def __init__(self, task: Any, tentative_schema: Dict[str, Any]) -> None:
-        self.short_term_mems: List[Dict[str, Any]] = []
+        self.short_term_mems: List[str] = []
         self.task = task
         self.tentative_schema = tentative_schema
     
@@ -97,9 +98,7 @@ class Actor:
             if result is None:
                 raise ValueError("No valid SQL found in the response.")
 
-            self.short_term_mems.append(result)
             logging.info("Actor's work complete")
-
             return result
         except Exception as e:
             logging.error(f"Failed to generate SQL for task {self.task.question_id}: {e}")

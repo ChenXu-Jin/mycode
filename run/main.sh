@@ -1,5 +1,5 @@
 data_mode='dev'
-data_path='/root/data/dev/sub_sampled_bird_dev_set.json'
+data_path='/root/data/dev/small_dev_set.json'
 
 #all nodes: keyword_extraction schema_filter sql_generation self_reflexion evaluation
 pipeline_nodes='keyword_extraction+schema_filter+sql_generation+self_reflexion+evaluation'
@@ -37,7 +37,7 @@ pipeline_setup='{
     "feedback_summarize": {
         "engine": "'${engine4}'",
         "temperature": 0,
-        "base_uri": "",
+        "base_uri": ""
     }
 }'
 

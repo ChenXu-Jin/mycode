@@ -1,5 +1,4 @@
 import logging
-import json
 import re
 from langchain_core.output_parsers.base import BaseOutputParser
 from langchain_core.output_parsers import JsonOutputParser
@@ -28,13 +27,17 @@ class EvaluateOutputParser(BaseModel):
 class SelfReflectionOutputParser(BaseModel):
     feedback: str = Field(description="Specific, actionable steps to modify the SQL query to align with the question's intent.")
 
+class MemoryGenerationParser(BaseModel):
+    step: str = Field(description="The step you must check when generating SQL statements.")
+
 def get_llm_parser(parser_name: str):
     parser_configs = {
         "keyword_extraction": PythonListOutputParser,
         "sql_generation": lambda: JsonOutputParser(pydantic_object=SQLGenerationOutputParser),
         "actor_generate_sql": lambda: JsonOutputParser(pydantic_object=SQLGenerationOutputParser),
         "evaluate": lambda: JsonOutputParser(pydantic_object=EvaluateOutputParser),
-        "generate_feedback_mems": lambda: JsonOutputParser(pydantic_object=SelfReflectionOutputParser)
+        "generate_feedback_mems": lambda: JsonOutputParser(pydantic_object=SelfReflectionOutputParser),
+        "feedback_summarize": lambda: JsonOutputParser(pydantic_object=MemoryGenerationParser)
     }
 
     if parser_name not in parser_configs:

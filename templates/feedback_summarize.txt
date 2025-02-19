@@ -8,17 +8,17 @@ Question:
 {QUESTION}
 
 Incorrect SQL:
-{INCORRECT SQL}
+{INCORRECT_SQL}
 
 Correct SQL:
-{CONRRECT SQL}
+{CORRECT_SQL}
 
 ###
 
 Please respond with a JSON object structured as follows:
 
 {{
-    "step": "The step you must check when generating SQL statements"
+    "step": "The step you must check when generating SQL statements."
 }}
 
 Take a deep breath and review the inputs thoroughly.Keep the returned step clear and concise.
