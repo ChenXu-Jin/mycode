@@ -76,7 +76,7 @@ class Memory:
             return None
         
         request_kwargs = {
-
+            "QUESTION": "",
         }
 
         feedback_str = "\n".join(self.candidate_feedback)
