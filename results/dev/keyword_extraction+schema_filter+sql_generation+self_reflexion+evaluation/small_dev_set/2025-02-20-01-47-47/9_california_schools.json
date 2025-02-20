@@ -1,0 +1,160 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "schools",
+            "average score",
+            "Math",
+            "SAT test",
+            "charter-funded"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "frpm": [
+                "CDSCode",
+                "Academic Year",
+                "County Code",
+                "District Code",
+                "School Code",
+                "County Name",
+                "District Name",
+                "School Name",
+                "District Type",
+                "School Type",
+                "Educational Option Type",
+                "NSLP Provision Status",
+                "Charter School (Y/N)",
+                "Charter School Number",
+                "Charter Funding Type",
+                "IRC",
+                "Low Grade",
+                "High Grade",
+                "Enrollment (K-12)",
+                "Free Meal Count (K-12)",
+                "Percent (%) Eligible Free (K-12)",
+                "FRPM Count (K-12)",
+                "Percent (%) Eligible FRPM (K-12)",
+                "Enrollment (Ages 5-17)",
+                "Free Meal Count (Ages 5-17)",
+                "Percent (%) Eligible Free (Ages 5-17)",
+                "FRPM Count (Ages 5-17)",
+                "Percent (%) Eligible FRPM (Ages 5-17)",
+                "2013-14 CALPADS Fall 1 Certification Status"
+            ],
+            "satscores": [
+                "cds",
+                "rtype",
+                "sname",
+                "dname",
+                "cname",
+                "enroll12",
+                "NumTstTakr",
+                "AvgScrRead",
+                "AvgScrMath",
+                "AvgScrWrite",
+                "NumGE1500"
+            ],
+            "schools": [
+                "CDSCode",
+                "NCESDist",
+                "NCESSchool",
+                "StatusType",
+                "County",
+                "District",
+                "School",
+                "Street",
+                "StreetAbr",
+                "City",
+                "Zip",
+                "State",
+                "MailStreet",
+                "MailStrAbr",
+                "MailCity",
+                "MailZip",
+                "MailState",
+                "Phone",
+                "Ext",
+                "Website",
+                "OpenDate",
+                "ClosedDate",
+                "Charter",
+                "CharterNum",
+                "FundingType",
+                "DOC",
+                "DOCType",
+                "SOC",
+                "SOCType",
+                "EdOpsCode",
+                "EdOpsName",
+                "EILCode",
+                "EILName",
+                "GSoffered",
+                "GSserved",
+                "Virtual",
+                "Magnet",
+                "Latitude",
+                "Longitude",
+                "AdmFName1",
+                "AdmLName1",
+                "AdmEmail1",
+                "AdmFName2",
+                "AdmLName2",
+                "AdmEmail2",
+                "AdmFName3",
+                "AdmLName3",
+                "AdmEmail3",
+                "LastUpdate"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "frpm": [
+                "School Code",
+                "cdscode",
+                "Charter Funding Type"
+            ],
+            "satscores": [
+                "cds",
+                "avgscrmath"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To determine how many schools have an average SAT Math score over 560 and are directly charter-funded, I need to examine the 'satscores' and 'schools' tables. The 'AvgScrMath' column in the 'satscores' table indicates the average score, and the 'Charter' column in the 'schools' table specifies whether a school is charter-funded (with 1 indicating a charter school). Therefore, I will join these two tables based on the foreign key relationship using 'cds' from 'satscores' and 'CDSCode' from 'schools'. After joining, I will apply a filter to select schools where 'AvgScrMath' is greater than 560 and where 'Charter' is 1. I will then count the results. The final SQL query will select only the count of charter-funded schools meeting these criteria.",
+        "SQL": "SELECT COUNT(*) FROM satscores AS T1 JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.Charter = 1;",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT COUNT(*) FROM satscores AS T1 JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.Charter = 1;",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Among the schools with the average score in Math over 560 in the SAT test, how many schools are directly charter-funded?",
+            "Evidence": "",
+            "pred_sql": "SELECT COUNT(*) FROM satscores AS T1 JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.Charter = 1;",
+            "gold_sql": "SELECT COUNT(T2.`School Code`) FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.`Charter Funding Type` = 'Directly funded'"
+        },
+        "self_reflexion": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Among the schools with the average score in Math over 560 in the SAT test, how many schools are directly charter-funded?",
+            "Evidence": "",
+            "pred_sql": "SELECT COUNT(*) FROM satscores AS T1 JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.Charter = 1;",
+            "gold_sql": "SELECT COUNT(T2.`School Code`) FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.`Charter Funding Type` = 'Directly funded'"
+        },
+        "status": "success"
+    }
+]
