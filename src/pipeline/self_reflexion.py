@@ -4,9 +4,10 @@ from llm.llm_models import async_llm_chain_call
 from database_utils.database_manager import DatabaseManager
 from pipeline.pipeline_manager import PipelineManager
 from pipeline.utils import node_decorator, get_last_node_result
+from func_timeout import func_timeout, FunctionTimedOut
 from typing import Dict, List, Any
 
-MAX_REFLEXION_TIMES = 5
+MAX_REFLEXION_TIMES = 3
 
 @node_decorator(check_schema_status=False)
 def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_history: Dict[str, Any]) -> str:
@@ -37,7 +38,7 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
         iteration_count += 1
         logging.info(f"Iteration {iteration_count}: Evaluating SQL")
 
-        evaluation_result = evaluator.evaluate(tentative_schema)
+        evaluation_result = evaluator.evaluate()
 
         if evaluation_result["judgment"] == "Valid":
             if iteration_count > 1:
@@ -46,7 +47,7 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
             return {"SQL": current_sql}
         
         logging.info("SQL failed evaluation. Generating feedback.")
-        execute_result = evaluator.execute_current_sql()["result"]
+        execute_result = evaluator.execute_current_sql()
         current_sql_feedback = self_reflection.generate_feedback_mems(execute_result, evaluation_result, current_sql)
 
         long_term_mems = Memory().get_exist_memory(current_sql_feedback)
@@ -113,36 +114,29 @@ class Evaluator:
         self.task = task
         self.sql = current_sql
     
-    def evaluate(self, tentative_schema: Dict[str, Any]) -> Dict[str, Any]:
+    def evaluate(self, time_out: int = 30) -> Dict[str, Any]:
         logging.info(f"Evaluator start working for task: {self.task.question_id}")
-        sql_execute_result = self.execute_current_sql()["result"]
+        evaluate_result = {}
 
-        request_kwargs = {
-            "QUESTION": self.task.question,
-            "SQL": self.sql
-        }
+        try:
+            result = func_timeout(time_out, self.execute_current_sql)
+        except FunctionTimedOut as e:
+            evaluate_result["judgment"] = "error"
+            evaluate_result["message"] = "SQL query execution time is too long."
+            return evaluate_result
+        except Exception as e:
+            evaluate_result["judgment"] = "error"
+            evaluate_result["message"] = str(e)
+            return evaluate_result
 
-        engine, prompt, parser = PipelineManager().get_engine_prompt_parser(schema_string=tentative_schema)
-        sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
-        response = async_llm_chain_call(
-            engine=engine, 
-            prompt=prompt, 
-            parser=parser, 
-            request_list=[request_kwargs], 
-            step="evaluator_generate_result", 
-            sampling_count=sampling_count
-            )[0]
-        
-        if not response or not isinstance(response[0], dict):
-            raise ValueError("Invalid response format from async_llm_chain_call.")
-        result = response[0]
-        
-        return result
+        print(type(result))
+
+        return evaluate_result
 
     def execute_current_sql(self) -> Any:
         try:
             current_sql_result = DatabaseManager().execute_sql(sql=self.sql, fetch="one")
-            return {"result": current_sql_result, "STATS": "CORRECT"}
+            return current_sql_result
         except Exception as e:
             logging.error(f"Error executing SQL '{self.sql}': {e}")
             return {"result": str(e), "STATS": "ERROR"}

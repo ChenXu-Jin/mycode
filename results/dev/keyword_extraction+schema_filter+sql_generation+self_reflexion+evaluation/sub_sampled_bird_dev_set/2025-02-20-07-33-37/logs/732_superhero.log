@@ -1,0 +1,717 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: Which publisher published the slowest superhero?
+Hint: the slowest superhero refers to attribute_name = 'Speed' where MIN(attribute_value); publisher refers to publisher_name
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "slowest superhero",
+    "Speed",
+    "MIN(attribute_value)",
+    "publisher",
+    "publisher_name"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE alignment (
+  id        INTEGER not null
+            primary key,
+  alignment TEXT default NULL
+);
+
+CREATE TABLE attribute (
+  id             INTEGER not null
+            primary key,
+  attribute_name TEXT default NULL
+);
+
+CREATE TABLE colour (
+  id     INTEGER not null
+            primary key,
+  colour TEXT default NULL
+);
+
+CREATE TABLE gender (
+  id     INTEGER not null
+            primary key,
+  gender TEXT default NULL
+);
+
+CREATE TABLE publisher (
+  id             INTEGER not null
+            primary key,
+  publisher_name TEXT default NULL
+);
+
+CREATE TABLE race (
+  id   INTEGER not null
+            primary key,
+  race TEXT default NULL
+);
+
+CREATE TABLE superhero (
+  id             INTEGER not null
+            primary key,
+  superhero_name TEXT default NULL,
+  full_name      TEXT default NULL,
+  gender_id      INTEGER          default NULL,
+  eye_colour_id  INTEGER          default NULL,
+  hair_colour_id INTEGER          default NULL,
+  skin_colour_id INTEGER          default NULL,
+  race_id        INTEGER          default NULL,
+  publisher_id   INTEGER          default NULL,
+  alignment_id   INTEGER          default NULL,
+  height_cm      INTEGER          default NULL,
+  weight_kg      INTEGER          default NULL,
+  foreign key (alignment_id) references alignment(id),
+  foreign key (eye_colour_id) references colour(id),
+  foreign key (gender_id) references gender(id),
+  foreign key (hair_colour_id) references colour(id),
+  foreign key (publisher_id) references publisher(id),
+  foreign key (race_id) references race(id),
+  foreign key (skin_colour_id) references colour(id)
+);
+
+CREATE TABLE hero_attribute (
+  hero_id         INTEGER default NULL,
+  attribute_id    INTEGER default NULL,
+  attribute_value INTEGER default NULL,
+  foreign key (attribute_id) references attribute(id),
+  foreign key (hero_id) references superhero(id)
+);
+
+CREATE TABLE superpower (
+  id         INTEGER not null
+            primary key,
+  power_name TEXT default NULL
+);
+
+CREATE TABLE hero_power (
+  hero_id  INTEGER default NULL,
+  power_id INTEGER default NULL,
+  foreign key (hero_id) references superhero(id),
+  foreign key (power_id) references superpower(id)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+Which publisher published the slowest superhero? 
+
+Hint:
+the slowest superhero refers to attribute_name = 'Speed' where MIN(attribute_value); publisher refers to publisher_name
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the publisher of the slowest superhero, we need to identify the superhero with the lowest speed attribute. This involves several steps: first, we locate the attribute ID for 'Speed' in the 'attribute' table; then, we find the hero attributes that correspond to that 'Speed' attribute and get the hero ID with the MIN value of attribute_value. Next, we'll join this hero ID with the superhero table to get the publisher ID. Finally, we will join the superhero table with the publisher table to get the publisher's name for the identified superhero. Since we want only the publisher's name, we'll ensure our SELECT statement reflects that.",
+    "SQL": "SELECT pub.publisher_name FROM hero_attribute ha JOIN superhero s ON ha.hero_id = s.id JOIN publisher pub ON s.publisher_id = pub.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value IS NOT NULL ORDER BY ha.attribute_value ASC LIMIT 1;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Which publisher published the slowest superhero?
+
+SQL Query:
+SELECT pub.publisher_name FROM hero_attribute ha JOIN superhero s ON ha.hero_id = s.id JOIN publisher pub ON s.publisher_id = pub.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value IS NOT NULL ORDER BY ha.attribute_value ASC LIMIT 1;
+
+Database Content:
+{'alignment': ['id', 'alignment'], 'attribute': ['id', 'attribute_name'], 'colour': ['id', 'colour'], 'gender': ['id', 'gender'], 'publisher': ['id', 'publisher_name', 'publishername'], 'race': ['id', 'race'], 'superhero': ['id', 'superhero_name', 'full_name', 'gender_id', 'eye_colour_id', 'hair_colour_id', 'skin_colour_id', 'race_id', 'publisher_id', 'alignment_id', 'height_cm', 'weight_kg'], 'hero_attribute': ['hero_id', 'attribute_id', 'attribute_value', 'attributevalue'], 'superpower': ['id', 'power_name'], 'hero_power': ['hero_id', 'power_id']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the publisher of the slowest superhero, which implies finding the superhero with the lowest speed attribute value and then fetching the associated publisher's name. The provided SQL query attempts to achieve this by joining the necessary tables: `hero_attribute`, `superhero`, and `publisher`. It filters the results to include only those where the attribute is 'Speed' and the attribute value is not null. The query then orders the results by the `attribute_value` in ascending order and limits the result to the first record. However, the query does not account for the need to obtain the minimum speed value specifically for superheroes; it assumes that a direct filter condition will yield the desired result. Additionally, it is crucial to note that there is a possibility that there could be multiple superheroes with the same minimum speed. Overall, despite its attempt at aligning with the question, the SQL query does not guarantee capturing the publisher of the absolute slowest superhero due to lacking a precise minimum speed condition and ensuring it targets only one output in terms of distinct superheroes, not just any superhero meeting the criteria. Therefore, the SQL query fails to directly address the question as intended.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+###
+Question:
+Which publisher published the slowest superhero?
+
+Predicted SQL:
+SELECT pub.publisher_name FROM hero_attribute ha JOIN superhero s ON ha.hero_id = s.id JOIN publisher pub ON s.publisher_id = pub.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value IS NOT NULL ORDER BY ha.attribute_value ASC LIMIT 1;
+
+Execution Result:
+('Marvel Comics',)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the publisher of the slowest superhero, which implies finding the superhero with the lowest speed attribute value and then fetching the associated publisher's name. The provided SQL query attempts to achieve this by joining the necessary tables: `hero_attribute`, `superhero`, and `publisher`. It filters the results to include only those where the attribute is 'Speed' and the attribute value is not null. The query then orders the results by the `attribute_value` in ascending order and limits the result to the first record. However, the query does not account for the need to obtain the minimum speed value specifically for superheroes; it assumes that a direct filter condition will yield the desired result. Additionally, it is crucial to note that there is a possibility that there could be multiple superheroes with the same minimum speed. Overall, despite its attempt at aligning with the question, the SQL query does not guarantee capturing the publisher of the absolute slowest superhero due to lacking a precise minimum speed condition and ensuring it targets only one output in terms of distinct superheroes, not just any superhero meeting the criteria. Therefore, the SQL query fails to directly address the question as intended.", 'judgment': 'Invalid'}
+
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query to accurately find the publisher of the slowest superhero, consider the following steps: 1. Use a subquery to first determine the minimum speed attribute value for the superheroes. This subquery should specifically target the speed attribute and filter out null values before using its result. 2. After obtaining the minimum speed value, join it back with the main tables to fetch the corresponding publisher for the superhero with that minimum speed. 3. Ensure that you're selecting the publisher associated with that specific superhero effectively. Below is an updated version of the SQL query: \n\n```sql\nSELECT pub.publisher_name \nFROM superhero s \nJOIN hero_attribute ha ON ha.hero_id = s.id \nJOIN publisher pub ON s.publisher_id = pub.id \nWHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') \nAND ha.attribute_value = (SELECT MIN(ha2.attribute_value) \n                          FROM hero_attribute ha2 \n                          JOIN superhero s2 ON ha2.hero_id = s2.id \n                          WHERE ha2.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') \n                          AND ha2.attribute_value IS NOT NULL) \nLIMIT 1;\n``` \n4. This modified query effectively retrieves the publisher of the superhero with the least speed value while ensuring that only superheroes with non-null speed attributes are evaluated."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE alignment (
+  id        INTEGER not null
+            primary key,
+  alignment TEXT default NULL
+);
+
+CREATE TABLE attribute (
+  id             INTEGER not null
+            primary key,
+  attribute_name TEXT default NULL
+);
+
+CREATE TABLE colour (
+  id     INTEGER not null
+            primary key,
+  colour TEXT default NULL
+);
+
+CREATE TABLE gender (
+  id     INTEGER not null
+            primary key,
+  gender TEXT default NULL
+);
+
+CREATE TABLE publisher (
+  id             INTEGER not null
+            primary key,
+  publisher_name TEXT default NULL
+);
+
+CREATE TABLE race (
+  id   INTEGER not null
+            primary key,
+  race TEXT default NULL
+);
+
+CREATE TABLE superhero (
+  id             INTEGER not null
+            primary key,
+  superhero_name TEXT default NULL,
+  full_name      TEXT default NULL,
+  gender_id      INTEGER          default NULL,
+  eye_colour_id  INTEGER          default NULL,
+  hair_colour_id INTEGER          default NULL,
+  skin_colour_id INTEGER          default NULL,
+  race_id        INTEGER          default NULL,
+  publisher_id   INTEGER          default NULL,
+  alignment_id   INTEGER          default NULL,
+  height_cm      INTEGER          default NULL,
+  weight_kg      INTEGER          default NULL,
+  foreign key (alignment_id) references alignment(id),
+  foreign key (eye_colour_id) references colour(id),
+  foreign key (gender_id) references gender(id),
+  foreign key (hair_colour_id) references colour(id),
+  foreign key (publisher_id) references publisher(id),
+  foreign key (race_id) references race(id),
+  foreign key (skin_colour_id) references colour(id)
+);
+
+CREATE TABLE hero_attribute (
+  hero_id         INTEGER default NULL,
+  attribute_id    INTEGER default NULL,
+  attribute_value INTEGER default NULL,
+  foreign key (attribute_id) references attribute(id),
+  foreign key (hero_id) references superhero(id)
+);
+
+CREATE TABLE superpower (
+  id         INTEGER not null
+            primary key,
+  power_name TEXT default NULL
+);
+
+CREATE TABLE hero_power (
+  hero_id  INTEGER default NULL,
+  power_id INTEGER default NULL,
+  foreign key (hero_id) references superhero(id),
+  foreign key (power_id) references superpower(id)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To modify the SQL query to accurately find the publisher of the slowest superhero, consider the following steps: 1. Use a subquery to first determine the minimum speed attribute value for the superheroes. This subquery should specifically target the speed attribute and filter out null values before using its result. 2. After obtaining the minimum speed value, join it back with the main tables to fetch the corresponding publisher for the superhero with that minimum speed. 3. Ensure that you're selecting the publisher associated with that specific superhero effectively. Below is an updated version of the SQL query: 
+
+```sql
+SELECT pub.publisher_name 
+FROM superhero s 
+JOIN hero_attribute ha ON ha.hero_id = s.id 
+JOIN publisher pub ON s.publisher_id = pub.id 
+WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') 
+AND ha.attribute_value = (SELECT MIN(ha2.attribute_value) 
+                          FROM hero_attribute ha2 
+                          JOIN superhero s2 ON ha2.hero_id = s2.id 
+                          WHERE ha2.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') 
+                          AND ha2.attribute_value IS NOT NULL) 
+LIMIT 1;
+``` 
+4. This modified query effectively retrieves the publisher of the superhero with the least speed value while ensuring that only superheroes with non-null speed attributes are evaluated.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT pub.publisher_name FROM hero_attribute ha JOIN superhero s ON ha.hero_id = s.id JOIN publisher pub ON s.publisher_id = pub.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value IS NOT NULL ORDER BY ha.attribute_value ASC LIMIT 1;"]
+
+Question: 
+Which publisher published the slowest superhero? 
+
+Hint:
+the slowest superhero refers to attribute_name = 'Speed' where MIN(attribute_value); publisher refers to publisher_name
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To determine which publisher published the slowest superhero, I need to follow a systematic approach. First, I recognize that the slowest superhero is determined by the 'Speed' attribute, which means I must filter the `hero_attribute` table for entries where `attribute_name` is 'Speed'. Next, I will retrieve the minimum value of `attribute_value` for this speed attribute to identify the slowest superhero. To connect this superhero to its publisher, I will need to join the `superhero`, `hero_attribute`, and `publisher` tables together effectively. In this context, I will use a subquery to isolate the minimum speed value, ensuring that I filter out any null values. Finally, I will select the associated publisher\u2019s name for the superhero who possesses this minimum speed attribute. The overall structure includes an inner query to find the minimum speed followed by an outer query to join with the publisher table based on the `publisher_id`. The query is structured to follow SQL best practices, ensuring null filtering and proper JOIN operations are in place.",
+    "SQL": "SELECT pub.publisher_name FROM superhero s JOIN hero_attribute ha ON ha.hero_id = s.id JOIN publisher pub ON s.publisher_id = pub.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value = (SELECT MIN(ha2.attribute_value) FROM hero_attribute ha2 JOIN superhero s2 ON ha2.hero_id = s2.id WHERE ha2.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha2.attribute_value IS NOT NULL) LIMIT 1;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Which publisher published the slowest superhero?
+
+SQL Query:
+SELECT pub.publisher_name FROM superhero s JOIN hero_attribute ha ON ha.hero_id = s.id JOIN publisher pub ON s.publisher_id = pub.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value = (SELECT MIN(ha2.attribute_value) FROM hero_attribute ha2 JOIN superhero s2 ON ha2.hero_id = s2.id WHERE ha2.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha2.attribute_value IS NOT NULL) LIMIT 1;
+
+Database Content:
+{'alignment': ['id', 'alignment'], 'attribute': ['id', 'attribute_name'], 'colour': ['id', 'colour'], 'gender': ['id', 'gender'], 'publisher': ['id', 'publisher_name', 'publishername'], 'race': ['id', 'race'], 'superhero': ['id', 'superhero_name', 'full_name', 'gender_id', 'eye_colour_id', 'hair_colour_id', 'skin_colour_id', 'race_id', 'publisher_id', 'alignment_id', 'height_cm', 'weight_kg'], 'hero_attribute': ['hero_id', 'attribute_id', 'attribute_value', 'attributevalue'], 'superpower': ['id', 'power_name'], 'hero_power': ['hero_id', 'power_id']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question specifically asks which publisher published the slowest superhero. To derive the answer, the SQL query attempts to select the publisher names based on the minimum speed attribute value. It joins the superhero, hero_attribute, and publisher tables to obtain the required information. The inner subquery retrieves the minimum speed value from the hero_attribute table where the attribute_id corresponds to speed. However, the outer query uses the limit clause in a suboptimal way as it can lead to confusion in retrieval; the outer query should correctly reference the superhero with the minimum speed associated with the publisher. Furthermore, we need to ensure that the condition for fetching the superhero with the minimum speed is correctly articulated. The SQL query is logically sound in its structure, but it could benefit from a more direct approach rather than being overly complex with nested select statements and an unnecessary limit clause. Given these observations, the intent of the question is somewhat met, but the complex query usage introduces potential inaccuracies in returning the correct publisher related to the slowest superhero. Hence, the query does not correctly map to the requirements of the question. Therefore, the judgment is 'Invalid'.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+###
+Question:
+Which publisher published the slowest superhero?
+
+Predicted SQL:
+SELECT pub.publisher_name FROM superhero s JOIN hero_attribute ha ON ha.hero_id = s.id JOIN publisher pub ON s.publisher_id = pub.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value = (SELECT MIN(ha2.attribute_value) FROM hero_attribute ha2 JOIN superhero s2 ON ha2.hero_id = s2.id WHERE ha2.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha2.attribute_value IS NOT NULL) LIMIT 1;
+
+Execution Result:
+('Marvel Comics',)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question specifically asks which publisher published the slowest superhero. To derive the answer, the SQL query attempts to select the publisher names based on the minimum speed attribute value. It joins the superhero, hero_attribute, and publisher tables to obtain the required information. The inner subquery retrieves the minimum speed value from the hero_attribute table where the attribute_id corresponds to speed. However, the outer query uses the limit clause in a suboptimal way as it can lead to confusion in retrieval; the outer query should correctly reference the superhero with the minimum speed associated with the publisher. Furthermore, we need to ensure that the condition for fetching the superhero with the minimum speed is correctly articulated. The SQL query is logically sound in its structure, but it could benefit from a more direct approach rather than being overly complex with nested select statements and an unnecessary limit clause. Given these observations, the intent of the question is somewhat met, but the complex query usage introduces potential inaccuracies in returning the correct publisher related to the slowest superhero. Hence, the query does not correctly map to the requirements of the question. Therefore, the judgment is 'Invalid'.", 'judgment': 'Invalid'}
+
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query so that it correctly identifies the publisher of the slowest superhero, follow these steps: 1. Remove the unnecessary nested SELECT statements for attribute retrieval. Instead, isolate the superhero with the minimum speed in a common table expression (CTE) or a subquery and directly join this result with the publisher. 2. Change the WHERE clause to filter by the superhero with the minimum speed retrieved from the superhero and hero_attribute tables. Here's an updated structure for the SQL query: \n\n```sql\nWITH MinSpeedSuperhero AS (\n    SELECT s.id\n    FROM superhero s\n    JOIN hero_attribute ha ON ha.hero_id = s.id\n    WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed')\n    AND ha.attribute_value IS NOT NULL\n    ORDER BY ha.attribute_value ASC\n    LIMIT 1\n)\nSELECT pub.publisher_name\nFROM MinSpeedSuperhero mss\nJOIN superhero s ON mss.id = s.id\nJOIN publisher pub ON s.publisher_id = pub.id;\n``` \nThis query first identifies the superhero with the minimum speed and then retrieves the associated publisher's name, meeting the question's intent efficiently."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE alignment (
+  id        INTEGER not null
+            primary key,
+  alignment TEXT default NULL
+);
+
+CREATE TABLE attribute (
+  id             INTEGER not null
+            primary key,
+  attribute_name TEXT default NULL
+);
+
+CREATE TABLE colour (
+  id     INTEGER not null
+            primary key,
+  colour TEXT default NULL
+);
+
+CREATE TABLE gender (
+  id     INTEGER not null
+            primary key,
+  gender TEXT default NULL
+);
+
+CREATE TABLE publisher (
+  id             INTEGER not null
+            primary key,
+  publisher_name TEXT default NULL
+);
+
+CREATE TABLE race (
+  id   INTEGER not null
+            primary key,
+  race TEXT default NULL
+);
+
+CREATE TABLE superhero (
+  id             INTEGER not null
+            primary key,
+  superhero_name TEXT default NULL,
+  full_name      TEXT default NULL,
+  gender_id      INTEGER          default NULL,
+  eye_colour_id  INTEGER          default NULL,
+  hair_colour_id INTEGER          default NULL,
+  skin_colour_id INTEGER          default NULL,
+  race_id        INTEGER          default NULL,
+  publisher_id   INTEGER          default NULL,
+  alignment_id   INTEGER          default NULL,
+  height_cm      INTEGER          default NULL,
+  weight_kg      INTEGER          default NULL,
+  foreign key (alignment_id) references alignment(id),
+  foreign key (eye_colour_id) references colour(id),
+  foreign key (gender_id) references gender(id),
+  foreign key (hair_colour_id) references colour(id),
+  foreign key (publisher_id) references publisher(id),
+  foreign key (race_id) references race(id),
+  foreign key (skin_colour_id) references colour(id)
+);
+
+CREATE TABLE hero_attribute (
+  hero_id         INTEGER default NULL,
+  attribute_id    INTEGER default NULL,
+  attribute_value INTEGER default NULL,
+  foreign key (attribute_id) references attribute(id),
+  foreign key (hero_id) references superhero(id)
+);
+
+CREATE TABLE superpower (
+  id         INTEGER not null
+            primary key,
+  power_name TEXT default NULL
+);
+
+CREATE TABLE hero_power (
+  hero_id  INTEGER default NULL,
+  power_id INTEGER default NULL,
+  foreign key (hero_id) references superhero(id),
+  foreign key (power_id) references superpower(id)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To modify the SQL query so that it correctly identifies the publisher of the slowest superhero, follow these steps: 1. Remove the unnecessary nested SELECT statements for attribute retrieval. Instead, isolate the superhero with the minimum speed in a common table expression (CTE) or a subquery and directly join this result with the publisher. 2. Change the WHERE clause to filter by the superhero with the minimum speed retrieved from the superhero and hero_attribute tables. Here's an updated structure for the SQL query: 
+
+```sql
+WITH MinSpeedSuperhero AS (
+    SELECT s.id
+    FROM superhero s
+    JOIN hero_attribute ha ON ha.hero_id = s.id
+    WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed')
+    AND ha.attribute_value IS NOT NULL
+    ORDER BY ha.attribute_value ASC
+    LIMIT 1
+)
+SELECT pub.publisher_name
+FROM MinSpeedSuperhero mss
+JOIN superhero s ON mss.id = s.id
+JOIN publisher pub ON s.publisher_id = pub.id;
+``` 
+This query first identifies the superhero with the minimum speed and then retrieves the associated publisher's name, meeting the question's intent efficiently.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT pub.publisher_name FROM hero_attribute ha JOIN superhero s ON ha.hero_id = s.id JOIN publisher pub ON s.publisher_id = pub.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value IS NOT NULL ORDER BY ha.attribute_value ASC LIMIT 1;", "SELECT pub.publisher_name FROM superhero s JOIN hero_attribute ha ON ha.hero_id = s.id JOIN publisher pub ON s.publisher_id = pub.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value = (SELECT MIN(ha2.attribute_value) FROM hero_attribute ha2 JOIN superhero s2 ON ha2.hero_id = s2.id WHERE ha2.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha2.attribute_value IS NOT NULL) LIMIT 1;"]
+
+Question: 
+Which publisher published the slowest superhero? 
+
+Hint:
+the slowest superhero refers to attribute_name = 'Speed' where MIN(attribute_value); publisher refers to publisher_name
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the publisher of the slowest superhero, I need to identify two main pieces of information: the superhero with the minimum speed and the corresponding publisher. The speed is stored in the 'hero_attribute' table, linked to 'superhero' through 'hero_id' and associated with a specific attribute identified by its name 'Speed'. Using a CTE (Common Table Expression) to isolate the superhero with the minimum speed is a clear approach. I will join the superhero with the 'publisher' table to retrieve the publisher's name after identifying the superhero with the lowest speed value. I will ensure that any lookups for 'Speed' first retrieve the attribute ID from the 'attribute' table. I will adhere to the guiding principles by utilizing order by and limit instead of nested selects for better clarity and efficiency, while also using table aliases where appropriate.",
+    "SQL": "WITH MinSpeedSuperhero AS ( SELECT s.id FROM superhero s JOIN hero_attribute ha ON ha.hero_id = s.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value IS NOT NULL ORDER BY ha.attribute_value ASC LIMIT 1 ) SELECT pub.publisher_name FROM MinSpeedSuperhero mss JOIN superhero s ON mss.id = s.id JOIN publisher pub ON s.publisher_id = pub.id;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Which publisher published the slowest superhero?
+
+SQL Query:
+WITH MinSpeedSuperhero AS ( SELECT s.id FROM superhero s JOIN hero_attribute ha ON ha.hero_id = s.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value IS NOT NULL ORDER BY ha.attribute_value ASC LIMIT 1 ) SELECT pub.publisher_name FROM MinSpeedSuperhero mss JOIN superhero s ON mss.id = s.id JOIN publisher pub ON s.publisher_id = pub.id;
+
+Database Content:
+{'alignment': ['id', 'alignment'], 'attribute': ['id', 'attribute_name'], 'colour': ['id', 'colour'], 'gender': ['id', 'gender'], 'publisher': ['id', 'publisher_name', 'publishername'], 'race': ['id', 'race'], 'superhero': ['id', 'superhero_name', 'full_name', 'gender_id', 'eye_colour_id', 'hair_colour_id', 'skin_colour_id', 'race_id', 'publisher_id', 'alignment_id', 'height_cm', 'weight_kg'], 'hero_attribute': ['hero_id', 'attribute_id', 'attribute_value', 'attributevalue'], 'superpower': ['id', 'power_name'], 'hero_power': ['hero_id', 'power_id']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the publisher of the 'slowest superhero'. To find this, we need to identify which superhero has the lowest speed attribute. The SQL query starts by creating a Common Table Expression (CTE) named `MinSpeedSuperhero` that filters superheroes based on their speed attribute from the `hero_attribute` table, correctly identifying the slowest one by ordering the attributes by value. It subsequently joins the result to fetch the corresponding publisher. The query seems well-structured to achieve the intended outcome, and the relevant tables are properly joined. However, the execution result is not provided, which is critical to determining if the output meets the query's requirements. Given that the SQL query logically addresses the question and appears to follow the right approach, but we cannot verify it without execution confirmation, I would still assume it is valid in abstract terms. Nevertheless, since we lack that key information, the caution limits assurance. Since the query directly answers the question in its logical flow without any obvious mismatches in structure or intention, I conclude that it is Valid under the assumption of appropriate execution outcomes.",
+    "judgment": "Valid"
+}
+
+############################## Human at step Feedback summarize ##############################
+
+You are an SQL language expert. 
+Previously, you were generating SQL statements based on the questions we provided below, and ultimately you succeeded in generating them correctly. 
+Please summarize, based on the questions we provided, the incorrect SQL you generated, and the correct SQL, the step you must check when generating SQL statements again to prevent the same errors from recurring.
+
+Input Data
+###
+Question:
+Which publisher published the slowest superhero?
+
+Incorrect SQL:
+SELECT pub.publisher_name FROM hero_attribute ha JOIN superhero s ON ha.hero_id = s.id JOIN publisher pub ON s.publisher_id = pub.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value IS NOT NULL ORDER BY ha.attribute_value ASC LIMIT 1;
+SELECT pub.publisher_name FROM superhero s JOIN hero_attribute ha ON ha.hero_id = s.id JOIN publisher pub ON s.publisher_id = pub.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value = (SELECT MIN(ha2.attribute_value) FROM hero_attribute ha2 JOIN superhero s2 ON ha2.hero_id = s2.id WHERE ha2.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha2.attribute_value IS NOT NULL) LIMIT 1;
+
+Correct SQL:
+WITH MinSpeedSuperhero AS ( SELECT s.id FROM superhero s JOIN hero_attribute ha ON ha.hero_id = s.id WHERE ha.attribute_id = (SELECT id FROM attribute WHERE attribute_name = 'Speed') AND ha.attribute_value IS NOT NULL ORDER BY ha.attribute_value ASC LIMIT 1 ) SELECT pub.publisher_name FROM MinSpeedSuperhero mss JOIN superhero s ON mss.id = s.id JOIN publisher pub ON s.publisher_id = pub.id;
+
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "step": "The step you must check when generating SQL statements."
+}
+
+Take a deep breath and review the inputs thoroughly.Keep the returned step clear and concise.
+
+############################## AI at step Feedback summarize ##############################
+
+{
+    "step": "Ensure the logic precisely matches the query requirements, and use subqueries or CTEs effectively to isolate and retrieve the accurate information needed."
+}
+

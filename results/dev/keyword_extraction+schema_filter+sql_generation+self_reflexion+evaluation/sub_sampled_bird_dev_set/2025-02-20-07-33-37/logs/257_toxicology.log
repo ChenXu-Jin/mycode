@@ -1,0 +1,374 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: List down atom id2 for atoms with element sulfur.
+Hint: element sulfur refers to element = 's'
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "atom id2",
+    "element sulfur",
+    "element = 's'"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+List down atom id2 for atoms with element sulfur. 
+
+Hint:
+element sulfur refers to element = 's'
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To generate the SQL query, I need to identify the relevant tables based on the provided schema. The question asks for 'atom id2' for atoms with the 'element sulfur'. The 'atom' table contains the 'element' column and the 'atom_id' column. The 'connected' table contains 'atom_id2'. To find the 'atom_id2', I will need to join the 'atom' table with the 'connected' table where the 'element' is 's' (sulfur). I'll ensure to select only the 'atom_id2' column, and I will filter the records based on the specified element. Based on these considerations, I will write my SQL query.",
+    "SQL": "SELECT DISTINCT C.atom_id2 FROM atom AS A JOIN connected AS C ON A.atom_id = C.atom_id WHERE A.element = 's';"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+List down atom id2 for atoms with element sulfur.
+
+SQL Query:
+SELECT DISTINCT C.atom_id2 FROM atom AS A JOIN connected AS C ON A.atom_id = C.atom_id WHERE A.element = 's';
+
+Database Content:
+{'atom': ['atom_id', 'molecule_id', 'element', 'atomid'], 'bond': ['bond_id', 'molecule_id', 'bond_type'], 'connected': ['atom_id', 'atom_id2', 'bond_id', 'atomid', 'atomid2'], 'molecule': ['molecule_id', 'label']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "I started by analyzing the Question which asks for 'atom id2 for atoms with element sulfur'. This implies that the query needs to filter the connections of atoms specifically of the element sulfur. The SQL query utilizes a JOIN between the 'atom' and 'connected' tables. It checks for attributes of the 'atom' table by comparing 'A.element' to 's' (the element sulfur, typically represented as 'S' in chemical notation). However, in the question, 'sulfur' should avoid being abbreviated to 's', leading to potential mismatches in the filter. Thus the SQL query has an error since 's' may not correspond to the expected value 'sulfur'. Additionally, the requirement is about 'atom id2', which the query attempts to retrieve from the 'connected' table, correctly identifying 'C.atom_id2'. Since the element comparison is incorrect, the SQL query does not effectively meet the conditions of the Question. Therefore, the final judgment is Invalid due to the filtering condition's error.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+###
+Question:
+List down atom id2 for atoms with element sulfur.
+
+Predicted SQL:
+SELECT DISTINCT C.atom_id2 FROM atom AS A JOIN connected AS C ON A.atom_id = C.atom_id WHERE A.element = 's';
+
+Execution Result:
+('TR004_2',)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "I started by analyzing the Question which asks for 'atom id2 for atoms with element sulfur'. This implies that the query needs to filter the connections of atoms specifically of the element sulfur. The SQL query utilizes a JOIN between the 'atom' and 'connected' tables. It checks for attributes of the 'atom' table by comparing 'A.element' to 's' (the element sulfur, typically represented as 'S' in chemical notation). However, in the question, 'sulfur' should avoid being abbreviated to 's', leading to potential mismatches in the filter. Thus the SQL query has an error since 's' may not correspond to the expected value 'sulfur'. Additionally, the requirement is about 'atom id2', which the query attempts to retrieve from the 'connected' table, correctly identifying 'C.atom_id2'. Since the element comparison is incorrect, the SQL query does not effectively meet the conditions of the Question. Therefore, the final judgment is Invalid due to the filtering condition's error.", 'judgment': 'Invalid'}
+
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To align the SQL query with the question's intent, modify the filter condition that checks for the element sulfur. Instead of using 's' to represent sulfur, use 'sulfur' in the condition. Update the SQL query from 'WHERE A.element = 's'' to 'WHERE A.element = 'sulfur''. The corrected SQL query should look like this: 'SELECT DISTINCT C.atom_id2 FROM atom AS A JOIN connected AS C ON A.atom_id = C.atom_id WHERE A.element = 'sulfur';'. This adjustment ensures that only atoms with the correct element name are included, fulfilling the requirements of the question."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To align the SQL query with the question's intent, modify the filter condition that checks for the element sulfur. Instead of using 's' to represent sulfur, use 'sulfur' in the condition. Update the SQL query from 'WHERE A.element = 's'' to 'WHERE A.element = 'sulfur''. The corrected SQL query should look like this: 'SELECT DISTINCT C.atom_id2 FROM atom AS A JOIN connected AS C ON A.atom_id = C.atom_id WHERE A.element = 'sulfur';'. This adjustment ensures that only atoms with the correct element name are included, fulfilling the requirements of the question.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT DISTINCT C.atom_id2 FROM atom AS A JOIN connected AS C ON A.atom_id = C.atom_id WHERE A.element = 's';"]
+
+Question: 
+List down atom id2 for atoms with element sulfur. 
+
+Hint:
+element sulfur refers to element = 's'
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To address the question of listing atom id2 for atoms with the element 'sulfur', I first recognized that the relevant element in the atom table needs to be filtered based on its name. According to the provided schema, the 'atom' table contains information about atoms, including their associated elements, which is identified in the 'element' column. The instruction from Long-Term Memory led to the correction of an earlier query where 's' was used to denote sulfur. Instead, the full word 'sulfur' should be used for clarity and accuracy. The task requires connecting the 'atom' table with the 'connected' table to retrieve the corresponding atom_id2 for those atoms identified as sulfur. This necessitates a JOIN between the two tables based on the atom_id, ensuring that only connections linked to sulfur atoms are returned. Applying these considerations, I constructed the query: 'SELECT DISTINCT C.atom_id2 FROM atom AS A JOIN connected AS C ON A.atom_id = C.atom_id WHERE A.element = 'sulfur';'. This query utilizes DISTINCT to prevent duplicates in atom_id2 results, ensuring compliance with the question's specifications.",
+    "SQL": "SELECT DISTINCT C.atom_id2 FROM atom AS A JOIN connected AS C ON A.atom_id = C.atom_id WHERE A.element = 'sulfur';"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+List down atom id2 for atoms with element sulfur.
+
+SQL Query:
+SELECT DISTINCT C.atom_id2 FROM atom AS A JOIN connected AS C ON A.atom_id = C.atom_id WHERE A.element = 'sulfur';
+
+Database Content:
+{'atom': ['atom_id', 'molecule_id', 'element', 'atomid'], 'bond': ['bond_id', 'molecule_id', 'bond_type'], 'connected': ['atom_id', 'atom_id2', 'bond_id', 'atomid', 'atomid2'], 'molecule': ['molecule_id', 'label']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for a list of 'atom id2' for atoms that have the element 'sulfur'. The SQL query attempts to achieve this by selecting distinct 'atom_id2' from the 'connected' table while joining it with the 'atom' table on 'atom_id'. It filters the results such that only those records where the 'element' is 'sulfur' are included. This matches the intent of the question to retrieve 'atom id2' for sulfur atoms. As the query correctly joins the necessary tables (atom and connected), applies the correct filter to find sulfur atoms, and targets the correct attribute (atom_id2), it appears to fulfill the requirements of the question directly without omitting any critical elements. Thus, the SQL query is logically sound and aligns with the question's intent.",
+    "judgment": "Valid"
+}
+
+############################## Human at step Feedback summarize ##############################
+
+You are an SQL language expert. 
+Previously, you were generating SQL statements based on the questions we provided below, and ultimately you succeeded in generating them correctly. 
+Please summarize, based on the questions we provided, the incorrect SQL you generated, and the correct SQL, the step you must check when generating SQL statements again to prevent the same errors from recurring.
+
+Input Data
+###
+Question:
+List down atom id2 for atoms with element sulfur.
+
+Incorrect SQL:
+SELECT DISTINCT C.atom_id2 FROM atom AS A JOIN connected AS C ON A.atom_id = C.atom_id WHERE A.element = 's';
+
+Correct SQL:
+SELECT DISTINCT C.atom_id2 FROM atom AS A JOIN connected AS C ON A.atom_id = C.atom_id WHERE A.element = 'sulfur';
+
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "step": "The step you must check when generating SQL statements."
+}
+
+Take a deep breath and review the inputs thoroughly.Keep the returned step clear and concise.
+
+############################## AI at step Feedback summarize ##############################
+
+{
+    "step": "Ensure the values used in the WHERE clause match the full and correct data entries in the database."
+}
+

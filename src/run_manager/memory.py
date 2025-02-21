@@ -98,17 +98,3 @@ class Memory:
         new_long_term_memory = result_dict["step"]
 
         return new_long_term_memory
-        
-    # def handle_candidate_feedback(self, operator: str, **kwargs: Any) -> Any:
-    #     if operator is None:
-    #         raise ValueError("The operator cannot be empty; it should be ins, del, or sum.")
-        
-    #     if operator == "ins":
-    #         if kwargs["new_memory"] is None:
-    #             raise ValueError("No new candidate memory input")
-    #         self.candidate_feedback.append(kwargs["new_memory"])
-    #     if operator == "del":
-    #         self.candidate_feedback.clear()
-    #     if operator == "sum":
-    #         new_long_term_memory = self.feedback_summarize()
-    #         return new_long_term_memory

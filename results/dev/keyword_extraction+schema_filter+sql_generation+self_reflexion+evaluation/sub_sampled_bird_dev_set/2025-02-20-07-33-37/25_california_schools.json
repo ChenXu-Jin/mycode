@@ -1,0 +1,165 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "schools",
+            "Riverside",
+            "average math score",
+            "SAT",
+            "greater than 400",
+            "funding type",
+            "Average of average math",
+            "sum(average math scores)",
+            "count(schools)"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "frpm": [
+                "CDSCode",
+                "Academic Year",
+                "County Code",
+                "District Code",
+                "School Code",
+                "County Name",
+                "District Name",
+                "School Name",
+                "District Type",
+                "School Type",
+                "Educational Option Type",
+                "NSLP Provision Status",
+                "Charter School (Y/N)",
+                "Charter School Number",
+                "Charter Funding Type",
+                "IRC",
+                "Low Grade",
+                "High Grade",
+                "Enrollment (K-12)",
+                "Free Meal Count (K-12)",
+                "Percent (%) Eligible Free (K-12)",
+                "FRPM Count (K-12)",
+                "Percent (%) Eligible FRPM (K-12)",
+                "Enrollment (Ages 5-17)",
+                "Free Meal Count (Ages 5-17)",
+                "Percent (%) Eligible Free (Ages 5-17)",
+                "FRPM Count (Ages 5-17)",
+                "Percent (%) Eligible FRPM (Ages 5-17)",
+                "2013-14 CALPADS Fall 1 Certification Status"
+            ],
+            "satscores": [
+                "cds",
+                "rtype",
+                "sname",
+                "dname",
+                "cname",
+                "enroll12",
+                "NumTstTakr",
+                "AvgScrRead",
+                "AvgScrMath",
+                "AvgScrWrite",
+                "NumGE1500"
+            ],
+            "schools": [
+                "CDSCode",
+                "NCESDist",
+                "NCESSchool",
+                "StatusType",
+                "County",
+                "District",
+                "School",
+                "Street",
+                "StreetAbr",
+                "City",
+                "Zip",
+                "State",
+                "MailStreet",
+                "MailStrAbr",
+                "MailCity",
+                "MailZip",
+                "MailState",
+                "Phone",
+                "Ext",
+                "Website",
+                "OpenDate",
+                "ClosedDate",
+                "Charter",
+                "CharterNum",
+                "FundingType",
+                "DOC",
+                "DOCType",
+                "SOC",
+                "SOCType",
+                "EdOpsCode",
+                "EdOpsName",
+                "EILCode",
+                "EILName",
+                "GSoffered",
+                "GSserved",
+                "Virtual",
+                "Magnet",
+                "Latitude",
+                "Longitude",
+                "AdmFName1",
+                "AdmLName1",
+                "AdmEmail1",
+                "AdmFName2",
+                "AdmLName2",
+                "AdmEmail2",
+                "AdmFName3",
+                "AdmLName3",
+                "AdmEmail3",
+                "LastUpdate"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "satscores": [
+                "sname",
+                "cds",
+                "avgscrmath"
+            ],
+            "frpm": [
+                "Charter Funding Type",
+                "cdscode",
+                "District Name"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To find the schools in Riverside with an average SAT math score greater than 400, I first need to consider the appropriate tables. The school names will be derived from the 'schools' table, while SAT scores, particularly average math scores, will be extracted from the 'satscores' table. Since we want the average of the average math scores, I will need to apply a GROUP BY clause to group the results by school and then use a HAVING clause to filter schools that meet the required condition. After calculating the average math score and filtering, I'll select the school funding type from the schools' table. Both tables are linked via the 'CDSCode' field. Finally, I will ensure to remove any null values from the average math scores before the calculations. The final query will include only the school name and the funding type for the schools that meet the specified condition.",
+        "SQL": "SELECT T1.School, T1.FundingType FROM schools T1 INNER JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' AND T2.AvgScrMath IS NOT NULL GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT T1.School, T1.FundingType FROM schools T1 INNER JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' AND T2.AvgScrMath IS NOT NULL GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?",
+            "Evidence": "Average of average math = sum(average math scores) / count(schools).",
+            "pred_sql": "SELECT T1.School, T1.FundingType FROM schools T1 INNER JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' AND T2.AvgScrMath IS NOT NULL GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;",
+            "gold_sql": "SELECT T1.sname, T2.`Charter Funding Type` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T2.`District Name` LIKE 'Riverside%' GROUP BY T1.sname, T2.`Charter Funding Type` HAVING CAST(SUM(T1.AvgScrMath) AS REAL) / COUNT(T1.cds) > 400"
+        },
+        "self_reflexion": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?",
+            "Evidence": "Average of average math = sum(average math scores) / count(schools).",
+            "pred_sql": "SELECT T1.School, T1.FundingType FROM schools T1 INNER JOIN satscores T2 ON T1.CDSCode = T2.cds WHERE T1.City = 'Riverside' AND T2.AvgScrMath IS NOT NULL GROUP BY T1.CDSCode HAVING AVG(T2.AvgScrMath) > 400;",
+            "gold_sql": "SELECT T1.sname, T2.`Charter Funding Type` FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T2.`District Name` LIKE 'Riverside%' GROUP BY T1.sname, T2.`Charter Funding Type` HAVING CAST(SUM(T1.AvgScrMath) AS REAL) / COUNT(T1.cds) > 400"
+        },
+        "status": "success"
+    }
+]

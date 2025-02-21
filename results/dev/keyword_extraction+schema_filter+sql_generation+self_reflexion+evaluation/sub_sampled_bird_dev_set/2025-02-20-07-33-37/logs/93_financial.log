@@ -1,0 +1,900 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: How many male customers who are living in North Bohemia have average salary greater than 8000?
+Hint: Male means that gender = 'M'; A3 refers to region; A11 pertains to average salary.
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "male customers",
+    "North Bohemia",
+    "average salary",
+    "8000",
+    "gender = 'M'",
+    "region = A3",
+    "average salary = A11"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE account (
+  account_id  INTEGER default 0 not null
+        primary key,
+  district_id INTEGER default 0 not null,
+  frequency   TEXT   not null,
+  date        DATE          not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE card (
+  card_id INTEGER default 0 not null
+        primary key,
+  disp_id INTEGER           not null,
+  type    TEXT    not null,
+  issued  DATE          not null,
+  foreign key (disp_id) references disp (disp_id)
+);
+
+CREATE TABLE client (
+  client_id   INTEGER        not null
+        primary key,
+  gender      TEXT not null,
+  birth_date  DATE       not null,
+  district_id INTEGER        not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE disp (
+  disp_id    INTEGER        not null
+        primary key,
+  client_id  INTEGER        not null,
+  account_id INTEGER        not null,
+  type      TEXT not null,
+  foreign key (account_id) references account (account_id),
+  foreign key (client_id) references client (client_id)
+);
+
+CREATE TABLE district (
+  district_id INTEGER default 0 not null
+        primary key,
+  A2          TEXT   not null,
+  A3          TEXT   not null,
+  A4          TEXT       not null,
+  A5          TEXT           not null,
+  A6          TEXT           not null,
+  A7          TEXT           not null,
+  A8          INTEGER        not null,
+  A9          INTEGER           not null,
+  A10         REAL not null,
+  A11         INTEGER           not null,
+  A12         REAL null,
+  A13         REAL not null,
+  A14         INTEGER           not null,
+  A15         INTEGER        null,
+  A16         INTEGER          not null
+);
+
+CREATE TABLE loan (
+  loan_id    INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  date       DATE          not null,
+  amount     INTEGER           not null,
+  duration   INTEGER           not null,
+  payments   REAL not null,
+  status     TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE order (
+  order_id   INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  bank_to    TEXT    not null,
+  account_to INTEGER           not null,
+  amount     REAL not null,
+  k_symbol   TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE trans (
+  trans_id   INTEGER default 0    not null
+        primary key,
+  account_id INTEGER default 0    not null,
+  date       DATE             not null,
+  type       TEXT       not null,
+  operation  TEXT      null,
+  amount     INTEGER              not null,
+  balance    INTEGER             not null,
+  k_symbol   TEXT      null,
+  bank       TEXT       null,
+  account    INTEGER          null,
+  foreign key (account_id) references account (account_id)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+How many male customers who are living in North Bohemia have average salary greater than 8000? 
+
+Hint:
+Male means that gender = 'M'; A3 refers to region; A11 pertains to average salary.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the number of male customers living in North Bohemia with an average salary greater than 8000, I need to gather the relevant information from the 'client' and 'district' tables. First, I will filter clients by gender and by the district that corresponds to North Bohemia. For filtering by district, I'll use the A3 column in the 'district' table. After filtering for gender = 'M', I also need to check the average salary from column A11 in the district table. I'll join the 'client' and 'district' tables on the district_id to access both gender and salary information. Finally, I will use a COUNT operation to get the total number of clients that meet all these criteria. I will structure the SQL query to only count distinct client_ids to avoid counting duplicates, if any exist.",
+    "SQL": "SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+How many male customers who are living in North Bohemia have average salary greater than 8000?
+
+SQL Query:
+SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;
+
+Database Content:
+{'account': ['account_id', 'district_id', 'frequency', 'date'], 'card': ['card_id', 'disp_id', 'type', 'issued'], 'client': ['client_id', 'gender', 'birth_date', 'district_id'], 'disp': ['disp_id', 'client_id', 'account_id', 'type'], 'district': ['district_id', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16'], 'loan': ['loan_id', 'account_id', 'date', 'amount', 'duration', 'payments', 'status'], 'order': ['order_id', 'account_id', 'bank_to', 'account_to', 'amount', 'k_symbol'], 'trans': ['trans_id', 'account_id', 'date', 'type', 'operation', 'amount', 'balance', 'k_symbol', 'bank', 'account']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the count of male customers living in North Bohemia with an average salary greater than 8000. The SQL query targets the right entities: it counts distinct clients filtered by gender and district. However, a significant flaw exists; the column D.A11 > 8000 is referenced to filter for average salary, but there's no information in the provided database schema about how average salary is calculated or if D.A11 represents salary at all. The database content does not specify that A11 is related to the customer's actual salary or how to derive an average from any existing data. Thus, while the SQL query mostly aligns with the question's structure, it fundamentally misinterprets the term 'average salary', which leads to invalid conditions. Therefore, the query fails to accurately answer the question.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+###
+Question:
+How many male customers who are living in North Bohemia have average salary greater than 8000?
+
+Predicted SQL:
+SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;
+
+Execution Result:
+(0,)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the count of male customers living in North Bohemia with an average salary greater than 8000. The SQL query targets the right entities: it counts distinct clients filtered by gender and district. However, a significant flaw exists; the column D.A11 > 8000 is referenced to filter for average salary, but there's no information in the provided database schema about how average salary is calculated or if D.A11 represents salary at all. The database content does not specify that A11 is related to the customer's actual salary or how to derive an average from any existing data. Thus, while the SQL query mostly aligns with the question's structure, it fundamentally misinterprets the term 'average salary', which leads to invalid conditions. Therefore, the query fails to accurately answer the question.", 'judgment': 'Invalid'}
+
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query so that it accurately answers the question about counting male customers in North Bohemia with an average salary greater than 8000, follow these steps: 1. Verify the database schema to identify the correct columns for capturing individual salaries. Ensure that you locate the salary data for clients, which might reside in a different table. 2. If there is a table that includes individual salary records, you will need to include a JOIN statement to aggregate these salaries based on the client IDs. 3. Replace the filter condition 'D.A11 > 8000' with a proper aggregation calculation, such as using 'HAVING AVG(salary) > 8000' after joining the relevant salary data. 4. The modified SQL query could resemble the following structure:  \n   SELECT COUNT(DISTINCT C.client_id)  \n   FROM client C  \n   JOIN district D ON C.district_id = D.district_id  \n   JOIN salary_table S ON C.client_id = S.client_id  \n   WHERE C.gender = 'M' AND D.A3 = 'North Bohemia'  \n   GROUP BY C.client_id  \n   HAVING AVG(S.salary) > 8000;  \n  Make sure to adjust the table names and field names based on your actual database schema."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE account (
+  account_id  INTEGER default 0 not null
+        primary key,
+  district_id INTEGER default 0 not null,
+  frequency   TEXT   not null,
+  date        DATE          not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE card (
+  card_id INTEGER default 0 not null
+        primary key,
+  disp_id INTEGER           not null,
+  type    TEXT    not null,
+  issued  DATE          not null,
+  foreign key (disp_id) references disp (disp_id)
+);
+
+CREATE TABLE client (
+  client_id   INTEGER        not null
+        primary key,
+  gender      TEXT not null,
+  birth_date  DATE       not null,
+  district_id INTEGER        not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE disp (
+  disp_id    INTEGER        not null
+        primary key,
+  client_id  INTEGER        not null,
+  account_id INTEGER        not null,
+  type      TEXT not null,
+  foreign key (account_id) references account (account_id),
+  foreign key (client_id) references client (client_id)
+);
+
+CREATE TABLE district (
+  district_id INTEGER default 0 not null
+        primary key,
+  A2          TEXT   not null,
+  A3          TEXT   not null,
+  A4          TEXT       not null,
+  A5          TEXT           not null,
+  A6          TEXT           not null,
+  A7          TEXT           not null,
+  A8          INTEGER        not null,
+  A9          INTEGER           not null,
+  A10         REAL not null,
+  A11         INTEGER           not null,
+  A12         REAL null,
+  A13         REAL not null,
+  A14         INTEGER           not null,
+  A15         INTEGER        null,
+  A16         INTEGER          not null
+);
+
+CREATE TABLE loan (
+  loan_id    INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  date       DATE          not null,
+  amount     INTEGER           not null,
+  duration   INTEGER           not null,
+  payments   REAL not null,
+  status     TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE order (
+  order_id   INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  bank_to    TEXT    not null,
+  account_to INTEGER           not null,
+  amount     REAL not null,
+  k_symbol   TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE trans (
+  trans_id   INTEGER default 0    not null
+        primary key,
+  account_id INTEGER default 0    not null,
+  date       DATE             not null,
+  type       TEXT       not null,
+  operation  TEXT      null,
+  amount     INTEGER              not null,
+  balance    INTEGER             not null,
+  k_symbol   TEXT      null,
+  bank       TEXT       null,
+  account    INTEGER          null,
+  foreign key (account_id) references account (account_id)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To modify the SQL query so that it accurately answers the question about counting male customers in North Bohemia with an average salary greater than 8000, follow these steps: 1. Verify the database schema to identify the correct columns for capturing individual salaries. Ensure that you locate the salary data for clients, which might reside in a different table. 2. If there is a table that includes individual salary records, you will need to include a JOIN statement to aggregate these salaries based on the client IDs. 3. Replace the filter condition 'D.A11 > 8000' with a proper aggregation calculation, such as using 'HAVING AVG(salary) > 8000' after joining the relevant salary data. 4. The modified SQL query could resemble the following structure:  
+   SELECT COUNT(DISTINCT C.client_id)  
+   FROM client C  
+   JOIN district D ON C.district_id = D.district_id  
+   JOIN salary_table S ON C.client_id = S.client_id  
+   WHERE C.gender = 'M' AND D.A3 = 'North Bohemia'  
+   GROUP BY C.client_id  
+   HAVING AVG(S.salary) > 8000;  
+  Make sure to adjust the table names and field names based on your actual database schema.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;"]
+
+Question: 
+How many male customers who are living in North Bohemia have average salary greater than 8000? 
+
+Hint:
+Male means that gender = 'M'; A3 refers to region; A11 pertains to average salary.
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "The question seeks to count the number of male customers living in North Bohemia who have an average salary greater than 8000. I must first identify the relevant tables and columns from the provided schema. The client table holds information about customers, including their gender and district. The district table contains the location information. However, the average salary data is not directly stored in the given schema; it's implied that A11 in the district table serves as a proxy for average salary. The question specifies filtering on male customers (gender = 'M') and restricting results to those living in North Bohemia (A3 = 'North Bohemia'). I also need to ensure the clients are grouped for the count and the correct conditions for average salary are applied based on A11. Thus, I will set the filtering for average salary in the WHERE clause rather than using HAVING given I don't have details of salary records per client. Therefore, the query structure will count distinct male clients in North Bohemia who meet the average salary requirement based solely on A11 using WHERE for the filtering criteria while ensuring the necessary joins are applied. Finally, the constructed SQL query aligns with long-term memory principles, focusing on clarity and precision without overcomplicating it with unnecessary constructions.",
+    "SQL": "SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+How many male customers who are living in North Bohemia have average salary greater than 8000?
+
+SQL Query:
+SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;
+
+Database Content:
+{'account': ['account_id', 'district_id', 'frequency', 'date'], 'card': ['card_id', 'disp_id', 'type', 'issued'], 'client': ['client_id', 'gender', 'birth_date', 'district_id'], 'disp': ['disp_id', 'client_id', 'account_id', 'type'], 'district': ['district_id', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16'], 'loan': ['loan_id', 'account_id', 'date', 'amount', 'duration', 'payments', 'status'], 'order': ['order_id', 'account_id', 'bank_to', 'account_to', 'amount', 'k_symbol'], 'trans': ['trans_id', 'account_id', 'date', 'type', 'operation', 'amount', 'balance', 'k_symbol', 'bank', 'account']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "First, I assessed the question: it's asking for the number of male customers living in North Bohemia with an average salary greater than 8000. Next, I analyzed the SQL query provided. The query counts distinct client IDs (male customers) who are part of a particular district (North Bohemia). However, it filters based on a condition in the district (D.A11 > 8000), which suggests it's looking for a value related to the salary; there is no indication from the database content that this field (A11) represents customer salary. Therefore, while the query connects the clients to the district and counts males in North Bohemia, it fails to accurately address the salary condition because it is checking a field that is not confirmed to represent salary. Thus, the query cannot provide the requested count of customers based on their salary over 8000 as derived from the criteria specified in the question. This leads me to conclude that the SQL query does not correctly fulfill the requirements of the question, resulting in an Invalid judgment.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+###
+Question:
+How many male customers who are living in North Bohemia have average salary greater than 8000?
+
+Predicted SQL:
+SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;
+
+Execution Result:
+(0,)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "First, I assessed the question: it's asking for the number of male customers living in North Bohemia with an average salary greater than 8000. Next, I analyzed the SQL query provided. The query counts distinct client IDs (male customers) who are part of a particular district (North Bohemia). However, it filters based on a condition in the district (D.A11 > 8000), which suggests it's looking for a value related to the salary; there is no indication from the database content that this field (A11) represents customer salary. Therefore, while the query connects the clients to the district and counts males in North Bohemia, it fails to accurately address the salary condition because it is checking a field that is not confirmed to represent salary. Thus, the query cannot provide the requested count of customers based on their salary over 8000 as derived from the criteria specified in the question. This leads me to conclude that the SQL query does not correctly fulfill the requirements of the question, resulting in an Invalid judgment.", 'judgment': 'Invalid'}
+
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To modify the SQL query so that it accurately answers the question about male customers living in North Bohemia with an average salary greater than 8000, follow these actionable steps: 1. Identify the correct field that represents salary in the client table, rather than using D.A11, which appears to be related to district data. 2. Change the filter condition in the WHERE clause from D.A11 > 8000 to C.salary > 8000 (assuming 'salary' is the correct field name in the client table). 3. Ensure that there is no misalignment in the data types; if 'salary' is stored as a string, convert it to a numeric type for comparison. Thus, the modified query may look like this: SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND C.salary > 8000; This ensures you are counting distinct male clients living in the specified district who meet the salary requirement."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE account (
+  account_id  INTEGER default 0 not null
+        primary key,
+  district_id INTEGER default 0 not null,
+  frequency   TEXT   not null,
+  date        DATE          not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE card (
+  card_id INTEGER default 0 not null
+        primary key,
+  disp_id INTEGER           not null,
+  type    TEXT    not null,
+  issued  DATE          not null,
+  foreign key (disp_id) references disp (disp_id)
+);
+
+CREATE TABLE client (
+  client_id   INTEGER        not null
+        primary key,
+  gender      TEXT not null,
+  birth_date  DATE       not null,
+  district_id INTEGER        not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE disp (
+  disp_id    INTEGER        not null
+        primary key,
+  client_id  INTEGER        not null,
+  account_id INTEGER        not null,
+  type      TEXT not null,
+  foreign key (account_id) references account (account_id),
+  foreign key (client_id) references client (client_id)
+);
+
+CREATE TABLE district (
+  district_id INTEGER default 0 not null
+        primary key,
+  A2          TEXT   not null,
+  A3          TEXT   not null,
+  A4          TEXT       not null,
+  A5          TEXT           not null,
+  A6          TEXT           not null,
+  A7          TEXT           not null,
+  A8          INTEGER        not null,
+  A9          INTEGER           not null,
+  A10         REAL not null,
+  A11         INTEGER           not null,
+  A12         REAL null,
+  A13         REAL not null,
+  A14         INTEGER           not null,
+  A15         INTEGER        null,
+  A16         INTEGER          not null
+);
+
+CREATE TABLE loan (
+  loan_id    INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  date       DATE          not null,
+  amount     INTEGER           not null,
+  duration   INTEGER           not null,
+  payments   REAL not null,
+  status     TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE order (
+  order_id   INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  bank_to    TEXT    not null,
+  account_to INTEGER           not null,
+  amount     REAL not null,
+  k_symbol   TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE trans (
+  trans_id   INTEGER default 0    not null
+        primary key,
+  account_id INTEGER default 0    not null,
+  date       DATE             not null,
+  type       TEXT       not null,
+  operation  TEXT      null,
+  amount     INTEGER              not null,
+  balance    INTEGER             not null,
+  k_symbol   TEXT      null,
+  bank       TEXT       null,
+  account    INTEGER          null,
+  foreign key (account_id) references account (account_id)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To modify the SQL query so that it accurately answers the question about male customers living in North Bohemia with an average salary greater than 8000, follow these actionable steps: 1. Identify the correct field that represents salary in the client table, rather than using D.A11, which appears to be related to district data. 2. Change the filter condition in the WHERE clause from D.A11 > 8000 to C.salary > 8000 (assuming 'salary' is the correct field name in the client table). 3. Ensure that there is no misalignment in the data types; if 'salary' is stored as a string, convert it to a numeric type for comparison. Thus, the modified query may look like this: SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND C.salary > 8000; This ensures you are counting distinct male clients living in the specified district who meet the salary requirement.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;", "SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;"]
+
+Question: 
+How many male customers who are living in North Bohemia have average salary greater than 8000? 
+
+Hint:
+Male means that gender = 'M'; A3 refers to region; A11 pertains to average salary.
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To construct the SQL query for the question, we need to first identify the relevant tables and fields based on the provided schema. We are interested in counting male customers living in North Bohemia with an average salary greater than 8000. This involves querying the 'client' and 'district' tables. \n\nFirst, we recognize that gender filters male clients (`C.gender = 'M'`). We then observe that the reference to North Bohemia is made through the district's attribute (`D.A3 = 'North Bohemia'`). The condition regarding the average salary is linked to the average salary field (`D.A11 > 8000`).\n\nIncorporating this into the SELECT statement requires a join between the 'client' table (C) and the 'district' table (D) based on their foreign key relationship (`C.district_id = D.district_id`). Finally, we need to count distinct clients meeting all these conditions.\n\nFollowing the guiding principles, I will count distinct client IDs to avoid double counting, which aligns with the filtering needs of the question. This leads to the final SQL query: SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000.",
+    "SQL": "SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+How many male customers who are living in North Bohemia have average salary greater than 8000?
+
+SQL Query:
+SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;
+
+Database Content:
+{'account': ['account_id', 'district_id', 'frequency', 'date'], 'card': ['card_id', 'disp_id', 'type', 'issued'], 'client': ['client_id', 'gender', 'birth_date', 'district_id'], 'disp': ['disp_id', 'client_id', 'account_id', 'type'], 'district': ['district_id', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16'], 'loan': ['loan_id', 'account_id', 'date', 'amount', 'duration', 'payments', 'status'], 'order': ['order_id', 'account_id', 'bank_to', 'account_to', 'amount', 'k_symbol'], 'trans': ['trans_id', 'account_id', 'date', 'type', 'operation', 'amount', 'balance', 'k_symbol', 'bank', 'account']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the count of male customers in North Bohemia who have an average salary greater than 8000. The provided SQL query attempts to retrieve this information by filtering male clients from the 'client' table and joining it with the 'district' table to filter those in 'North Bohemia'. However, the query contains an error in the condition 'D.A11 > 8000'. The table schema does not specify that 'A11' represents salary; without clarification, it is ambiguous what 'A11' relates to. Additionally, there is no grouping involved to calculate an average salary, as the question indicates an average, but the query seems to check for a distinct count directly against a single value. Thus, the SQL query does not accurately reflect the requirements of the question, which specifically mentions 'average salary'. Therefore, the SQL query fails to satisfy the intent of the question.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+###
+Question:
+How many male customers who are living in North Bohemia have average salary greater than 8000?
+
+Predicted SQL:
+SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;
+
+Execution Result:
+(0,)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the count of male customers in North Bohemia who have an average salary greater than 8000. The provided SQL query attempts to retrieve this information by filtering male clients from the 'client' table and joining it with the 'district' table to filter those in 'North Bohemia'. However, the query contains an error in the condition 'D.A11 > 8000'. The table schema does not specify that 'A11' represents salary; without clarification, it is ambiguous what 'A11' relates to. Additionally, there is no grouping involved to calculate an average salary, as the question indicates an average, but the query seems to check for a distinct count directly against a single value. Thus, the SQL query does not accurately reflect the requirements of the question, which specifically mentions 'average salary'. Therefore, the SQL query fails to satisfy the intent of the question.", 'judgment': 'Invalid'}
+
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "1. Determine and confirm what column in the schema represents the salary of clients, since 'D.A11' is ambiguous. Make sure to identify the correct table and column that store salary information. \n2. The question refers to 'average salary', so modify the query to calculate average salary for male customers. To do this, you will need a GROUP BY clause to group records by client, and then compute the average. \n3. Rewrite the SQL query to select customer IDs from the 'client' table, where the gender is 'M' and the district is 'North Bohemia', and include an aggregation function to calculate average salaries. For example: \n   - Use AVG(salary_column) in your SELECT statement, replacing 'salary_column' with the actual salary column identified in step 1. \n4. Replace the COUNT(DISTINCT C.client_id) with a COUNT of the number of clients satisfying the average salary condition. Consider using a HAVING clause to filter groups with an average salary greater than 8000. \n\nA possible revised SQL query could look like this:\n\nSELECT COUNT(*) \nFROM client C \nJOIN district D ON C.district_id = D.district_id \nWHERE C.gender = 'M' AND D.A3 = 'North Bohemia' \nGROUP BY C.client_id \nHAVING AVG(salary_column) > 8000;"
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE account (
+  account_id  INTEGER default 0 not null
+        primary key,
+  district_id INTEGER default 0 not null,
+  frequency   TEXT   not null,
+  date        DATE          not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE card (
+  card_id INTEGER default 0 not null
+        primary key,
+  disp_id INTEGER           not null,
+  type    TEXT    not null,
+  issued  DATE          not null,
+  foreign key (disp_id) references disp (disp_id)
+);
+
+CREATE TABLE client (
+  client_id   INTEGER        not null
+        primary key,
+  gender      TEXT not null,
+  birth_date  DATE       not null,
+  district_id INTEGER        not null,
+  foreign key (district_id) references district (district_id)
+);
+
+CREATE TABLE disp (
+  disp_id    INTEGER        not null
+        primary key,
+  client_id  INTEGER        not null,
+  account_id INTEGER        not null,
+  type      TEXT not null,
+  foreign key (account_id) references account (account_id),
+  foreign key (client_id) references client (client_id)
+);
+
+CREATE TABLE district (
+  district_id INTEGER default 0 not null
+        primary key,
+  A2          TEXT   not null,
+  A3          TEXT   not null,
+  A4          TEXT       not null,
+  A5          TEXT           not null,
+  A6          TEXT           not null,
+  A7          TEXT           not null,
+  A8          INTEGER        not null,
+  A9          INTEGER           not null,
+  A10         REAL not null,
+  A11         INTEGER           not null,
+  A12         REAL null,
+  A13         REAL not null,
+  A14         INTEGER           not null,
+  A15         INTEGER        null,
+  A16         INTEGER          not null
+);
+
+CREATE TABLE loan (
+  loan_id    INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  date       DATE          not null,
+  amount     INTEGER           not null,
+  duration   INTEGER           not null,
+  payments   REAL not null,
+  status     TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE order (
+  order_id   INTEGER default 0 not null
+        primary key,
+  account_id INTEGER           not null,
+  bank_to    TEXT    not null,
+  account_to INTEGER           not null,
+  amount     REAL not null,
+  k_symbol   TEXT    not null,
+  foreign key (account_id) references account (account_id)
+);
+
+CREATE TABLE trans (
+  trans_id   INTEGER default 0    not null
+        primary key,
+  account_id INTEGER default 0    not null,
+  date       DATE             not null,
+  type       TEXT       not null,
+  operation  TEXT      null,
+  amount     INTEGER              not null,
+  balance    INTEGER             not null,
+  k_symbol   TEXT      null,
+  bank       TEXT       null,
+  account    INTEGER          null,
+  foreign key (account_id) references account (account_id)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. 1. Determine and confirm what column in the schema represents the salary of clients, since 'D.A11' is ambiguous. Make sure to identify the correct table and column that store salary information. 
+2. The question refers to 'average salary', so modify the query to calculate average salary for male customers. To do this, you will need a GROUP BY clause to group records by client, and then compute the average. 
+3. Rewrite the SQL query to select customer IDs from the 'client' table, where the gender is 'M' and the district is 'North Bohemia', and include an aggregation function to calculate average salaries. For example: 
+   - Use AVG(salary_column) in your SELECT statement, replacing 'salary_column' with the actual salary column identified in step 1. 
+4. Replace the COUNT(DISTINCT C.client_id) with a COUNT of the number of clients satisfying the average salary condition. Consider using a HAVING clause to filter groups with an average salary greater than 8000. 
+
+A possible revised SQL query could look like this:
+
+SELECT COUNT(*) 
+FROM client C 
+JOIN district D ON C.district_id = D.district_id 
+WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' 
+GROUP BY C.client_id 
+HAVING AVG(salary_column) > 8000;
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;", "SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;", "SELECT COUNT(DISTINCT C.client_id) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' AND D.A11 > 8000;"]
+
+Question: 
+How many male customers who are living in North Bohemia have average salary greater than 8000? 
+
+Hint:
+Male means that gender = 'M'; A3 refers to region; A11 pertains to average salary.
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To answer the question, we need to identify the number of male customers living in North Bohemia with an average salary greater than 8000. The relevant columns are found in the 'client' and 'district' tables. We know that 'gender' is stored in the 'client' table with M indicating male and that the region is indicated by A3 in the 'district' table. The average salary is stored in 'A11' of the 'district' table. \n\nFirstly, we will join the 'client' table (C) with the 'district' table (D) on 'district_id', allowing us to access the district information for each client. We then filter for male customers and those living in North Bohemia. \n\nNext, we need to group the results by client to compute the average salary. To reflect this in the SQL, we will use the AVG function in a HAVING clause to filter out those with an average salary above 8000. However, I will also include a COUNT function to sum the customers who meet this criteria. Finally, I'll use COUNT(*) instead of COUNT(DISTINCT C.client_id) to capture all entries satisfying the average condition without redundant client IDs. \n\nThe final SQL query will correctly reflect the required conditions and output as specified in the question.",
+    "SQL": "SELECT COUNT(*) FROM client C JOIN district D ON C.district_id = D.district_id WHERE C.gender = 'M' AND D.A3 = 'North Bohemia' GROUP BY C.client_id HAVING AVG(D.A11) > 8000;"
+}
+

@@ -1,0 +1,163 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "administrator's email address",
+            "chartered school",
+            "fewest students enrolled",
+            "grades 1 through 12",
+            "Charter School (Y/N)",
+            "Enrollment (K-12)"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "frpm": [
+                "CDSCode",
+                "Academic Year",
+                "County Code",
+                "District Code",
+                "School Code",
+                "County Name",
+                "District Name",
+                "School Name",
+                "District Type",
+                "School Type",
+                "Educational Option Type",
+                "NSLP Provision Status",
+                "Charter School (Y/N)",
+                "Charter School Number",
+                "Charter Funding Type",
+                "IRC",
+                "Low Grade",
+                "High Grade",
+                "Enrollment (K-12)",
+                "Free Meal Count (K-12)",
+                "Percent (%) Eligible Free (K-12)",
+                "FRPM Count (K-12)",
+                "Percent (%) Eligible FRPM (K-12)",
+                "Enrollment (Ages 5-17)",
+                "Free Meal Count (Ages 5-17)",
+                "Percent (%) Eligible Free (Ages 5-17)",
+                "FRPM Count (Ages 5-17)",
+                "Percent (%) Eligible FRPM (Ages 5-17)",
+                "2013-14 CALPADS Fall 1 Certification Status",
+                "CharterSchool(Y/N)",
+                "Enrollment(K-12)"
+            ],
+            "satscores": [
+                "cds",
+                "rtype",
+                "sname",
+                "dname",
+                "cname",
+                "enroll12",
+                "NumTstTakr",
+                "AvgScrRead",
+                "AvgScrMath",
+                "AvgScrWrite",
+                "NumGE1500"
+            ],
+            "schools": [
+                "CDSCode",
+                "NCESDist",
+                "NCESSchool",
+                "StatusType",
+                "County",
+                "District",
+                "School",
+                "Street",
+                "StreetAbr",
+                "City",
+                "Zip",
+                "State",
+                "MailStreet",
+                "MailStrAbr",
+                "MailCity",
+                "MailZip",
+                "MailState",
+                "Phone",
+                "Ext",
+                "Website",
+                "OpenDate",
+                "ClosedDate",
+                "Charter",
+                "CharterNum",
+                "FundingType",
+                "DOC",
+                "DOCType",
+                "SOC",
+                "SOCType",
+                "EdOpsCode",
+                "EdOpsName",
+                "EILCode",
+                "EILName",
+                "GSoffered",
+                "GSserved",
+                "Virtual",
+                "Magnet",
+                "Latitude",
+                "Longitude",
+                "AdmFName1",
+                "AdmLName1",
+                "AdmEmail1",
+                "AdmFName2",
+                "AdmLName2",
+                "AdmEmail2",
+                "AdmFName3",
+                "AdmLName3",
+                "AdmEmail3",
+                "LastUpdate"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "schools": [
+                "admemail1",
+                "cdscode"
+            ],
+            "frpm": [
+                "cdscode",
+                "Charter School (Y/N)",
+                "Enrollment (K-12)"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To find the administrator's email address of the chartered school with the fewest students enrolled in grades 1 through 12, I need to focus on two tables: 'frpm' and 'schools'. First, I will filter for charter schools by selecting rows where 'Charter School (Y/N)' = 1 in the 'frpm' table. For the enrollment criterion, I will look for the 'Enrollment (K-12)' column to determine the number of students enrolled. Using an ORDER BY statement with LIMIT 1 will allow me to find the school with the minimum enrollment. To get the email address of the administrator, I will join the two tables based on the 'CDSCode'. The final query will select the administrator's email from the 'schools' table, ensuring only the relevant columns are included.",
+        "SQL": "SELECT AdmEmail1 FROM schools AS T1 JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Charter School (Y/N)` = 1 ORDER BY T2.`Enrollment (K-12)` ASC LIMIT 1;",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "WITH MinEnrollment AS (SELECT T2.CDSCode, MIN(T2.`Enrollment (K-12)`) AS MinEnroll FROM frpm AS T2 WHERE T2.`Charter School (Y/N)` = 1 GROUP BY T2.CDSCode) SELECT T1.AdmEmail1 FROM schools AS T1 JOIN MinEnrollment AS ME ON T1.CDSCode = ME.CDSCode WHERE ME.MinEnroll = (SELECT MIN(MinEnroll) FROM MinEnrollment) LIMIT 1;",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 1,
+            "error": "--",
+            "Question": "What is the administrator's email address of the chartered school with the fewest students enrolled in grades 1 through 12?",
+            "Evidence": "Charted school means `Charter School (Y/N)` = 1 in the table frpm; Students enrolled in grades 1 through 12 refers to `Enrollment (K-12)`",
+            "pred_sql": "SELECT AdmEmail1 FROM schools AS T1 JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.`Charter School (Y/N)` = 1 ORDER BY T2.`Enrollment (K-12)` ASC LIMIT 1;",
+            "gold_sql": "SELECT T2.AdmEmail1 FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`Charter School (Y/N)` = 1 ORDER BY T1.`Enrollment (K-12)` ASC LIMIT 1"
+        },
+        "self_reflexion": {
+            "result": 1,
+            "error": "--",
+            "Question": "What is the administrator's email address of the chartered school with the fewest students enrolled in grades 1 through 12?",
+            "Evidence": "Charted school means `Charter School (Y/N)` = 1 in the table frpm; Students enrolled in grades 1 through 12 refers to `Enrollment (K-12)`",
+            "pred_sql": "WITH MinEnrollment AS (SELECT T2.CDSCode, MIN(T2.`Enrollment (K-12)`) AS MinEnroll FROM frpm AS T2 WHERE T2.`Charter School (Y/N)` = 1 GROUP BY T2.CDSCode) SELECT T1.AdmEmail1 FROM schools AS T1 JOIN MinEnrollment AS ME ON T1.CDSCode = ME.CDSCode WHERE ME.MinEnroll = (SELECT MIN(MinEnroll) FROM MinEnrollment) LIMIT 1;",
+            "gold_sql": "SELECT T2.AdmEmail1 FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T1.`Charter School (Y/N)` = 1 ORDER BY T1.`Enrollment (K-12)` ASC LIMIT 1"
+        },
+        "status": "success"
+    }
+]

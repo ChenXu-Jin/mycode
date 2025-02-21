@@ -14,7 +14,6 @@ def get_llm_prompt(
     template_configs = {
         "keyword_extraction": {"input_variables": ["HINT", "QUESTION"]},
         "sql_generation": {"input_variables": ["HINT", "QUESTION"]},
-        "evaluate": {"input_variables": ["QUESTION", "SQL"]},
         "actor_generate_sql": {"input_variables": ["HINT", "QUESTION"]},
         "generate_feedback_mems": {"input_variables": ["HINT", "QUESTION"]},
         "feedback_summarize": {"input_variables": ["QUESTION", "INCORRECT_SQL", "CORRECT_SQL"]}

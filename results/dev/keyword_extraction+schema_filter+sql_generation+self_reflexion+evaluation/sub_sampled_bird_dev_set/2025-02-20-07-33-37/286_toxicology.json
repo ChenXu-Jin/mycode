@@ -1,0 +1,82 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "chemical compounds",
+            "database",
+            "percent",
+            "triple-bond",
+            "compounds form",
+            "bond_type",
+            "#"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "atom": [
+                "atom_id",
+                "molecule_id",
+                "element"
+            ],
+            "bond": [
+                "bond_id",
+                "molecule_id",
+                "bond_type",
+                "bondtype"
+            ],
+            "connected": [
+                "atom_id",
+                "atom_id2",
+                "bond_id"
+            ],
+            "molecule": [
+                "molecule_id",
+                "label"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "bond": [
+                "bond_id",
+                "bond_type"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To find the percent of chemical compounds that form a triple-bond, I need to gather the total number of unique compounds and the total number of compounds that have a bond type equal to '#'. I will achieve this by first counting the distinct `molecule_id` values from the `bond` table while applying filters for the bond type. Then, I will calculate the total number of compounds that have a triple bond and divide that by the total number of compounds to get the percentage. The final calculation will be done in the SELECT statement while ensuring that I follow the syntax and formatting rules provided.",
+        "SQL": "SELECT (CAST(COUNT(DISTINCT CASE WHEN T2.bond_type = '#' THEN T2.molecule_id END) AS FLOAT) / COUNT(DISTINCT T2.molecule_id)) * 100 AS percent_triple_bond FROM bond AS T2;",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT (CAST(COUNT(DISTINCT CASE WHEN T2.bond_type = '#' THEN T2.molecule_id END) AS FLOAT) / COUNT(DISTINCT C.molecule_id)) * 100 AS percent_triple_bond FROM molecule AS C LEFT JOIN bond AS T2 ON C.molecule_id = T2.molecule_id;",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Among all chemical compounds identified in the database, what percent of compounds form a triple-bond.",
+            "Evidence": "triple bond refers to bond_type = '#';",
+            "pred_sql": "SELECT (CAST(COUNT(DISTINCT CASE WHEN T2.bond_type = '#' THEN T2.molecule_id END) AS FLOAT) / COUNT(DISTINCT T2.molecule_id)) * 100 AS percent_triple_bond FROM bond AS T2;",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T.bond_type = '#' THEN T.bond_id ELSE NULL END) AS REAL) * 100 / COUNT(T.bond_id) FROM bond AS T"
+        },
+        "self_reflexion": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Among all chemical compounds identified in the database, what percent of compounds form a triple-bond.",
+            "Evidence": "triple bond refers to bond_type = '#';",
+            "pred_sql": "SELECT (CAST(COUNT(DISTINCT CASE WHEN T2.bond_type = '#' THEN T2.molecule_id END) AS FLOAT) / COUNT(DISTINCT C.molecule_id)) * 100 AS percent_triple_bond FROM molecule AS C LEFT JOIN bond AS T2 ON C.molecule_id = T2.molecule_id;",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T.bond_type = '#' THEN T.bond_id ELSE NULL END) AS REAL) * 100 / COUNT(T.bond_id) FROM bond AS T"
+        },
+        "status": "success"
+    }
+]

@@ -1,0 +1,93 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "bond type",
+            "molecules",
+            "molecule id",
+            "TR000",
+            "TR050",
+            "double bond",
+            "single bond",
+            "triple bond",
+            "bond_type",
+            "=",
+            "-",
+            "#"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "atom": [
+                "atom_id",
+                "molecule_id",
+                "element",
+                "moleculeid"
+            ],
+            "bond": [
+                "bond_id",
+                "molecule_id",
+                "bond_type",
+                "bondtype",
+                "moleculeid"
+            ],
+            "connected": [
+                "atom_id",
+                "atom_id2",
+                "bond_id"
+            ],
+            "molecule": [
+                "molecule_id",
+                "label",
+                "moleculeid"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "bond": [
+                "molecule_id",
+                "bond_type"
+            ],
+            "molecule": [
+                "molecule_id"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To answer the question, I need to retrieve the bond types for the molecule IDs that range from TR000 to TR050. The relevant table here is the 'bond' table since it contains the 'bond_type' and is linked to the 'molecule' table. I will filter the 'molecule_id' in the 'bond' table to include only those between TR000 and TR050. The 'bond_type' is the only column asked for in the output, so I will only select that column and impose the appropriate filter for molecule IDs. I don't need to join with other tables since 'bond' contains the information I need directly regarding bond type. Finally, as I need to satisfy the data filtering based on the molecule IDs, I will use the WHERE clause in the SELECT statement. Overall, I will write a straightforward SELECT query that gets the bond type, filtered by the specified range of molecule IDs.",
+        "SQL": "SELECT bond_type FROM bond WHERE molecule_id BETWEEN 'TR000' AND 'TR050';",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT bond_type FROM bond WHERE molecule_id BETWEEN 'TR000' AND 'TR050';",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "List down the bond type for molecules from molecule id TR000 to TR050.",
+            "Evidence": "double bond refers to bond_type = ' = '; single bond refers to bond_type = '-'; triple bond refers to bond_type = '#';",
+            "pred_sql": "SELECT bond_type FROM bond WHERE molecule_id BETWEEN 'TR000' AND 'TR050';",
+            "gold_sql": "SELECT T2.molecule_id, T2.bond_type FROM molecule AS T1 INNER JOIN bond AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.molecule_id BETWEEN 'TR000' AND 'TR050'"
+        },
+        "self_reflexion": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "List down the bond type for molecules from molecule id TR000 to TR050.",
+            "Evidence": "double bond refers to bond_type = ' = '; single bond refers to bond_type = '-'; triple bond refers to bond_type = '#';",
+            "pred_sql": "SELECT bond_type FROM bond WHERE molecule_id BETWEEN 'TR000' AND 'TR050';",
+            "gold_sql": "SELECT T2.molecule_id, T2.bond_type FROM molecule AS T1 INNER JOIN bond AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.molecule_id BETWEEN 'TR000' AND 'TR050'"
+        },
+        "status": "success"
+    }
+]

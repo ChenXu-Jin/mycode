@@ -1,0 +1,140 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "amount of debt",
+            "client number 992",
+            "client",
+            "payments"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "account": [
+                "account_id",
+                "district_id",
+                "frequency",
+                "date"
+            ],
+            "card": [
+                "card_id",
+                "disp_id",
+                "type",
+                "issued"
+            ],
+            "client": [
+                "client_id",
+                "gender",
+                "birth_date",
+                "district_id"
+            ],
+            "disp": [
+                "disp_id",
+                "client_id",
+                "account_id",
+                "type"
+            ],
+            "district": [
+                "district_id",
+                "A2",
+                "A3",
+                "A4",
+                "A5",
+                "A6",
+                "A7",
+                "A8",
+                "A9",
+                "A10",
+                "A11",
+                "A12",
+                "A13",
+                "A14",
+                "A15",
+                "A16"
+            ],
+            "loan": [
+                "loan_id",
+                "account_id",
+                "date",
+                "amount",
+                "duration",
+                "payments",
+                "status",
+                "payment"
+            ],
+            "order": [
+                "order_id",
+                "account_id",
+                "bank_to",
+                "account_to",
+                "amount",
+                "k_symbol"
+            ],
+            "trans": [
+                "trans_id",
+                "account_id",
+                "date",
+                "type",
+                "operation",
+                "amount",
+                "balance",
+                "k_symbol",
+                "bank",
+                "account"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "loan": [
+                "amount",
+                "status",
+                "account_id"
+            ],
+            "client": [
+                "district_id",
+                "client_id"
+            ],
+            "account": [
+                "district_id",
+                "account_id"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "First, we need to find the client ID which is 992 and retrieve their corresponding account(s). After that, we will find the total debt (which is represented by the total amount from the loan table) related to that client. We will also need to find the payment details from the loans based on the account ID. Therefore, I'll start by joining the client table with the disp table using client_id, then the corresponding accounts from the account table, and finally fetching loan information to get the debt amount and payment status.",
+        "SQL": "SELECT SUM(L.amount) AS total_debt, L.payments FROM client AS C JOIN disp AS D ON C.client_id = D.client_id JOIN account AS A ON D.account_id = A.account_id JOIN loan AS L ON A.account_id = L.account_id WHERE C.client_id = 992 AND L.amount IS NOT NULL GROUP BY L.payments;",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT SUM(L.amount) AS total_debt, CASE WHEN SUM(COALESCE(T.amount, 0)) >= SUM(L.amount) THEN 'Paid Off' WHEN SUM(COALESCE(T.amount, 0)) < 0.5 * SUM(L.amount) THEN 'Behind' ELSE 'On Track' END AS payment_status FROM client AS C JOIN disp AS D ON C.client_id = D.client_id JOIN account AS A ON D.account_id = A.account_id JOIN loan AS L ON A.account_id = L.account_id LEFT JOIN trans AS T ON A.account_id = T.account_id WHERE C.client_id = 992;",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "What is the amount of debt that client number 992 has, and how is this client doing with payments?",
+            "Evidence": "",
+            "pred_sql": "SELECT SUM(L.amount) AS total_debt, L.payments FROM client AS C JOIN disp AS D ON C.client_id = D.client_id JOIN account AS A ON D.account_id = A.account_id JOIN loan AS L ON A.account_id = L.account_id WHERE C.client_id = 992 AND L.amount IS NOT NULL GROUP BY L.payments;",
+            "gold_sql": "SELECT T3.amount, T3.status FROM client AS T1 INNER JOIN account AS T2 ON T1.district_id = T2.district_id INNER JOIN loan AS T3 ON T2.account_id = T3.account_id WHERE T1.client_id = 992"
+        },
+        "self_reflexion": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "What is the amount of debt that client number 992 has, and how is this client doing with payments?",
+            "Evidence": "",
+            "pred_sql": "SELECT SUM(L.amount) AS total_debt, CASE WHEN SUM(COALESCE(T.amount, 0)) >= SUM(L.amount) THEN 'Paid Off' WHEN SUM(COALESCE(T.amount, 0)) < 0.5 * SUM(L.amount) THEN 'Behind' ELSE 'On Track' END AS payment_status FROM client AS C JOIN disp AS D ON C.client_id = D.client_id JOIN account AS A ON D.account_id = A.account_id JOIN loan AS L ON A.account_id = L.account_id LEFT JOIN trans AS T ON A.account_id = T.account_id WHERE C.client_id = 992;",
+            "gold_sql": "SELECT T3.amount, T3.status FROM client AS T1 INNER JOIN account AS T2 ON T1.district_id = T2.district_id INNER JOIN loan AS T3 ON T2.account_id = T3.account_id WHERE T1.client_id = 992"
+        },
+        "status": "success"
+    }
+]

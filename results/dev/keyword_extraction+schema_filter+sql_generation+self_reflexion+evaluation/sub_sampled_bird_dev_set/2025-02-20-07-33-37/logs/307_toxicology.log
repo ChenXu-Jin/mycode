@@ -1,0 +1,414 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: Name the atoms' elements that form bond TR000_2_3.
+Hint: element = 'cl' means Chlorine; element = 'c' means Carbon; element = 'h' means Hydrogen; element = 'o' means Oxygen, element = 's' means Sulfur; element = 'n' means Nitrogen, element = 'p' means Phosphorus, element = 'na' means Sodium, element = 'br' means Bromine, element = 'f' means Fluorine; element = 'i' means Iodine; element = 'sn' means Tin; element = 'pb' means Lead; element = 'te' means Tellurium; element = 'ca' means Calcium
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "atoms' elements",
+    "bond TR000_2_3",
+    "element",
+    "cl",
+    "Chlorine",
+    "c",
+    "Carbon",
+    "h",
+    "Hydrogen",
+    "o",
+    "Oxygen",
+    "s",
+    "Sulfur",
+    "n",
+    "Nitrogen",
+    "p",
+    "Phosphorus",
+    "na",
+    "Sodium",
+    "br",
+    "Bromine",
+    "f",
+    "Fluorine",
+    "i",
+    "Iodine",
+    "sn",
+    "Tin",
+    "pb",
+    "Lead",
+    "te",
+    "Tellurium",
+    "ca",
+    "Calcium"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+Name the atoms' elements that form bond TR000_2_3. 
+
+Hint:
+element = 'cl' means Chlorine; element = 'c' means Carbon; element = 'h' means Hydrogen; element = 'o' means Oxygen, element = 's' means Sulfur; element = 'n' means Nitrogen, element = 'p' means Phosphorus, element = 'na' means Sodium, element = 'br' means Bromine, element = 'f' means Fluorine; element = 'i' means Iodine; element = 'sn' means Tin; element = 'pb' means Lead; element = 'te' means Tellurium; element = 'ca' means Calcium
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "To find the elements of the atoms that form the bond with ID 'TR000_2_3', I need information from both the 'bond' table and the 'connected' table to determine which atoms are connected by this bond. After identifying the connected atoms, I need to look up their elements from the 'atom' table. The steps are as follows: 1. I will filter the 'bond' table to get the bond with ID 'TR000_2_3'. 2. Then, I'll join this with the 'connected' table to find the corresponding atom IDs that are connected by this bond. 3. Finally, I will join this result with the 'atom' table to get the elements of the identified atoms. I will ensure that only the 'element' column is selected as that is the only requested information.",
+    "SQL": "SELECT T3.element FROM bond AS T1 JOIN connected AS T2 ON T1.bond_id = T2.bond_id JOIN atom AS T3 ON T2.atom_id = T3.atom_id OR T2.atom_id2 = T3.atom_id WHERE T1.bond_id = 'TR000_2_3';"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Name the atoms' elements that form bond TR000_2_3.
+
+SQL Query:
+SELECT T3.element FROM bond AS T1 JOIN connected AS T2 ON T1.bond_id = T2.bond_id JOIN atom AS T3 ON T2.atom_id = T3.atom_id OR T2.atom_id2 = T3.atom_id WHERE T1.bond_id = 'TR000_2_3';
+
+Database Content:
+{'atom': ['atom_id', 'molecule_id', 'element'], 'bond': ['bond_id', 'molecule_id', 'bond_type'], 'connected': ['atom_id', 'atom_id2', 'bond_id'], 'molecule': ['molecule_id', 'label']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the names of the elements of the atoms that are connected by a specific bond identified as 'TR000_2_3'. The SQL query attempts to retrieve the elements of these atoms by joining three tables: bond, connected, and atom. It specifies the correct bonding condition, where it filters based on the bond_id. However, the join condition for atom (T3) is a potential error; it uses an OR condition to check if either of the two atom identifiers (T2.atom_id or T2.atom_id2) matches T3.atom_id, which could lead to retrieving incorrect or duplicate elements due to overlap in connected atom relationships. The SQL ultimately would retrieve elements but may include duplicates instead of distinct values. Thus, the output might not directly correspond to the intent of listing the unique atoms' elements. Therefore, although the query attempts to answer the question correctly, it is configured in a way that may lead to inaccurate results. Hence, I consider it not fully aligned with the question's requirement.",
+    "judgment": "Invalid"
+}
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a data science and SQL optimization expert.
+Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
+Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+
+Input Data
+###
+Question:
+Name the atoms' elements that form bond TR000_2_3.
+
+Predicted SQL:
+SELECT T3.element FROM bond AS T1 JOIN connected AS T2 ON T1.bond_id = T2.bond_id JOIN atom AS T3 ON T2.atom_id = T3.atom_id OR T2.atom_id2 = T3.atom_id WHERE T1.bond_id = 'TR000_2_3';
+
+Execution Result:
+('c',)
+
+Evaluation Result:
+{'chain_of_thought_reasoning': "The question asks for the names of the elements of the atoms that are connected by a specific bond identified as 'TR000_2_3'. The SQL query attempts to retrieve the elements of these atoms by joining three tables: bond, connected, and atom. It specifies the correct bonding condition, where it filters based on the bond_id. However, the join condition for atom (T3) is a potential error; it uses an OR condition to check if either of the two atom identifiers (T2.atom_id or T2.atom_id2) matches T3.atom_id, which could lead to retrieving incorrect or duplicate elements due to overlap in connected atom relationships. The SQL ultimately would retrieve elements but may include duplicates instead of distinct values. Thus, the output might not directly correspond to the intent of listing the unique atoms' elements. Therefore, although the query attempts to answer the question correctly, it is configured in a way that may lead to inaccurate results. Hence, I consider it not fully aligned with the question's requirement.", 'judgment': 'Invalid'}
+
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "To align the SQL query with the intent of the question, you should take the following steps: 1. Use the DISTINCT keyword in the SELECT clause to ensure that only unique elements are returned, preventing duplicate entries for atoms that might be connected by the same bond. 2. Instead of using an OR condition in the JOIN on the atom table, you can use a UNION to combine the results of two separate SELECT statements that each join on the respective atom IDs. This will clarify the intent of separately considering each atom in the connection without risking duplicates from a single join. 3. Ensure that you include an alias for the SELECT statement to enhance clarity. The revised SQL query could look something like this: \n\nSELECT DISTINCT T3.element FROM bond AS T1 \nJOIN connected AS T2 ON T1.bond_id = T2.bond_id \nJOIN atom AS T3 ON T2.atom_id = T3.atom_id \nWHERE T1.bond_id = 'TR000_2_3' \nUNION \nSELECT DISTINCT T3.element FROM bond AS T1 \nJOIN connected AS T2 ON T1.bond_id = T2.bond_id \nJOIN atom AS T3 ON T2.atom_id2 = T3.atom_id \nWHERE T1.bond_id = 'TR000_2_3';"
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. To align the SQL query with the intent of the question, you should take the following steps: 1. Use the DISTINCT keyword in the SELECT clause to ensure that only unique elements are returned, preventing duplicate entries for atoms that might be connected by the same bond. 2. Instead of using an OR condition in the JOIN on the atom table, you can use a UNION to combine the results of two separate SELECT statements that each join on the respective atom IDs. This will clarify the intent of separately considering each atom in the connection without risking duplicates from a single join. 3. Ensure that you include an alias for the SELECT statement to enhance clarity. The revised SQL query could look something like this: 
+
+SELECT DISTINCT T3.element FROM bond AS T1 
+JOIN connected AS T2 ON T1.bond_id = T2.bond_id 
+JOIN atom AS T3 ON T2.atom_id = T3.atom_id 
+WHERE T1.bond_id = 'TR000_2_3' 
+UNION 
+SELECT DISTINCT T3.element FROM bond AS T1 
+JOIN connected AS T2 ON T1.bond_id = T2.bond_id 
+JOIN atom AS T3 ON T2.atom_id2 = T3.atom_id 
+WHERE T1.bond_id = 'TR000_2_3';
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT T3.element FROM bond AS T1 JOIN connected AS T2 ON T1.bond_id = T2.bond_id JOIN atom AS T3 ON T2.atom_id = T3.atom_id OR T2.atom_id2 = T3.atom_id WHERE T1.bond_id = 'TR000_2_3';"]
+
+Question: 
+Name the atoms' elements that form bond TR000_2_3. 
+
+Hint:
+element = 'cl' means Chlorine; element = 'c' means Carbon; element = 'h' means Hydrogen; element = 'o' means Oxygen, element = 's' means Sulfur; element = 'n' means Nitrogen, element = 'p' means Phosphorus, element = 'na' means Sodium, element = 'br' means Bromine, element = 'f' means Fluorine; element = 'i' means Iodine; element = 'sn' means Tin; element = 'pb' means Lead; element = 'te' means Tellurium; element = 'ca' means Calcium
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "To determine the elements of the atoms that form the bond identified by 'TR000_2_3', I need to extract the atoms connected by this bond. The relevant tables here are 'bond', 'connected', and 'atom'. I will start by joining the 'bond' table with the 'connected' table to get the connections corresponding to bond 'TR000_2_3'. Then, I'll join again with the 'atom' table in two parts: first to find the elements associated with the first atom in the connection ('atom_id'), and next to find the elements associated with the second atom in the connection ('atom_id2'). To avoid duplicate entries of elements (in case both atoms are the same), I will utilize a UNION to combine the results, and I'll use the DISTINCT keyword to ensure uniqueness in the final output. This aligns with the guidelines in both Long-Term and Short-Term Memories effectively, prioritizing clarity and correctness. Finally, I will structure the final SQL query to reflect these steps clearly.",
+    "SQL": "SELECT DISTINCT T3.element FROM bond AS T1 JOIN connected AS T2 ON T1.bond_id = T2.bond_id JOIN atom AS T3 ON T2.atom_id = T3.atom_id WHERE T1.bond_id = 'TR000_2_3' UNION SELECT DISTINCT T3.element FROM bond AS T1 JOIN connected AS T2 ON T1.bond_id = T2.bond_id JOIN atom AS T3 ON T2.atom_id2 = T3.atom_id WHERE T1.bond_id = 'TR000_2_3';"
+}
+
+############################## Human at step evaluator_generate_result ##############################
+
+You are a database technology expert proficient in SQL statements.
+Below, you will be presented with a natural language question, an SQL query, and the corresponding database content for that query.
+Your task is to determine whether the provided SQL query correctly selects the database schema items and accurately answers the given question.
+If the SQL query fails to correctly answer the question, please identify the specific errors.
+Before making the final judgment, think step by step to analyze the alignment between the question, SQL query, and execution result.
+
+Input Data
+
+Question:
+Name the atoms' elements that form bond TR000_2_3.
+
+SQL Query:
+SELECT DISTINCT T3.element FROM bond AS T1 JOIN connected AS T2 ON T1.bond_id = T2.bond_id JOIN atom AS T3 ON T2.atom_id = T3.atom_id WHERE T1.bond_id = 'TR000_2_3' UNION SELECT DISTINCT T3.element FROM bond AS T1 JOIN connected AS T2 ON T1.bond_id = T2.bond_id JOIN atom AS T3 ON T2.atom_id2 = T3.atom_id WHERE T1.bond_id = 'TR000_2_3';
+
+Database Content:
+{'atom': ['atom_id', 'molecule_id', 'element'], 'bond': ['bond_id', 'molecule_id', 'bond_type'], 'connected': ['atom_id', 'atom_id2', 'bond_id'], 'molecule': ['molecule_id', 'label']}
+
+Validation Guidelines:
+
+1. Carefully analyze the Question to understand its intent, including what is being queried, conditions, filters, and expected outputs.
+2. Check if the SQL Query logically corresponds to the Question, covering all necessary components such as filtering conditions, aggregations, and groupings.
+3. Cross-check the Execution Result with the Question to ensure the output aligns with the intent.
+4. Ensure the SQL Query is not missing any critical conditions or columns required to fulfill the Question's requirements.
+5. If the SQL Query satisfies the intent and the Execution Result correctly answers the Question, consider it Valid. Otherwise, consider it Invalid.
+6. Consider scenarios where the SQL Query may partially meet the intent but fails in key aspects, leading to an Invalid outcome.
+7. Base your judgment strictly on the correspondence between the question, SQL query, and execution result without making assumptions.
+
+Output Format:
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final judgment.",
+    "judgment": "Valid or Invalid"
+}
+
+Take a deep breath, review all elements carefully, and think step by step.
+
+############################## AI at step evaluator_generate_result ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the names of the atoms' elements that form the bond identified by 'TR000_2_3'. The SQL query attempts to retrieve elements associated with that specific bond by joining the 'bond', 'connected', and 'atom' tables. The first part of the query retrieves elements based on the first atom_id and the second part retrieves them based on the atom_id2. Since both referenced cases are valid ways to associate atoms with a bond, this is logically sound. Additionally, the use of DISTINCT is appropriate to ensure unique results. There is no apparent missing information or conditions in the query relative to the question. Therefore, upon execution, if the query returns the correct elements tied to the bond 'TR000_2_3', it is considered valid.",
+    "judgment": "Valid"
+}
+
+############################## Human at step Feedback summarize ##############################
+
+You are an SQL language expert. 
+Previously, you were generating SQL statements based on the questions we provided below, and ultimately you succeeded in generating them correctly. 
+Please summarize, based on the questions we provided, the incorrect SQL you generated, and the correct SQL, the step you must check when generating SQL statements again to prevent the same errors from recurring.
+
+Input Data
+###
+Question:
+Name the atoms' elements that form bond TR000_2_3.
+
+Incorrect SQL:
+SELECT T3.element FROM bond AS T1 JOIN connected AS T2 ON T1.bond_id = T2.bond_id JOIN atom AS T3 ON T2.atom_id = T3.atom_id OR T2.atom_id2 = T3.atom_id WHERE T1.bond_id = 'TR000_2_3';
+
+Correct SQL:
+SELECT DISTINCT T3.element FROM bond AS T1 JOIN connected AS T2 ON T1.bond_id = T2.bond_id JOIN atom AS T3 ON T2.atom_id = T3.atom_id WHERE T1.bond_id = 'TR000_2_3' UNION SELECT DISTINCT T3.element FROM bond AS T1 JOIN connected AS T2 ON T1.bond_id = T2.bond_id JOIN atom AS T3 ON T2.atom_id2 = T3.atom_id WHERE T1.bond_id = 'TR000_2_3';
+
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "step": "The step you must check when generating SQL statements."
+}
+
+Take a deep breath and review the inputs thoroughly.Keep the returned step clear and concise.
+
+############################## AI at step Feedback summarize ##############################
+
+{
+    "step": "Ensure correct JOIN conditions are used, particularly when dealing with multiple related tables to capture all relevant relationships and ensure data integrity."
+}
+

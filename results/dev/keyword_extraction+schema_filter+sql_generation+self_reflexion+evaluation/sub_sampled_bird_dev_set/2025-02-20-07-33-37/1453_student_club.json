@@ -1,0 +1,135 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "name of events",
+            "less than average parking cost",
+            "event_name",
+            "cost",
+            "DIVIDE(SUM(cost), COUNT(event_id)",
+            "category = 'Parking'"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "event": [
+                "event_id",
+                "event_name",
+                "event_date",
+                "type",
+                "notes",
+                "location",
+                "status",
+                "eventname"
+            ],
+            "major": [
+                "major_id",
+                "major_name",
+                "department",
+                "college"
+            ],
+            "zip_code": [
+                "zip_code",
+                "type",
+                "city",
+                "county",
+                "state",
+                "short_state"
+            ],
+            "attendance": [
+                "link_to_event",
+                "link_to_member"
+            ],
+            "budget": [
+                "budget_id",
+                "category",
+                "spent",
+                "remaining",
+                "amount",
+                "event_status",
+                "link_to_event"
+            ],
+            "expense": [
+                "expense_id",
+                "expense_description",
+                "expense_date",
+                "cost",
+                "approved",
+                "link_to_member",
+                "link_to_budget"
+            ],
+            "income": [
+                "income_id",
+                "date_received",
+                "amount",
+                "source",
+                "notes",
+                "link_to_member"
+            ],
+            "member": [
+                "member_id",
+                "first_name",
+                "last_name",
+                "email",
+                "position",
+                "t_shirt_size",
+                "phone",
+                "zip",
+                "link_to_major"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "expense": [
+                "cost",
+                "link_to_budget"
+            ],
+            "event": [
+                "event_name",
+                "event_id"
+            ],
+            "budget": [
+                "link_to_event",
+                "budget_id",
+                "category"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "To solve the problem, I need to find events that have a parking cost less than the average parking cost. First, I will find the average cost of parking by filtering expenses where the category is 'Parking'. This can be done using a subquery that calculates the average cost. Then, I will retrieve the event names from the 'event' table and join it with the 'expense' table to filter based on the condition that the cost is less than the average found in the subquery. I will ensure to only select the 'event_name' from the 'event' table that meets the specified condition. The final SQL query will include a join between the two tables and will filter based on the parking cost condition.",
+        "SQL": "SELECT T1.event_name FROM event T1 INNER JOIN expense T2 ON T1.event_id = T2.link_to_budget WHERE T2.cost < (SELECT AVG(cost) FROM expense WHERE link_to_budget IN (SELECT budget_id FROM budget WHERE category = 'Parking'))",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT T1.event_name FROM event T1 INNER JOIN expense T2 ON T1.event_id = T2.link_to_budget WHERE T2.cost < (SELECT AVG(cost) FROM expense WHERE link_to_budget IN (SELECT budget_id FROM budget WHERE category = 'Parking'))",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "List the name of events with less than average parking cost.",
+            "Evidence": "name of events refers to event_name; less than average parking cost refers to cost < DIVIDE(SUM(cost), COUNT(event_id)) where category = 'Parking'",
+            "pred_sql": "SELECT T1.event_name FROM event T1 INNER JOIN expense T2 ON T1.event_id = T2.link_to_budget WHERE T2.cost < (SELECT AVG(cost) FROM expense WHERE link_to_budget IN (SELECT budget_id FROM budget WHERE category = 'Parking'))",
+            "gold_sql": "SELECT T1.event_name FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget WHERE T2.category = 'Parking' AND T3.cost < (SELECT AVG(cost) FROM expense)"
+        },
+        "self_reflexion": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "List the name of events with less than average parking cost.",
+            "Evidence": "name of events refers to event_name; less than average parking cost refers to cost < DIVIDE(SUM(cost), COUNT(event_id)) where category = 'Parking'",
+            "pred_sql": "SELECT T1.event_name FROM event T1 INNER JOIN expense T2 ON T1.event_id = T2.link_to_budget WHERE T2.cost < (SELECT AVG(cost) FROM expense WHERE link_to_budget IN (SELECT budget_id FROM budget WHERE category = 'Parking'))",
+            "gold_sql": "SELECT T1.event_name FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget WHERE T2.category = 'Parking' AND T3.cost < (SELECT AVG(cost) FROM expense)"
+        },
+        "status": "success"
+    }
+]
