@@ -1,4 +1,5 @@
 import logging
+from run_manager.logger import Logger
 from run_manager.memory import Memory
 from llm.llm_models import async_llm_chain_call
 from database_utils.database_manager import DatabaseManager
@@ -119,7 +120,7 @@ class Evaluator:
         evaluate_result = {}
 
         try:
-            result = func_timeout(time_out, self.execute_current_sql)
+            execute_result = func_timeout(time_out, self.execute_current_sql)
         except FunctionTimedOut as e:
             evaluate_result["judgment"] = "error"
             evaluate_result["message"] = "SQL query execution time is too long."
@@ -129,13 +130,25 @@ class Evaluator:
             evaluate_result["message"] = str(e)
             return evaluate_result
 
-        print(type(result))
+        Logger().log_conversation(text=evaluate_result, _from="human", step="evaluate")
+
+        all_results = []
+        for item in execute_result:
+            for column in item:
+                all_results.append(str(column))
+        
+        if "None" in all_results or "-" in all_results:
+            evaluate_result["judgment"] = "error"
+            evaluate_result["message"] = "SQL execution result is None"
+        else:
+            evaluate_result["judgment"] = "Valid"
+            evaluate_result["message"] = "SQL is valid"
 
         return evaluate_result
 
     def execute_current_sql(self) -> Any:
         try:
-            current_sql_result = DatabaseManager().execute_sql(sql=self.sql, fetch="one")
+            current_sql_result = DatabaseManager().execute_sql(sql=self.sql, fetch="all")
             return current_sql_result
         except Exception as e:
             logging.error(f"Error executing SQL '{self.sql}': {e}")
