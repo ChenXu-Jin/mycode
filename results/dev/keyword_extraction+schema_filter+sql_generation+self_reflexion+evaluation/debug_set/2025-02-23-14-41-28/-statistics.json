@@ -1,0 +1,56 @@
+{
+    "counts": {
+        "sql_generation": {
+            "correct": 2,
+            "incorrect": 1,
+            "error": 0,
+            "total": 3
+        },
+        "self_reflexion": {
+            "correct": 1,
+            "incorrect": 2,
+            "error": 0,
+            "total": 3
+        }
+    },
+    "ids": {
+        "sql_generation": {
+            "correct": [
+                [
+                    "codebase_community",
+                    538
+                ],
+                [
+                    "student_club",
+                    1447
+                ]
+            ],
+            "incorrect": [
+                [
+                    "card_games",
+                    350
+                ]
+            ],
+            "error": []
+        },
+        "self_reflexion": {
+            "correct": [
+                [
+                    "student_club",
+                    1447
+                ]
+            ],
+            "incorrect": [
+                [
+                    "card_games",
+                    350
+                ],
+                [
+                    "codebase_community",
+                    538
+                ]
+            ],
+            "error": []
+        }
+    }
+}

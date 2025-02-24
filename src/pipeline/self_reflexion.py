@@ -130,14 +130,14 @@ class Evaluator:
             evaluate_result["message"] = str(e)
             return evaluate_result
 
-        Logger().log_conversation(text=evaluate_result, _from="human", step="evaluate")
+        Logger().log_conversation(text=execute_result, _from="human", step="evaluate")
 
         all_results = []
         for item in execute_result:
             for column in item:
                 all_results.append(str(column))
         
-        if "None" in all_results or "-" in all_results:
+        if "None" in all_results or "-" in all_results or execute_result is None:
             evaluate_result["judgment"] = "error"
             evaluate_result["message"] = "SQL execution result is None"
         else:

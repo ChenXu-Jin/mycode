@@ -1,0 +1,5 @@
+{
+    "1447": "SELECT T1.event_name, T1.location FROM event T1 JOIN budget T2 ON T1.event_id = T2.link_to_event WHERE T2.remaining > 0",
+    "538": "SELECT T1.Title FROM posts T1 JOIN users T2 ON T1.OwnerUserId = T2.Id WHERE T2.DisplayName = 'csgillespie'",
+    "350": "SELECT FD.language FROM cards AS T1 JOIN foreign_data AS FD ON T1.uuid = FD.uuid WHERE T1.name = 'annul' AND T1.number = '29';"
+}

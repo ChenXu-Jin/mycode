@@ -1,0 +1,5 @@
+{
+    "1447": "SELECT DISTINCT T1.event_name, T1.location FROM event T1 LEFT JOIN budget T2 ON T1.event_id = T2.link_to_event WHERE T2.remaining > 0 AND T2.remaining IS NOT NULL AND T2.amount IS NOT NULL AND T2.link_to_event IS NOT NULL;",
+    "538": "SELECT Title FROM posts WHERE OwnerUserId = (SELECT Id FROM users WHERE DisplayName = 'csgillespie') AND Title IS NOT NULL;",
+    "350": "SELECT FD.language FROM cards AS T1 JOIN foreign_data AS FD ON T1.uuid = FD.uuid WHERE T1.name = 'annul' AND T1.number = '29';"
+}
