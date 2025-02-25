@@ -119,13 +119,13 @@
     },
     {
         "node_type": "sql_generation",
-        "chain_of_thought_reasoning": "To answer the question, I need to find the titles of the posts that are owned by the user with the display name 'csgillespie'. First, I'll need to look at the users table to find the user ID corresponding to this display name. After obtaining the user ID, I can then filter the posts table for any posts that have the OwnerUserId matching that user ID. Finally, I will select the Title of those posts. I will ensure to follow the guidelines about which columns to output and will only include the necessary data (the title of the posts). The final query will join the users table and the posts table, filtering based on the display name and selecting the title.",
-        "SQL": "SELECT T2.Title FROM users T1 JOIN posts T2 ON T1.Id = T2.OwnerUserId WHERE T1.DisplayName = 'csgillespie';",
+        "chain_of_thought_reasoning": "To answer the question, I need to identify the titles of the posts owned by the user 'csgillespie'. First, I will look for the corresponding user in the 'users' table to get the UserId for 'csgillespie', since posts are linked to users via the OwnerUserId. After retrieving the UserId, I will then query the 'posts' table to fetch the titles where the OwnerUserId matches this UserId. I will select only the Title column as asked, and according to the instructions, I will prefer the Id column if the title is not specified explicitly but since here we need the title, I will include it. I will also ensure to alias the tables for clarity in the SQL query.",
+        "SQL": "SELECT T2.Title FROM users AS T1 JOIN posts AS T2 ON T1.Id = T2.OwnerUserId WHERE T1.DisplayName = 'csgillespie'",
         "status": "success"
     },
     {
         "node_type": "self_reflexion",
-        "SQL": "SELECT COALESCE(T2.Title, 'No Title') FROM users T1 JOIN posts T2 ON T1.Id = T2.OwnerUserId WHERE T1.DisplayName = 'csgillespie' AND T2.Title IS NOT NULL;",
+        "SQL": "SELECT T2.Title FROM users AS T1 JOIN posts AS T2 ON T1.Id = T2.OwnerUserId WHERE T1.DisplayName = 'csgillespie'",
         "status": "success"
     },
     {
@@ -135,15 +135,15 @@
             "error": "--",
             "Question": "Please list the titles of the posts owned by the user csgillespie?",
             "Evidence": "\"csgillespie\" is the DisplayName of user",
-            "pred_sql": "SELECT T2.Title FROM users T1 JOIN posts T2 ON T1.Id = T2.OwnerUserId WHERE T1.DisplayName = 'csgillespie';",
+            "pred_sql": "SELECT T2.Title FROM users AS T1 JOIN posts AS T2 ON T1.Id = T2.OwnerUserId WHERE T1.DisplayName = 'csgillespie'",
             "gold_sql": "SELECT T1.Title FROM posts AS T1 INNER JOIN users AS T2 ON T1.OwnerUserId = T2.Id WHERE T2.DisplayName = 'csgillespie'"
         },
         "self_reflexion": {
-            "result": 0,
-            "error": "incorrect answer",
+            "result": 1,
+            "error": "--",
             "Question": "Please list the titles of the posts owned by the user csgillespie?",
             "Evidence": "\"csgillespie\" is the DisplayName of user",
-            "pred_sql": "SELECT COALESCE(T2.Title, 'No Title') FROM users T1 JOIN posts T2 ON T1.Id = T2.OwnerUserId WHERE T1.DisplayName = 'csgillespie' AND T2.Title IS NOT NULL;",
+            "pred_sql": "SELECT T2.Title FROM users AS T1 JOIN posts AS T2 ON T1.Id = T2.OwnerUserId WHERE T1.DisplayName = 'csgillespie'",
             "gold_sql": "SELECT T1.Title FROM posts AS T1 INNER JOIN users AS T2 ON T1.OwnerUserId = T2.Id WHERE T2.DisplayName = 'csgillespie'"
         },
         "status": "success"

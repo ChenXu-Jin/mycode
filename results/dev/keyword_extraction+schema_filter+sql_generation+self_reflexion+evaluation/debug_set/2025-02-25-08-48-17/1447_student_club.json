@@ -97,13 +97,13 @@
     },
     {
         "node_type": "sql_generation",
-        "chain_of_thought_reasoning": "To find the names and locations of events that underspend their budget, I need to join the 'event' table with the 'budget' table. The conditions specify that an event underspends its budget when the 'remaining' budget is greater than 0. Therefore, I will select the 'event_name' and 'location' from the 'event' table where there is a corresponding 'budget' record with a 'remaining' value greater than 0. I will use appropriate table aliases for clarity.",
+        "chain_of_thought_reasoning": "To address the question, we need to retrieve the names and locations of events where the budget has been underspent, which is defined by the condition that the remaining budget is greater than 0. This requires joining the 'event' table with the 'budget' table on the `event_id`, and then employing a filter on the `remaining` column from the budget table. The selected columns will thus be event_name from the event table and location from the event table. I will ensure to only select what was explicitly asked for, which are the name (event_name) and location of the events.",
         "SQL": "SELECT T1.event_name, T1.location FROM event T1 JOIN budget T2 ON T1.event_id = T2.link_to_event WHERE T2.remaining > 0",
         "status": "success"
     },
     {
         "node_type": "self_reflexion",
-        "SQL": "SELECT DISTINCT T1.event_name, T1.location FROM event T1 JOIN budget T2 ON T1.event_id = T2.link_to_event WHERE T2.remaining > 0",
+        "SQL": "SELECT T1.event_name, T1.location FROM event T1 JOIN budget T2 ON T1.event_id = T2.link_to_event WHERE T2.remaining > 0",
         "status": "success"
     },
     {
@@ -121,7 +121,7 @@
             "error": "--",
             "Question": "List the name and location of events that underspend its budget.",
             "Evidence": "name of event refers to event_name; underspend its budget refers to remaining > 0",
-            "pred_sql": "SELECT DISTINCT T1.event_name, T1.location FROM event T1 JOIN budget T2 ON T1.event_id = T2.link_to_event WHERE T2.remaining > 0",
+            "pred_sql": "SELECT T1.event_name, T1.location FROM event T1 JOIN budget T2 ON T1.event_id = T2.link_to_event WHERE T2.remaining > 0",
             "gold_sql": "SELECT DISTINCT T1.event_name, T1.location FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event WHERE T2.remaining > 0"
         },
         "status": "success"

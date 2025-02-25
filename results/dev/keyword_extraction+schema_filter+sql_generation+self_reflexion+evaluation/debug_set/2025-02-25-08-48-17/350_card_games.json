@@ -5,7 +5,7 @@
             "alternative languages",
             "card",
             "Annul",
-            "numbered 29",
+            "29",
             "name = 'annul'",
             "number = '29'"
         ],
@@ -161,31 +161,30 @@
     },
     {
         "node_type": "sql_generation",
-        "chain_of_thought_reasoning": "To answer the question, I need to find the card with the name 'Annul' and number '29'. This information can be retrieved from the 'cards' table. Next, I need to find the alternative languages for this card, which will be found in the 'foreign_data' table, using the UUID from the 'cards' table to link the two tables together. Therefore, I will join the 'cards' table with the 'foreign_data' table based on the UUID, filtering for the specific card name and number. Finally, I will select the 'language' column from the 'foreign_data' table to display the alternative languages available for the specified card.",
-        "SQL": "SELECT FD.language FROM cards AS C JOIN foreign_data AS FD ON C.uuid = FD.uuid WHERE C.name = 'Annul' AND C.number = '29'",
-        "status": "success"
+        "status": "error",
+        "error": "<class 'StopIteration'>: <>"
     },
     {
         "node_type": "self_reflexion",
-        "SQL": "SELECT FD.language FROM cards AS C JOIN foreign_data AS FD ON C.uuid = FD.uuid WHERE C.name = 'Annul' AND C.number = '29'",
-        "status": "success"
+        "status": "error",
+        "error": "<class 'KeyError'>: <'SQL'>"
     },
     {
         "node_type": "evaluation",
         "sql_generation": {
-            "result": 1,
-            "error": "--",
+            "result": "error happends during generation or revision",
+            "error": "<class 'StopIteration'>: <>",
             "Question": "State the alternative languages available for card named Annul numbered 29.",
             "Evidence": "annul refers to name = 'annul'; numbered 29 refers to number = '29';",
-            "pred_sql": "SELECT FD.language FROM cards AS C JOIN foreign_data AS FD ON C.uuid = FD.uuid WHERE C.name = 'Annul' AND C.number = '29'",
+            "pred_sql": "--",
             "gold_sql": "SELECT T2.language FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid WHERE T1.name = 'Annul' AND T1.number = 29"
         },
         "self_reflexion": {
-            "result": 1,
-            "error": "--",
+            "result": "error happends during generation or revision",
+            "error": "<class 'KeyError'>: <'SQL'>",
             "Question": "State the alternative languages available for card named Annul numbered 29.",
             "Evidence": "annul refers to name = 'annul'; numbered 29 refers to number = '29';",
-            "pred_sql": "SELECT FD.language FROM cards AS C JOIN foreign_data AS FD ON C.uuid = FD.uuid WHERE C.name = 'Annul' AND C.number = '29'",
+            "pred_sql": "--",
             "gold_sql": "SELECT T2.language FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid WHERE T1.name = 'Annul' AND T1.number = 29"
         },
         "status": "success"

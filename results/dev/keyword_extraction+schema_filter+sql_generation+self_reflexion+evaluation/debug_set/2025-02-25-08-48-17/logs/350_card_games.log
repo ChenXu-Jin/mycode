@@ -47,7 +47,7 @@ Only output the Python list, no explanations needed.
     "alternative languages",
     "card",
     "Annul",
-    "numbered 29",
+    "29",
     "name = 'annul'",
     "number = '29'"
 ]
@@ -244,11 +244,7 @@ Take a deep breath and think step by step to find the correct sqlite SQL query. 
 ############################## AI at step sql_generate ##############################
 
 {
-    "chain_of_thought_reasoning": "To answer the question, I need to find the card with the name 'Annul' and number '29'. This information can be retrieved from the 'cards' table. Next, I need to find the alternative languages for this card, which will be found in the 'foreign_data' table, using the UUID from the 'cards' table to link the two tables together. Therefore, I will join the 'cards' table with the 'foreign_data' table based on the UUID, filtering for the specific card name and number. Finally, I will select the 'language' column from the 'foreign_data' table to display the alternative languages available for the specified card.",
-    "SQL": "SELECT FD.language FROM cards AS C JOIN foreign_data AS FD ON C.uuid = FD.uuid WHERE C.name = 'Annul' AND C.number = '29'"
+    "chain_of_thought_reasoning": "To find the alternative languages available for the card named 'Annul' with the number '29', I need to use two tables: the 'cards' table to filter the card by its name and number, and the 'foreign_data' table to get the languages related to that card. First, I'll select the necessary columns from 'foreign_data', which is the 'language'. Then, I will join the 'foreign_data' table with the 'cards' table on the 'uuid' column to ensure we are looking at the correct card. Finally, I'll filter the results based on the card's name and number as specified in the question, using a condition in the WHERE clause.",
+    "SQL": "SELECT T2.language FROM foreign_data T1 JOIN cards T2 ON T1.uuid = T2.uuid WHERE T2.name = 'Annul' AND T2.number = '29';"
 }
-
-############################## human at step evaluate ##############################
-
-{}
 

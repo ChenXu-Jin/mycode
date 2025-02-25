@@ -132,17 +132,23 @@ class Evaluator:
 
         Logger().log_conversation(text=execute_result, _from="human", step="evaluate")
 
-        all_results = []
-        for item in execute_result:
-            for column in item:
-                all_results.append(str(column))
-        
-        if "None" in all_results or "-" in all_results or execute_result is None:
+        if not execute_result or execute_result == []:
             evaluate_result["judgment"] = "error"
-            evaluate_result["message"] = "SQL execution result is None"
-        else:
+            evaluate_result["message"] = "SQL execution result is empty or None"
+            return evaluate_result
+        
+        contains_valid_data = False
+        for item in execute_result:
+            if item is not None and all(val is not None for val in item):  # Ensure there are no None values in the tuple
+                contains_valid_data = True
+                break
+
+        if contains_valid_data:
             evaluate_result["judgment"] = "Valid"
             evaluate_result["message"] = "SQL is valid"
+        else:
+            evaluate_result["judgment"] = "error"
+            evaluate_result["message"] = "SQL execution result contains only None values"
 
         return evaluate_result
 

@@ -35,8 +35,8 @@ Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 
 Task:
 Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
 
-Question: State the alternative languages available for card named Annul numbered 29.
-Hint: annul refers to name = 'annul'; numbered 29 refers to number = '29';
+Question: List the name and location of events that underspend its budget.
+Hint: name of event refers to event_name; underspend its budget refers to remaining > 0
 
 Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
 Only output the Python list, no explanations needed. 
@@ -44,12 +44,10 @@ Only output the Python list, no explanations needed.
 ############################## AI at step keyword_extraction ##############################
 
 [
-    "alternative languages",
-    "card",
-    "Annul",
-    "numbered 29",
-    "name = 'annul'",
-    "number = '29'"
+    "name and location of events",
+    "underspend its budget",
+    "event_name",
+    "remaining > 0"
 ]
 
 ############################## Human at step sql_generate ##############################
@@ -61,152 +59,97 @@ Before generating the final SQL query think step by step on how to write the que
 
 Database Schema
 ###
-CREATE TABLE cards (
-  id                      INTEGER           not null
-        primary key autoincrement,
-  artist                  TEXT,
-  asciiName               TEXT,
-  availability            TEXT,
-  borderColor             TEXT,
-  cardKingdomFoilId       TEXT,
-  cardKingdomId           TEXT,
-  colorIdentity           TEXT,
-  colorIndicator          TEXT,
-  colors                  TEXT,
-  convertedManaCost       REAL,
-  duelDeck                TEXT,
-  edhrecRank              INTEGER,
-  faceConvertedManaCost   REAL,
-  faceName                TEXT,
-  flavorName              TEXT,
-  flavorText              TEXT,
-  frameEffects            TEXT,
-  frameVersion            TEXT,
-  hand                    TEXT,
-  hasAlternativeDeckLimit INTEGER default 0 not null,
-  hasContentWarning       INTEGER default 0 not null,
-  hasFoil                 INTEGER default 0 not null,
-  hasNonFoil              INTEGER default 0 not null,
-  isAlternative           INTEGER default 0 not null,
-  isFullArt               INTEGER default 0 not null,
-  isOnlineOnly            INTEGER default 0 not null,
-  isOversized             INTEGER default 0 not null,
-  isPromo                 INTEGER default 0 not null,
-  isReprint               INTEGER default 0 not null,
-  isReserved              INTEGER default 0 not null,
-  isStarter               INTEGER default 0 not null,
-  isStorySpotlight        INTEGER default 0 not null,
-  isTextless              INTEGER default 0 not null,
-  isTimeshifted           INTEGER default 0 not null,
-  keywords                TEXT,
-  layout                  TEXT,
-  leadershipSkills        TEXT,
-  life                    TEXT,
-  loyalty                 TEXT,
-  manaCost                TEXT,
-  mcmId                   TEXT,
-  mcmMetaId               TEXT,
-  mtgArenaId              TEXT,
-  mtgjsonV4Id             TEXT,
-  mtgoFoilId              TEXT,
-  mtgoId                  TEXT,
-  multiverseId            TEXT,
-  name                    TEXT,
-  number                  TEXT,
-  originalReleaseDate     TEXT,
-  originalText            TEXT,
-  originalType            TEXT,
-  otherFaceIds            TEXT,
-  power                   TEXT,
-  printings               TEXT,
-  promoTypes              TEXT,
-  purchaseUrls            TEXT,
-  rarity                  TEXT,
-  scryfallId              TEXT,
-  scryfallIllustrationId  TEXT,
-  scryfallOracleId        TEXT,
-  setCode                 TEXT,
-  side                    TEXT,
-  subtypes                TEXT,
-  supertypes              TEXT,
-  tcgplayerProductId      TEXT,
-  text                    TEXT,
-  toughness               TEXT,
-  type                    TEXT,
-  types                   TEXT,
-  uuid                    TEXT              not null
-        unique,
-  variations              TEXT,
-  watermark               TEXT
+CREATE TABLE event (
+  event_id   TEXT
+        constraint event_pk
+            primary key,
+  event_name TEXT,
+  event_date TEXT,
+  type       TEXT,
+  notes      TEXT,
+  location   TEXT,
+  status     TEXT
 );
 
-CREATE TABLE foreign_data (
-  id           INTEGER not null
-        primary key autoincrement,
-  flavorText   TEXT,
-  language     TEXT,
-  multiverseid INTEGER,
-  name         TEXT,
-  text         TEXT,
-  type         TEXT,
-  uuid         TEXT
-        references cards (uuid)
+CREATE TABLE major (
+  major_id   TEXT
+        constraint major_pk
+            primary key,
+  major_name TEXT,
+  department TEXT,
+  college    TEXT
 );
 
-CREATE TABLE legalities (
-  id     INTEGER not null
-        primary key autoincrement,
-  format TEXT,
-  status TEXT,
-  uuid   TEXT
-        references cards (uuid)
-            on update cascade on delete cascade
+CREATE TABLE zip_code (
+  zip_code    INTEGER
+        constraint zip_code_pk
+            primary key,
+  type        TEXT,
+  city        TEXT,
+  county      TEXT,
+  state       TEXT,
+  short_state TEXT
 );
 
-CREATE TABLE sets (
-  id               INTEGER           not null
-        primary key autoincrement,
-  baseSetSize      INTEGER,
-  block            TEXT,
-  booster          TEXT,
-  code             TEXT              not null
-        unique,
-  isFoilOnly       INTEGER default 0 not null,
-  isForeignOnly    INTEGER default 0 not null,
-  isNonFoilOnly    INTEGER default 0 not null,
-  isOnlineOnly     INTEGER default 0 not null,
-  isPartialPreview INTEGER default 0 not null,
-  keyruneCode      TEXT,
-  mcmId            INTEGER,
-  mcmIdExtras      INTEGER,
-  mcmName          TEXT,
-  mtgoCode         TEXT,
-  name             TEXT,
-  parentCode       TEXT,
-  releaseDate      DATE,
-  tcgplayerGroupId INTEGER,
-  totalSetSize     INTEGER,
-  type             TEXT
+CREATE TABLE attendance (
+  link_to_event  TEXT,
+  link_to_member TEXT,
+  primary key (link_to_event, link_to_member),
+  foreign key (link_to_event) references event(event_id),
+  foreign key (link_to_member) references member(member_id)
 );
 
-CREATE TABLE set_translations (
-  id          INTEGER not null
-        primary key autoincrement,
-  language    TEXT,
-  setCode     TEXT
-        references sets (code)
-            on update cascade on delete cascade,
-  translation TEXT
+CREATE TABLE budget (
+  budget_id     TEXT
+            primary key,
+  category      TEXT,
+  spent         REAL,
+  remaining     REAL,
+  amount        INTEGER,
+  event_status  TEXT,
+  link_to_event TEXT,
+  foreign key (link_to_event) references event(event_id)
 );
 
-CREATE TABLE rulings (
-  id   INTEGER not null
-        primary key autoincrement,
-  date DATE,
-  text TEXT,
-  uuid TEXT
-        references cards (uuid)
-            on update cascade on delete cascade
+CREATE TABLE expense (
+  expense_id          TEXT
+            primary key,
+  expense_description TEXT,
+  expense_date        TEXT,
+  cost                REAL,
+  approved            TEXT,
+  link_to_member      TEXT,
+  link_to_budget      TEXT,
+  foreign key (link_to_budget) references budget(budget_id),
+  foreign key (link_to_member) references member(member_id)
+);
+
+CREATE TABLE income (
+  income_id      TEXT
+        constraint income_pk
+            primary key,
+  date_received  TEXT,
+  amount         INTEGER,
+  source         TEXT,
+  notes          TEXT,
+  link_to_member TEXT,
+  foreign key (link_to_member) references member(member_id)
+);
+
+CREATE TABLE member (
+  member_id     TEXT
+        constraint member_pk
+            primary key,
+  first_name    TEXT,
+  last_name     TEXT,
+  email         TEXT,
+  position      TEXT,
+  t_shirt_size  TEXT,
+  phone         TEXT,
+  zip           INTEGER,
+  link_to_major TEXT,
+  foreign key (link_to_major) references major(major_id),
+  foreign key (zip) references zip_code(zip_code)
 );
 
 This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
@@ -225,10 +168,10 @@ Database admin instructions:
 
 ###
 Question: 
-State the alternative languages available for card named Annul numbered 29. 
+List the name and location of events that underspend its budget. 
 
 Hint:
-annul refers to name = 'annul'; numbered 29 refers to number = '29';
+name of event refers to event_name; underspend its budget refers to remaining > 0
 
 Please respond with a JSON object structured as follows:
 
@@ -244,11 +187,200 @@ Take a deep breath and think step by step to find the correct sqlite SQL query. 
 ############################## AI at step sql_generate ##############################
 
 {
-    "chain_of_thought_reasoning": "To find the alternative languages available for the card named 'Annul' with the number '29', I need to look in the 'foreign_data' table, which contains relevant information about card translations including language and card UUIDs. First, I'll get the UUID of the card 'Annul' with the specified number from the 'cards' table. Then, I will join this result with the 'foreign_data' table to retrieve the language information associated with that UUID. The 'name' column maps to the card's name, and the 'number' column directly maps to the card's number as specified in the question. I will utilize the appropriate filtering conditions to ensure I accurately capture the required data.",
-    "SQL": "SELECT FD.language FROM cards AS C JOIN foreign_data AS FD ON C.uuid = FD.uuid WHERE C.name = 'annul' AND C.number = '29';"
+    "chain_of_thought_reasoning": "To address the question, we need to retrieve the names and locations of events where the budget has been underspent, which is defined by the condition that the remaining budget is greater than 0. This requires joining the 'event' table with the 'budget' table on the `event_id`, and then employing a filter on the `remaining` column from the budget table. The selected columns will thus be event_name from the event table and location from the event table. I will ensure to only select what was explicitly asked for, which are the name (event_name) and location of the events.",
+    "SQL": "SELECT T1.event_name, T1.location FROM event T1 JOIN budget T2 ON T1.event_id = T2.link_to_event WHERE T2.remaining > 0"
 }
 
 ############################## human at step evaluate ##############################
 
-[]
+[
+    [
+        "September Speaker",
+        "MU 215"
+    ],
+    [
+        "October Meeting",
+        "MU 215"
+    ],
+    [
+        "February Speaker",
+        "MU 215"
+    ],
+    [
+        "February Speaker",
+        "MU 215"
+    ],
+    [
+        "January Speaker",
+        "MU 215"
+    ],
+    [
+        "April Meeting",
+        "MU 215"
+    ],
+    [
+        "February Speaker",
+        "MU 215"
+    ],
+    [
+        "April Speaker",
+        "MU 215"
+    ],
+    [
+        "October Speaker",
+        "MU 215"
+    ],
+    [
+        "January Speaker",
+        "MU 215"
+    ],
+    [
+        "November Meeting",
+        "MU 215"
+    ],
+    [
+        "Officers meeting - March",
+        null
+    ],
+    [
+        "September Meeting",
+        "MU 215"
+    ],
+    [
+        "November Speaker",
+        "MU 215"
+    ],
+    [
+        "March Meeting",
+        "MU 215"
+    ],
+    [
+        "Registration",
+        "Campus Common"
+    ],
+    [
+        "November Speaker",
+        "MU 215"
+    ],
+    [
+        "October Meeting",
+        "MU 215"
+    ],
+    [
+        "March Meeting",
+        "MU 215"
+    ],
+    [
+        "April Speaker",
+        "MU 215"
+    ],
+    [
+        "March Speaker",
+        "MU 215"
+    ],
+    [
+        "February Meeting",
+        "MU 215"
+    ],
+    [
+        "January Speaker",
+        "MU 215"
+    ],
+    [
+        "September Speaker",
+        "MU 215"
+    ],
+    [
+        "October Speaker",
+        "MU 215"
+    ],
+    [
+        "Yearly Kickoff",
+        "MU 215"
+    ],
+    [
+        "Officers meeting - January",
+        null
+    ],
+    [
+        "Officers meeting - February",
+        null
+    ],
+    [
+        "March Speaker",
+        "MU 215"
+    ],
+    [
+        "January Speaker",
+        "MU 215"
+    ],
+    [
+        "March Speaker",
+        "MU 215"
+    ],
+    [
+        "February Speaker",
+        "MU 215"
+    ],
+    [
+        "April Speaker",
+        "MU 215"
+    ],
+    [
+        "February Meeting",
+        "MU 215"
+    ],
+    [
+        "January Meeting",
+        "MU 215"
+    ],
+    [
+        "January Meeting",
+        "MU 215"
+    ],
+    [
+        "October Speaker",
+        "MU 215"
+    ],
+    [
+        "April Meeting",
+        "MU 215"
+    ],
+    [
+        "October Speaker",
+        "MU 215"
+    ],
+    [
+        "September Speaker",
+        "MU 215"
+    ],
+    [
+        "April Speaker",
+        "MU 215"
+    ],
+    [
+        "November Speaker",
+        "MU 215"
+    ],
+    [
+        "Yearly Kickoff",
+        "MU 215"
+    ],
+    [
+        "September Meeting",
+        "MU 215"
+    ],
+    [
+        "Officers meeting - April",
+        null
+    ],
+    [
+        "November Speaker",
+        "MU 215"
+    ],
+    [
+        "March Speaker",
+        "MU 215"
+    ]
+]
 
