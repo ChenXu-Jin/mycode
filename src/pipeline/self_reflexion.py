@@ -31,7 +31,7 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
 
     actor = Actor(task=task, tentative_schema=tentative_schema)
     evaluator = Evaluator(task=task, current_sql=first_time_sql)
-    self_reflection = SelfReflection(task=task)
+    self_reflection = SelfReflection(task=task, tentative_schema=tentative_schema)
 
     current_sql = first_time_sql
     iteration_count = 0
@@ -48,8 +48,8 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
             return {"SQL": current_sql}
         
         logging.info("SQL failed evaluation. Generating feedback.")
-        execute_result = evaluator.execute_current_sql()
-        current_sql_feedback = self_reflection.generate_feedback_mems(execute_result, evaluation_result, current_sql)
+        sql_error = evaluation_result["message"]
+        current_sql_feedback = self_reflection.generate_feedback_mems(sql=current_sql, sql_error=sql_error)
 
         long_term_mems = Memory().get_exist_memory(current_sql_feedback)
 
@@ -139,7 +139,8 @@ class Evaluator:
         
         contains_valid_data = False
         for item in execute_result:
-            if item is not None and all(val is not None for val in item):  # Ensure there are no None values in the tuple
+            # Check if any value in the tuple is not None
+            if item is not None and any(val is not None for val in item):
                 contains_valid_data = True
                 break
 
@@ -161,18 +162,21 @@ class Evaluator:
             return {"result": str(e), "STATS": "ERROR"}
 
 class SelfReflection:
-    def __init__(self, task: Any) -> None:
+    def __init__(self, task: Any, tentative_schema: Dict[str, Any]) -> None:
         self.task = task
+        self.tentative_schema = tentative_schema
     
-    def generate_feedback_mems(self, execute_result: Dict[str, Any], evaluate_result: Dict[str, Any], sql: str) -> str:
+    def generate_feedback_mems(self, sql: str, sql_error: str) -> str:
         logging.info(f"SelfReflection start working for task: {self.task.question_id}")
 
         request_kwargs = {
+            "SQL": sql,
             "QUESTION": self.task.question,
-            "SQL": sql
+            "GUIDANCE": self.task.evidence
         }
 
-        engine, prompt, parser = PipelineManager().get_engine_prompt_parser(execute_result=execute_result, evaluate_result=evaluate_result)
+        db_schema_string = DatabaseManager().get_database_schema_string(self.tentative_schema)
+        engine, prompt, parser = PipelineManager().get_engine_prompt_parser(schema_string=db_schema_string, sql_error=sql_error)
         sampling_count = PipelineManager().self_reflexion.get("sampling_count", 1)
         response = async_llm_chain_call(
             engine=engine, 

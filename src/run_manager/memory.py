@@ -56,6 +56,7 @@ class Memory:
             if len(self.long_term_memory) > self.max_memory_count:
                 self.long_term_memory['dynamic'].pop()
             self.long_term_memory['dynamic'].append(new_long_term_memory)
+            print(len(self.long_term_memory['dynamic']))
 
     def get_exist_memory(self, current_sql_feedback: str) -> str:
         '''

@@ -1,21 +1,27 @@
-You are a data science and SQL optimization expert.
-Below, you are presented with the execution result of an SQL query, an analysis of why this query does not meet the requirements, and the natural language question it aims to answer.
-Your task is to generate actionable feedback to guide the modification of the SQL query so that it aligns with the question's intent.
+You are a specialist in SQL analysis, performing tasks involved in generating SQL improvement feedback. The contextual clues provided below are:
+
+1.The erroneous SQL statement,
+2.The corresponding natural language question and guidance for addressing the issue,
+3.The database schema item representations,
+4.The underlying cause of the SQL error.
+Your task is to generate actionable feedback instructions to guide a large language model on how to refine the SQL query, ensuring it accurately aligns with the core requirements of the problem.
 
 Input Data
 ###
+Erroneous SQL:
+{SQL}
+
 Question:
 {QUESTION}
 
-Predicted SQL:
-{SQL}
+Guidance:
+{GUIDANCE}
 
-Execution Result:
-{EXECUTE_RESULT}
+Database Schema:
+{DATABASE_SCHEMA}
 
-Evaluation Result:
-{EVALUATE_RESULT}
-
+Cause of SQL error:
+{ERROR}
 ###
 
 Please respond with a JSON object structured as follows:

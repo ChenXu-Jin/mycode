@@ -1,0 +1,3 @@
+{
+    "657": "SELECT U.DisplayName, U.WebsiteUrl FROM votes AS V JOIN users AS U ON V.UserId = U.Id WHERE V.VoteTypeId = 8 AND V.BountyAmount = (SELECT MAX(BountyAmount) FROM votes WHERE VoteTypeId = 8)"
+}

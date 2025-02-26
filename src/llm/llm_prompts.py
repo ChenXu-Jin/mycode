@@ -15,7 +15,7 @@ def get_llm_prompt(
         "keyword_extraction": {"input_variables": ["HINT", "QUESTION"]},
         "sql_generation": {"input_variables": ["HINT", "QUESTION"]},
         "actor_generate_sql": {"input_variables": ["HINT", "QUESTION"]},
-        "generate_feedback_mems": {"input_variables": ["HINT", "QUESTION"]},
+        "generate_feedback_mems": {"input_variables": ["SQL", "QUESTION", "GUIDANCE"]},
         "feedback_summarize": {"input_variables": ["QUESTION", "INCORRECT_SQL", "CORRECT_SQL"]}
     }
 
@@ -33,10 +33,8 @@ def get_llm_prompt(
         partial_variables["SHORT_TERM_MEMS"] = kwargs["short_term_mems"]
     if "schema_string" in kwargs:
         partial_variables["DATABASE_SCHEMA"] = kwargs["schema_string"]
-    if "execute_result" in kwargs:
-        partial_variables["EXECUTE_RESULT"] = kwargs["execute_result"]
-    if "evaluate_result" in kwargs:
-        partial_variables["EVALUATE_RESULT"] = kwargs["evaluate_result"]
+    if "sql_error" in kwargs:
+        partial_variables["ERROR"] = kwargs["sql_error"]
     if "feedback_str" in kwargs:
         partial_variables['CANDIDATE_FEEDBACK'] = kwargs["feedback_str"]
 
