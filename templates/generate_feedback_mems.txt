@@ -20,7 +20,7 @@ Guidance:
 Database Schema:
 {DATABASE_SCHEMA}
 
-Cause of SQL error:
+Cause of SQL Error:
 {ERROR}
 ###
 
