@@ -1,4 +1,0 @@
-{
-    "1447": "SELECT T1.event_name, T1.location FROM event T1 JOIN budget T2 ON T1.event_id = T2.link_to_event WHERE T2.remaining > 0",
-    "538": "SELECT T2.Title FROM users AS T1 JOIN posts AS T2 ON T1.Id = T2.OwnerUserId WHERE T1.DisplayName = 'csgillespie'"
-}

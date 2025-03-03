@@ -129,33 +129,7 @@
     },
     {
         "node_type": "sql_generation",
-        "chain_of_thought_reasoning": "To answer the question, the first step is to identify schools that have an average Math score greater than 560 from the 'satscores' table. The relevant column for Math scores in the 'satscores' table is 'AvgScrMath'. Next, we need to determine which of these schools are charter-funded. From the 'schools' table, we can identify charter-funded schools using the 'FundingType' column. Therefore, we will need to join the 'satscores' and 'schools' tables on the 'cds' and 'CDSCode' columns respectively. After filtering the schools based on the average Math score and 'FundingType', we will count the number of schools that meet the criteria. The count will be returned as the main result of the query. The use of SQL COUNT function will help us achieve this outcome, and we need to group the results to get a single aggregated count value.",
-        "SQL": "SELECT COUNT(*) FROM satscores T1 JOIN schools T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.FundingType = 'Charter';",
-        "status": "success"
-    },
-    {
-        "node_type": "self_reflexion",
-        "SQL": "SELECT COUNT(*) FROM satscores T1 JOIN schools T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.FundingType = 'Charter';",
-        "status": "success"
-    },
-    {
-        "node_type": "evaluation",
-        "sql_generation": {
-            "result": 0,
-            "error": "incorrect answer",
-            "Question": "Among the schools with the average score in Math over 560 in the SAT test, how many schools are directly charter-funded?",
-            "Evidence": "",
-            "pred_sql": "SELECT COUNT(*) FROM satscores T1 JOIN schools T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.FundingType = 'Charter';",
-            "gold_sql": "SELECT COUNT(T2.`School Code`) FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.`Charter Funding Type` = 'Directly funded'"
-        },
-        "self_reflexion": {
-            "result": 0,
-            "error": "incorrect answer",
-            "Question": "Among the schools with the average score in Math over 560 in the SAT test, how many schools are directly charter-funded?",
-            "Evidence": "",
-            "pred_sql": "SELECT COUNT(*) FROM satscores T1 JOIN schools T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.FundingType = 'Charter';",
-            "gold_sql": "SELECT COUNT(T2.`School Code`) FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T1.AvgScrMath > 560 AND T2.`Charter Funding Type` = 'Directly funded'"
-        },
-        "status": "success"
+        "status": "error",
+        "error": "<class 'StopIteration'>: <>"
     }
 ]

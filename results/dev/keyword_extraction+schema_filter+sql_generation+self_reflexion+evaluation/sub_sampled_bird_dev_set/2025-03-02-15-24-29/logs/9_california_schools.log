@@ -35,8 +35,8 @@ Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 
 Task:
 Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
 
-Question: Give the name of the league with the highest matches of all time and how many matches were played in the said league.
-Hint: name of the league refers to League.name; league with highest matches of all time refers to MAX(COUNT(league_id));
+Question: Among the schools with the average score in Math over 560 in the SAT test, how many schools are directly charter-funded?
+Hint: 
 
 Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
 Only output the Python list, no explanations needed. 
@@ -44,12 +44,11 @@ Only output the Python list, no explanations needed.
 ############################## AI at step keyword_extraction ##############################
 
 [
-    "name of the league",
-    "League.name",
-    "league with highest matches of all time",
-    "MAX(COUNT(league_id))",
-    "matches",
-    "played",
-    "how many"
+    "schools",
+    "average score",
+    "Math",
+    "560",
+    "SAT test",
+    "charter-funded"
 ]
 
