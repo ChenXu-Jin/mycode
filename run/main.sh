@@ -2,7 +2,7 @@ data_mode='dev'
 data_path='/root/data/dev/debug_set.json'
 
 #all nodes: keyword_extraction schema_filter sql_generation self_reflexion evaluation
-pipeline_nodes='keyword_extraction+schema_filter+sql_generation+evaluation'
+pipeline_nodes='keyword_extraction+schema_filter+sql_generation+self_reflexion+evaluation'
 
 ########## engines ##########
 engine1='gemini-1.5-pro'
@@ -26,19 +26,16 @@ pipeline_setup='{
     "sql_generation": {
         "engine": "'${engine6}'",
         "temperature": 0,
-        "base_uri": "",
         "sampling_count": 1
     },
     "self_reflexion": {
-        "engine": "'${engine3}'",
+        "engine": "'${engine6}'",
         "temperature": 0,
-        "base_uri": "",
         "sampling_count": 1
     },
     "feedback_summarize": {
-        "engine": "'${engine4}'",
-        "temperature": 0,
-        "base_uri": ""
+        "engine": "'${engine6}'",
+        "temperature": 0
     }
 }'
 
