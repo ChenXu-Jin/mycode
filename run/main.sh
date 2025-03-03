@@ -2,7 +2,7 @@ data_mode='dev'
 data_path='/root/data/dev/debug_set.json'
 
 #all nodes: keyword_extraction schema_filter sql_generation self_reflexion evaluation
-pipeline_nodes='keyword_extraction+schema_filter+sql_generation+self_reflexion+evaluation'
+pipeline_nodes='keyword_extraction+schema_filter+sql_generation+evaluation'
 
 ########## engines ##########
 engine1='gemini-1.5-pro'
@@ -10,6 +10,7 @@ engine2='gpt-3.5-turbo'
 engine3='gpt-4o-mini'
 engine4='gpt-4-turbo'
 engine5='claude-3-opus-20240229'
+engine6='gemini-2.0-flash'
 
 schema_filter_mode="ask_model"
 ### pipeline nodes setup ###
@@ -23,7 +24,7 @@ pipeline_setup='{
         "mode": "'${schema_filter_mode}'"
     },
     "sql_generation": {
-        "engine": "'${engine3}'",
+        "engine": "'${engine6}'",
         "temperature": 0,
         "base_uri": "",
         "sampling_count": 1

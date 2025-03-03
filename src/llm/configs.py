@@ -5,9 +5,8 @@ from typing import Dict, Any
 
 ENGINE_CONFIGS: Dict[str, Dict[str, Any]] = {
     "gemini-1.5-pro": {
-        "constructor": ChatGoogleGenerativeAI,
-        "params": {"model": "gemini-1.5-pro", "temperature": 0, "convert_system_message_to_human": True},
-        "preprocess": lambda x: x.to_messages()
+        "constructor": ChatOpenAI,
+        "params": {"model": "gemini-1.5-pro", "temperature": 0},
     },
     "gpt-3.5-turbo": {
         "constructor": ChatOpenAI,
@@ -22,7 +21,11 @@ ENGINE_CONFIGS: Dict[str, Dict[str, Any]] = {
         "params": {"model": "gpt-4-turbo", "temperature": 0}
     },
     "claude-3-opus-20240229": {
-        "constructor": ChatAnthropic,
+        "constructor": ChatOpenAI,
         "params": {"model": "claude-3-opus-20240229", "temperature": 0}
     },
+    "gemini-2.0-flash": {
+        "constructor": ChatOpenAI,
+        "params": {"model": "gemini-2.0-flash", "temperature": 0}
+    }
 }
