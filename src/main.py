@@ -11,6 +11,7 @@ def args_parse() -> argparse.Namespace:
     parser.add_argument('--pipeline_nodes', type=str, required=True)
     parser.add_argument('--pipeline_setup', type=str, required=True)
     parser.add_argument('--log_level', type=str, default='warning')
+    parser.add_argument('--max_memory_count', type=int, default=10)
     args = parser.parse_args()
     args.run_start_time = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 

@@ -23,7 +23,8 @@ class RunManager:
 
         self.result_directory = self.get_result_directory()
         self.statistics_manager = StatisticsManager(self.result_directory)
-        self.memory = Memory(max_memory_count=10)
+        self.memory = Memory(max_memory_count=self.args.max_memory_count)
+        print(self.memory.max_memory_count)
         
     def get_result_directory(self) -> str:
         data_mode = self.args.data_mode

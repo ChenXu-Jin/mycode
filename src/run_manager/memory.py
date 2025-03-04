@@ -53,8 +53,8 @@ class Memory:
         new_long_term_memory = self.feedback_summarize(incorrect_sql, correct_sql, question)
 
         if new_long_term_memory is not None:
-            if len(self.long_term_memory) > self.max_memory_count:
-                self.long_term_memory['dynamic'].pop()
+            if len(self.long_term_memory['dynamic']) >= self.max_memory_count:
+                self.long_term_memory['dynamic'].pop(0)
             self.long_term_memory['dynamic'].append(new_long_term_memory)
             print(len(self.long_term_memory['dynamic']))
 
