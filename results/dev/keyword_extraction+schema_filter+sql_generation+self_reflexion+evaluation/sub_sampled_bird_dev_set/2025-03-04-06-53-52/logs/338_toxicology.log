@@ -1,0 +1,644 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: What is the atom ID of double bonded carbon in TR012 molecule?
+Hint: carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "atom ID",
+    "double bonded carbon",
+    "TR012 molecule",
+    "carbon",
+    "element = 'c'",
+    "double bond",
+    "bond_type = ' = '"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+What is the atom ID of double bonded carbon in TR012 molecule? 
+
+Hint:
+carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the atom ID of a double bonded carbon atom in a specific molecule (TR012). This requires joining the `atom`, `bond`, `connected`, and `molecule` tables. The `atom` table contains the atom ID and element type ('c' for carbon). The `molecule` table contains the molecule ID and label ('TR012' is the label). The `bond` table specifies the bond type (' = ' for double bond). The `connected` table links atoms to bonds. I need to filter the atoms based on element = 'c' and molecule label = 'TR012', and then find the connections involving double bonds.",
+    "SQL": "SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '='"
+}
+
+############################## human at step evaluate ##############################
+
+[]
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a specialist in SQL analysis, performing tasks involved in generating SQL improvement feedback. The contextual clues provided below are:
+
+1.The erroneous SQL statement,
+2.The corresponding natural language question and guidance for addressing the issue,
+3.The database schema item representations,
+4.The underlying cause of the SQL error.
+Your task is to generate actionable feedback instructions to guide a large language model on how to refine the SQL query, ensuring it accurately aligns with the core requirements of the problem.
+
+Input Data
+###
+Erroneous SQL:
+SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '='
+
+Question:
+What is the atom ID of double bonded carbon in TR012 molecule?
+
+Guidance:
+carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Database Schema:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Cause of SQL Error:
+SQL execution result is empty or None
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "The current query joins `atom` with `connected` and `bond` tables, but it does not ensure that the `atom_id` in `connected` is specifically the atom involved in the double bond. Also, it only considers one atom in the double bond within connected table, but double bond must connect with another atom. To fix this, modify the query as follows:\n\n1.  Introduce a subquery or another join to find `atom_id`s (`atom_id2`) that are also connected to a double bond. This ensures that the selected `atom_id` is indeed part of a double bond.\n2.  Join the `connected` table with the `bond` table to filter double bonds.\n3. Filter by molecule label and element to find double bonded carbon atoms.\n\nHere's a possible revised query structure:\n\n```sql\nSELECT T1.atom_id\nFROM atom AS T1\nINNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id\nINNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id\nINNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id\nWHERE T2.label = 'TR012'\n  AND T1.element = 'c'\n  AND T4.bond_type = '='\n  AND EXISTS (SELECT 1 FROM connected AS T5 WHERE T5.atom_id2 = T1.atom_id AND T5.bond_id IN (SELECT bond_id FROM bond WHERE bond_type = '='))\n```\n\nThis revised query uses `EXISTS` to verify that there exists a connection to the `atom_id` with a double bond, ensuring that the selected atom is part of that bond."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. Consider case-insensitive matching for string comparisons in the WHERE clause, especially when dealing with elements or other text-based attributes.
+7. The current query joins `atom` with `connected` and `bond` tables, but it does not ensure that the `atom_id` in `connected` is specifically the atom involved in the double bond. Also, it only considers one atom in the double bond within connected table, but double bond must connect with another atom. To fix this, modify the query as follows:
+
+1.  Introduce a subquery or another join to find `atom_id`s (`atom_id2`) that are also connected to a double bond. This ensures that the selected `atom_id` is indeed part of a double bond.
+2.  Join the `connected` table with the `bond` table to filter double bonds.
+3. Filter by molecule label and element to find double bonded carbon atoms.
+
+Here's a possible revised query structure:
+
+```sql
+SELECT T1.atom_id
+FROM atom AS T1
+INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id
+INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id
+INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id
+WHERE T2.label = 'TR012'
+  AND T1.element = 'c'
+  AND T4.bond_type = '='
+  AND EXISTS (SELECT 1 FROM connected AS T5 WHERE T5.atom_id2 = T1.atom_id AND T5.bond_id IN (SELECT bond_id FROM bond WHERE bond_type = '='))
+```
+
+This revised query uses `EXISTS` to verify that there exists a connection to the `atom_id` with a double bond, ensuring that the selected atom is part of that bond.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '='"]
+
+Question: 
+What is the atom ID of double bonded carbon in TR012 molecule? 
+
+Hint:
+carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the atom IDs of double-bonded carbon atoms in the molecule labeled 'TR012'. I need to join the `atom`, `molecule`, `connected`, and `bond` tables. I'll start by joining `atom` and `molecule` on `molecule_id` to filter for the molecule labeled 'TR012' and carbon atoms. Next, I'll join `connected` on `atom_id` to find atoms connected by a bond, and then join `bond` on `bond_id` to filter for double bonds. I'll also use EXISTS subquery to ensure that there's another atom connected by a double bond to the current atom.",
+    "SQL": "SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '=' AND EXISTS (SELECT 1 FROM connected AS T5 WHERE T5.atom_id2 = T1.atom_id AND T5.bond_id IN (SELECT bond_id FROM bond WHERE bond_type = '='))"
+}
+
+############################## human at step evaluate ##############################
+
+[]
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a specialist in SQL analysis, performing tasks involved in generating SQL improvement feedback. The contextual clues provided below are:
+
+1.The erroneous SQL statement,
+2.The corresponding natural language question and guidance for addressing the issue,
+3.The database schema item representations,
+4.The underlying cause of the SQL error.
+Your task is to generate actionable feedback instructions to guide a large language model on how to refine the SQL query, ensuring it accurately aligns with the core requirements of the problem.
+
+Input Data
+###
+Erroneous SQL:
+SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '=' AND EXISTS (SELECT 1 FROM connected AS T5 WHERE T5.atom_id2 = T1.atom_id AND T5.bond_id IN (SELECT bond_id FROM bond WHERE bond_type = '='))
+
+Question:
+What is the atom ID of double bonded carbon in TR012 molecule?
+
+Guidance:
+carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Database Schema:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Cause of SQL Error:
+SQL execution result is empty or None
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "The current query uses an `EXISTS` clause and joins through the `connected` table in a way that might be overly complex and potentially filters out correct results. To find the atom ID of double-bonded carbon in the TR012 molecule, you should focus on directly linking atoms to bonds of type '=' within the specified molecule. Simplify the query by directly joining `atom`, `molecule`, `connected`, and `bond` tables. Specifically, ensure that the `connected` table is used to link two atoms (one being carbon) via a double bond within the target molecule (TR012).  Instead of using EXISTS, use a direct join between the tables. Make sure to select the atom_id from the atom table for carbons that are double bonded in the TR012 molecule. The `connected` table needs to establish the link between a carbon atom and the double bond."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. Consider case-insensitive matching for string comparisons in the WHERE clause, especially when dealing with elements or other text-based attributes.
+7. The current query uses an `EXISTS` clause and joins through the `connected` table in a way that might be overly complex and potentially filters out correct results. To find the atom ID of double-bonded carbon in the TR012 molecule, you should focus on directly linking atoms to bonds of type '=' within the specified molecule. Simplify the query by directly joining `atom`, `molecule`, `connected`, and `bond` tables. Specifically, ensure that the `connected` table is used to link two atoms (one being carbon) via a double bond within the target molecule (TR012).  Instead of using EXISTS, use a direct join between the tables. Make sure to select the atom_id from the atom table for carbons that are double bonded in the TR012 molecule. The `connected` table needs to establish the link between a carbon atom and the double bond.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '='", "SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '=' AND EXISTS (SELECT 1 FROM connected AS T5 WHERE T5.atom_id2 = T1.atom_id AND T5.bond_id IN (SELECT bond_id FROM bond WHERE bond_type = '='))"]
+
+Question: 
+What is the atom ID of double bonded carbon in TR012 molecule? 
+
+Hint:
+carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the atom ID of double-bonded carbon atoms in the TR012 molecule. This requires joining the `atom`, `molecule`, `connected`, and `bond` tables. The join conditions will be based on `molecule_id`, `atom_id`, and `bond_id`. The `WHERE` clause will filter based on the molecule label ('TR012'), element ('c'), and bond type ('='). The goal is to select `atom_id` from the `atom` table.",
+    "SQL": "SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '='"
+}
+
+############################## human at step evaluate ##############################
+
+[]
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a specialist in SQL analysis, performing tasks involved in generating SQL improvement feedback. The contextual clues provided below are:
+
+1.The erroneous SQL statement,
+2.The corresponding natural language question and guidance for addressing the issue,
+3.The database schema item representations,
+4.The underlying cause of the SQL error.
+Your task is to generate actionable feedback instructions to guide a large language model on how to refine the SQL query, ensuring it accurately aligns with the core requirements of the problem.
+
+Input Data
+###
+Erroneous SQL:
+SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '='
+
+Question:
+What is the atom ID of double bonded carbon in TR012 molecule?
+
+Guidance:
+carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Database Schema:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Cause of SQL Error:
+SQL execution result is empty or None
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "The query needs adjustment to correctly identify atoms connected by a double bond within the specified molecule. Currently, it joins `atom` with `connected` and `bond` tables, but it doesn't ensure that the connected atom is also part of the same molecule and that the bond is actually connecting the carbon atom to another atom. \n\nHere's how to refine the query:\n\n1.  **Clarify the Join Condition with 'connected' Table:** The 'connected' table represents a relationship between two atoms via a bond.  The original query correctly joins `atom` (T1) to `connected` (T3) on `T1.atom_id = T3.atom_id`. We need to ensure that the bond connecting these atoms is a double bond. The current join doesn't explicitly check this condition.\n\n2. **Join to the 'atom' table again:**  Join the 'connected' table (T3) with the 'atom' table again, aliased as T5, using `T3.atom_id2 = T5.atom_id`. This allows us to access information about the atom that T1 is connected to.\n\n3. **Filter by Double Bond within the Molecule:** The condition `T4.bond_type = '='` is already present and correct for filtering for double bonds. Ensure that the tables are correctly joined such that this filter applies to the bond connecting T1 and T5.\n\n4. **Ensure Connected Atom is in the Same Molecule:** Add a condition to ensure that atom T5 (the atom connected to T1) is part of the same molecule, T2. This can be achieved with `T5.molecule_id = T2.molecule_id`.\n\nIn summary, the refined query should incorporate an additional join to the `atom` table via the `connected` table and include the additional filter condition to confirm the connected atom is in the same molecule."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. Consider case-insensitive matching for string comparisons in the WHERE clause, especially when dealing with elements or other text-based attributes.
+7. The query needs adjustment to correctly identify atoms connected by a double bond within the specified molecule. Currently, it joins `atom` with `connected` and `bond` tables, but it doesn't ensure that the connected atom is also part of the same molecule and that the bond is actually connecting the carbon atom to another atom. 
+
+Here's how to refine the query:
+
+1.  **Clarify the Join Condition with 'connected' Table:** The 'connected' table represents a relationship between two atoms via a bond.  The original query correctly joins `atom` (T1) to `connected` (T3) on `T1.atom_id = T3.atom_id`. We need to ensure that the bond connecting these atoms is a double bond. The current join doesn't explicitly check this condition.
+
+2. **Join to the 'atom' table again:**  Join the 'connected' table (T3) with the 'atom' table again, aliased as T5, using `T3.atom_id2 = T5.atom_id`. This allows us to access information about the atom that T1 is connected to.
+
+3. **Filter by Double Bond within the Molecule:** The condition `T4.bond_type = '='` is already present and correct for filtering for double bonds. Ensure that the tables are correctly joined such that this filter applies to the bond connecting T1 and T5.
+
+4. **Ensure Connected Atom is in the Same Molecule:** Add a condition to ensure that atom T5 (the atom connected to T1) is part of the same molecule, T2. This can be achieved with `T5.molecule_id = T2.molecule_id`.
+
+In summary, the refined query should incorporate an additional join to the `atom` table via the `connected` table and include the additional filter condition to confirm the connected atom is in the same molecule.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '='", "SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '=' AND EXISTS (SELECT 1 FROM connected AS T5 WHERE T5.atom_id2 = T1.atom_id AND T5.bond_id IN (SELECT bond_id FROM bond WHERE bond_type = '='))", "SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '='"]
+
+Question: 
+What is the atom ID of double bonded carbon in TR012 molecule? 
+
+Hint:
+carbon refers to element = 'c'; double bond refers to bond_type = ' = ';
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the atom ID of carbon atoms that are double-bonded within the molecule 'TR012'.\n\n1. **Join tables:** We need to join `atom`, `molecule`, `connected`, and `bond` tables. The `atom` and `molecule` tables are joined on `molecule_id`. The `atom` and `connected` tables are joined on `atom_id`. The `connected` and `bond` tables are joined on `bond_id`.\n2. **Filter by molecule label:** Filter the results to only include atoms that are part of the molecule with the label 'TR012'.\n3. **Filter by element:** Filter the results to only include atoms where the element is 'c' (carbon).\n4. **Filter by bond type:** Filter the results to only include atoms that are connected by a double bond ('=').\n5. **Selecting atom_id:** Select the `atom_id` of the carbon atoms that meet the criteria.\n6. **Additional Join for ensuring the other atom is in same molecule:** To ensure that the atom connected by the double bond is also part of the same molecule, add another join of atom table on atom_id2 from connected table and add the condition that their molecule_id is the same.",
+    "SQL": "SELECT T1.atom_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id INNER JOIN bond AS T4 ON T3.bond_id = T4.bond_id INNER JOIN atom AS T5 ON T3.atom_id2 = T5.atom_id WHERE T2.label = 'TR012' AND T1.element = 'c' AND T4.bond_type = '=' AND T5.molecule_id = T2.molecule_id"
+}
+

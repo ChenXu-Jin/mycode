@@ -1,0 +1,91 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "chemical compounds",
+            "molecule TR047",
+            "double-bond",
+            "percent",
+            "bond_type = ' = '",
+            "percentage",
+            "DIVIDE",
+            "SUM(bond_type = ' = ')",
+            "COUNT(all bond_id)",
+            "molecule_id = 'TR047'"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "atom": [
+                "atom_id",
+                "molecule_id",
+                "element",
+                "moleculeid"
+            ],
+            "bond": [
+                "bond_id",
+                "molecule_id",
+                "bond_type",
+                "bondtype",
+                "bondid",
+                "moleculeid"
+            ],
+            "connected": [
+                "atom_id",
+                "atom_id2",
+                "bond_id",
+                "bondid"
+            ],
+            "molecule": [
+                "molecule_id",
+                "label",
+                "moleculeid"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "bond": [
+                "molecule_id",
+                "bond_id",
+                "bond_type"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "The question asks for the percentage of molecules with molecule_id = 'TR047' that have a double bond. I should first select all molecules where molecule_id = 'TR047' from the bond table, and then compute the percentage of bond_type equal to ' = ' from them. The percentage can be computed as sum(bond_type=' = ')*1.0/count(*).",
+        "SQL": "SELECT CAST(SUM(CASE WHEN T1.bond_type = '=' THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.bond_id) FROM bond AS T1 WHERE T1.molecule_id = 'TR047'",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT CAST(SUM(CASE WHEN T1.bond_type = '=' THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.bond_id) FROM bond AS T1 WHERE T1.molecule_id = 'TR047'",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 1,
+            "error": "--",
+            "Question": "Among all chemical compounds that contain molecule TR047, identify the percent that form a double-bond.",
+            "Evidence": "TR047 is the molecule id; double bond refers to bond_type = ' = '; percentage = DIVIDE(SUM(bond_type = ' = '), COUNT(all bond_id)) as percent where molecule_id = 'TR047'",
+            "pred_sql": "SELECT CAST(SUM(CASE WHEN T1.bond_type = '=' THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.bond_id) FROM bond AS T1 WHERE T1.molecule_id = 'TR047'",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T.bond_type = '=' THEN T.bond_id ELSE NULL END) AS REAL) * 100 / COUNT(T.bond_id) FROM bond AS T WHERE T.molecule_id = 'TR047'"
+        },
+        "self_reflexion": {
+            "result": 1,
+            "error": "--",
+            "Question": "Among all chemical compounds that contain molecule TR047, identify the percent that form a double-bond.",
+            "Evidence": "TR047 is the molecule id; double bond refers to bond_type = ' = '; percentage = DIVIDE(SUM(bond_type = ' = '), COUNT(all bond_id)) as percent where molecule_id = 'TR047'",
+            "pred_sql": "SELECT CAST(SUM(CASE WHEN T1.bond_type = '=' THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.bond_id) FROM bond AS T1 WHERE T1.molecule_id = 'TR047'",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T.bond_type = '=' THEN T.bond_id ELSE NULL END) AS REAL) * 100 / COUNT(T.bond_id) FROM bond AS T WHERE T.molecule_id = 'TR047'"
+        },
+        "status": "success"
+    }
+]

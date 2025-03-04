@@ -1,0 +1,85 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "atom id",
+            "TR346 molecule",
+            "bond type"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "atom": [
+                "atom_id",
+                "molecule_id",
+                "element",
+                "atomid"
+            ],
+            "bond": [
+                "bond_id",
+                "molecule_id",
+                "bond_type",
+                "bondtype"
+            ],
+            "connected": [
+                "atom_id",
+                "atom_id2",
+                "bond_id",
+                "atomid",
+                "atomid2"
+            ],
+            "molecule": [
+                "molecule_id",
+                "label"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "atom": [
+                "atom_id",
+                "molecule_id"
+            ],
+            "bond": [
+                "bond_type",
+                "molecule_id"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "The question asks for two things related to a specific molecule ('TR346'): the atom IDs belonging to that molecule, and the number of distinct bond types associated with it. \n\nTo get the atom IDs, I need to select the atom_id from the 'atom' table where the molecule_id matches 'TR346'.\n\nTo get the number of bond types, I need to count the distinct bond_type values from the 'bond' table where the molecule_id matches 'TR346'. I can use COUNT(DISTINCT bond_type) for this.",
+        "SQL": "SELECT T1.atom_id, (SELECT COUNT(DISTINCT bond_type) FROM bond WHERE molecule_id = 'TR346') FROM atom AS T1 WHERE T1.molecule_id = 'TR346'",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT T1.atom_id, (SELECT COUNT(DISTINCT bond_type) FROM bond WHERE molecule_id = 'TR346') FROM atom AS T1 WHERE T1.molecule_id = 'TR346'",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 1,
+            "error": "--",
+            "Question": "List out the atom id that belongs to the TR346 molecule and how many bond type can be created by this molecule?",
+            "Evidence": "",
+            "pred_sql": "SELECT T1.atom_id, (SELECT COUNT(DISTINCT bond_type) FROM bond WHERE molecule_id = 'TR346') FROM atom AS T1 WHERE T1.molecule_id = 'TR346'",
+            "gold_sql": "SELECT T1.atom_id, COUNT(DISTINCT T2.bond_type) FROM atom AS T1 INNER JOIN bond AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.molecule_id = 'TR346' GROUP BY T1.atom_id, T2.bond_type"
+        },
+        "self_reflexion": {
+            "result": 1,
+            "error": "--",
+            "Question": "List out the atom id that belongs to the TR346 molecule and how many bond type can be created by this molecule?",
+            "Evidence": "",
+            "pred_sql": "SELECT T1.atom_id, (SELECT COUNT(DISTINCT bond_type) FROM bond WHERE molecule_id = 'TR346') FROM atom AS T1 WHERE T1.molecule_id = 'TR346'",
+            "gold_sql": "SELECT T1.atom_id, COUNT(DISTINCT T2.bond_type) FROM atom AS T1 INNER JOIN bond AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.molecule_id = 'TR346' GROUP BY T1.atom_id, T2.bond_type"
+        },
+        "status": "success"
+    }
+]

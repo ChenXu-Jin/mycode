@@ -1,0 +1,675 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic?
+Hint: TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "bond type",
+    "majority of the bonds",
+    "molecule TR018",
+    "carcinogenic",
+    "TR018",
+    "MAX(COUNT(bond_type))",
+    "label = +",
+    "label = -"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic? 
+
+Hint:
+TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for two pieces of information: the most frequent bond type in molecule TR018, and whether the molecule is carcinogenic. I need to query the `bond` table to find the most frequent `bond_type` for `molecule_id` TR018. I also need to query the `molecule` table to determine if the molecule with `molecule_id` TR018 has a `label` of '+' (carcinogenic) or '-' (non-carcinogenic). I will use a subquery to find the most frequent `bond_type` and then combine this with the `label` information from the `molecule` table using a common `molecule_id` value.",
+    "SQL": "SELECT T1.bond_type, T2.label FROM bond AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1"
+}
+
+############################## human at step evaluate ##############################
+
+[]
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a specialist in SQL analysis, performing tasks involved in generating SQL improvement feedback. The contextual clues provided below are:
+
+1.The erroneous SQL statement,
+2.The corresponding natural language question and guidance for addressing the issue,
+3.The database schema item representations,
+4.The underlying cause of the SQL error.
+Your task is to generate actionable feedback instructions to guide a large language model on how to refine the SQL query, ensuring it accurately aligns with the core requirements of the problem.
+
+Input Data
+###
+Erroneous SQL:
+SELECT T1.bond_type, T2.label FROM bond AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1
+
+Question:
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic?
+
+Guidance:
+TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Database Schema:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Cause of SQL Error:
+SQL execution result is empty or None
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "The provided SQL query retrieves the bond type with the highest count for molecule 'TR018' and the molecule's label. However, to accurately answer the question, it needs refinement. Here's how to improve it:\n\n1. **Subquery for Bond Type Count:** Create a subquery to determine the most frequent `bond_type` for the specified molecule ('TR018'). This subquery should group by `bond_type`, count the occurrences, and then select the `bond_type` with the maximum count using `ORDER BY COUNT(*) DESC LIMIT 1`.\n\n2. **Outer Query to Retrieve Label:** The outer query should then select the `label` from the `molecule` table where `molecule_id` is 'TR018'.\n\n3. **Combine Results:** Combine the results of the subquery and the outer query. This can be achieved by joining the results or using a correlated subquery if needed, ensuring that the final result presents both the most frequent bond type and the corresponding label.\n\n4. **Handle Empty Results:** Consider what to return if the molecule 'TR018' doesn't exist in the `molecule` table, or if there are no bonds associated with it in the `bond` table. You might want to return NULL or a predefined value in these cases.\n\nHere's a revised SQL query incorporating these suggestions:\n\n```sql\nSELECT (SELECT T1.bond_type FROM bond AS T1 WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(*) DESC LIMIT 1) AS most_frequent_bond_type,\n       T2.label\nFROM molecule AS T2\nWHERE T2.molecule_id = 'TR018';\n```\n\nThis revised query first identifies the most frequent bond type for molecule 'TR018' using a subquery and then retrieves the corresponding label for that molecule from the `molecule` table. Ensure the database contains data for molecule 'TR018' for meaningful results."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. The provided SQL query retrieves the bond type with the highest count for molecule 'TR018' and the molecule's label. However, to accurately answer the question, it needs refinement. Here's how to improve it:
+
+1. **Subquery for Bond Type Count:** Create a subquery to determine the most frequent `bond_type` for the specified molecule ('TR018'). This subquery should group by `bond_type`, count the occurrences, and then select the `bond_type` with the maximum count using `ORDER BY COUNT(*) DESC LIMIT 1`.
+
+2. **Outer Query to Retrieve Label:** The outer query should then select the `label` from the `molecule` table where `molecule_id` is 'TR018'.
+
+3. **Combine Results:** Combine the results of the subquery and the outer query. This can be achieved by joining the results or using a correlated subquery if needed, ensuring that the final result presents both the most frequent bond type and the corresponding label.
+
+4. **Handle Empty Results:** Consider what to return if the molecule 'TR018' doesn't exist in the `molecule` table, or if there are no bonds associated with it in the `bond` table. You might want to return NULL or a predefined value in these cases.
+
+Here's a revised SQL query incorporating these suggestions:
+
+```sql
+SELECT (SELECT T1.bond_type FROM bond AS T1 WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(*) DESC LIMIT 1) AS most_frequent_bond_type,
+       T2.label
+FROM molecule AS T2
+WHERE T2.molecule_id = 'TR018';
+```
+
+This revised query first identifies the most frequent bond type for molecule 'TR018' using a subquery and then retrieves the corresponding label for that molecule from the `molecule` table. Ensure the database contains data for molecule 'TR018' for meaningful results.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT T1.bond_type, T2.label FROM bond AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1"]
+
+Question: 
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic? 
+
+Hint:
+TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the bond type with the highest count for molecule 'TR018' and whether the molecule is carcinogenic or not, which is indicated by the 'label' column.\n\nFirst, identify the most frequent bond type for molecule 'TR018'. This requires grouping by `bond_type`, counting occurrences, and selecting the `bond_type` with the maximum count.\n\nSecond, retrieve the `label` from the `molecule` table where `molecule_id` is 'TR018'. The label indicates carcinogenic property.\n\nCombine these results in a single query. A subquery can be used for getting most frequent bond type, and outer query can be used to get label.\n\nHandle edge cases: Consider the cases when the molecule 'TR018' is not found in the `molecule` table or there are no bonds for it in the `bond` table. The question doesn't specify what to return in these cases, so returning NULL should be sufficient.",
+    "SQL": "SELECT (SELECT T1.bond_type FROM bond AS T1 WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(*) DESC LIMIT 1) AS most_frequent_bond_type,\n       T2.label\nFROM molecule AS T2\nWHERE T2.molecule_id = 'TR018';"
+}
+
+############################## human at step evaluate ##############################
+
+[]
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a specialist in SQL analysis, performing tasks involved in generating SQL improvement feedback. The contextual clues provided below are:
+
+1.The erroneous SQL statement,
+2.The corresponding natural language question and guidance for addressing the issue,
+3.The database schema item representations,
+4.The underlying cause of the SQL error.
+Your task is to generate actionable feedback instructions to guide a large language model on how to refine the SQL query, ensuring it accurately aligns with the core requirements of the problem.
+
+Input Data
+###
+Erroneous SQL:
+SELECT (SELECT T1.bond_type FROM bond AS T1 WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(*) DESC LIMIT 1) AS most_frequent_bond_type,
+       T2.label
+FROM molecule AS T2
+WHERE T2.molecule_id = 'TR018';
+
+Question:
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic?
+
+Guidance:
+TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Database Schema:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Cause of SQL Error:
+SQL execution result is empty or None
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "The provided SQL query attempts to find the most frequent bond type for molecule TR018 and its label. However, it could be improved for clarity and efficiency. Here's how to refine it:\n\n1. **Calculate the most frequent bond type:** Use a subquery to determine the most frequent bond type for molecule 'TR018'. The current subquery is correct, but ensure it correctly returns the bond type with the highest count.\n\n2. **Retrieve the molecule's label:** Directly select the label from the `molecule` table based on the `molecule_id` 'TR018'. The current approach for selecting label is adequate.\n\n3. **Combine into a Single Query:** Combine these two parts into a single SELECT statement. No JOIN is needed since the bond type calculation is independent and TR018 id is already given.\n\n4. **Error Handling (If Applicable):** If it's possible that TR018 might not exist or have bonds, consider adding a `COALESCE` function around the subquery result to handle cases where the subquery returns NULL (no bonds found). For instance, use `COALESCE((SELECT ...), 'No Bonds')`.\n\nHere's an improved query outline:\n\n```sql\nSELECT (SELECT T1.bond_type FROM bond AS T1 WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(*) DESC LIMIT 1) AS most_frequent_bond_type,\n       T2.label\nFROM molecule AS T2\nWHERE T2.molecule_id = 'TR018';\n```"
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. The provided SQL query attempts to find the most frequent bond type for molecule TR018 and its label. However, it could be improved for clarity and efficiency. Here's how to refine it:
+
+1. **Calculate the most frequent bond type:** Use a subquery to determine the most frequent bond type for molecule 'TR018'. The current subquery is correct, but ensure it correctly returns the bond type with the highest count.
+
+2. **Retrieve the molecule's label:** Directly select the label from the `molecule` table based on the `molecule_id` 'TR018'. The current approach for selecting label is adequate.
+
+3. **Combine into a Single Query:** Combine these two parts into a single SELECT statement. No JOIN is needed since the bond type calculation is independent and TR018 id is already given.
+
+4. **Error Handling (If Applicable):** If it's possible that TR018 might not exist or have bonds, consider adding a `COALESCE` function around the subquery result to handle cases where the subquery returns NULL (no bonds found). For instance, use `COALESCE((SELECT ...), 'No Bonds')`.
+
+Here's an improved query outline:
+
+```sql
+SELECT (SELECT T1.bond_type FROM bond AS T1 WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(*) DESC LIMIT 1) AS most_frequent_bond_type,
+       T2.label
+FROM molecule AS T2
+WHERE T2.molecule_id = 'TR018';
+```
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT T1.bond_type, T2.label FROM bond AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1", "SELECT (SELECT T1.bond_type FROM bond AS T1 WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(*) DESC LIMIT 1) AS most_frequent_bond_type,\n       T2.label\nFROM molecule AS T2\nWHERE T2.molecule_id = 'TR018';"]
+
+Question: 
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic? 
+
+Hint:
+TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the most frequent bond type in molecule TR018 and whether the molecule is carcinogenic. The molecule table contains molecule_id and label, where the label indicates if the molecule is carcinogenic ('+' means carcinogenic, '-' means non-carcinogenic). The bond table contains bond_id, molecule_id and bond_type. First, I need to find the most frequent bond type in the bond table for molecule_id TR018. Then I need to find the label for molecule_id TR018 in the molecule table. The two results will then be combined using one SELECT statement. This is similar to what I tried in the short-term memory.",
+    "SQL": "SELECT (SELECT T1.bond_type FROM bond AS T1 WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(*) DESC LIMIT 1) AS most_frequent_bond_type,\n       T2.label\nFROM molecule AS T2\nWHERE T2.molecule_id = 'TR018';"
+}
+
+############################## human at step evaluate ##############################
+
+[]
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a specialist in SQL analysis, performing tasks involved in generating SQL improvement feedback. The contextual clues provided below are:
+
+1.The erroneous SQL statement,
+2.The corresponding natural language question and guidance for addressing the issue,
+3.The database schema item representations,
+4.The underlying cause of the SQL error.
+Your task is to generate actionable feedback instructions to guide a large language model on how to refine the SQL query, ensuring it accurately aligns with the core requirements of the problem.
+
+Input Data
+###
+Erroneous SQL:
+SELECT (SELECT T1.bond_type FROM bond AS T1 WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(*) DESC LIMIT 1) AS most_frequent_bond_type,
+       T2.label
+FROM molecule AS T2
+WHERE T2.molecule_id = 'TR018';
+
+Question:
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic?
+
+Guidance:
+TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Database Schema:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Cause of SQL Error:
+SQL execution result is empty or None
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "The provided SQL query retrieves the most frequent bond type for molecule 'TR018' but fails to correctly combine this information with the molecule's 'label' (carcinogenic or non-carcinogenic). The subquery correctly identifies the most frequent bond type. However, the main query independently fetches the 'label' for 'TR018' without linking it to the result of the subquery in a meaningful way. The subquery also doesn't handle ties in bond type counts correctly. Here's how to refine the query:\n\n1.  **Combine Results in a Single Query:** Avoid using the subquery in the SELECT clause in the way that is done. Instead, perform the selection of `T2.label` jointly using the `molecule` and `bond` tables.\n2.  **Use a Common Table Expression (CTE) to Determine Most Frequent Bond Type:** Define a CTE that groups bonds by type for the given molecule, orders them by count in descending order, and selects only the top bond type. This will clarify the logic and avoid issues if the subquery returns an empty result when there are no bonds.\n3.  **Join with the Molecule Table:** Join the CTE with the `molecule` table using the `molecule_id` to retrieve the 'label' associated with that molecule. This will correctly combine the most frequent bond type with the molecule's label.\n4.  **Select Both Bond Type and Label:** In the final SELECT statement, retrieve both the most frequent bond type (from the CTE) and the molecule's label (from the `molecule` table).\n\nHere's an example of the refined query:\n\n```sql\nWITH MostFrequentBond AS (\n  SELECT bond_type\n  FROM bond\n  WHERE molecule_id = 'TR018'\n  GROUP BY bond_type\n  ORDER BY COUNT(*) DESC\n  LIMIT 1\n)\nSELECT mfb.bond_type, m.label\nFROM MostFrequentBond mfb, molecule m\nWHERE m.molecule_id = 'TR018';\n```\n\nThis revised query should accurately retrieve the most frequent bond type and the corresponding label for the specified molecule."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE atom (
+  `atom_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `element` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE bond (
+  `bond_id` TEXT NOT NULL,
+  `molecule_id` TEXT DEFAULT NULL,
+  `bond_type` TEXT DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`)
+);
+
+CREATE TABLE connected (
+  `atom_id` TEXT NOT NULL,
+  `atom_id2` TEXT NOT NULL,
+  `bond_id` TEXT DEFAULT NULL,
+  PRIMARY KEY (`atom_id`,`atom_id2`),
+  FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`atom_id2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bond_id`) REFERENCES `bond` (`bond_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE molecule (
+  `molecule_id` TEXT NOT NULL,
+  `label` TEXT DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. The provided SQL query retrieves the most frequent bond type for molecule 'TR018' but fails to correctly combine this information with the molecule's 'label' (carcinogenic or non-carcinogenic). The subquery correctly identifies the most frequent bond type. However, the main query independently fetches the 'label' for 'TR018' without linking it to the result of the subquery in a meaningful way. The subquery also doesn't handle ties in bond type counts correctly. Here's how to refine the query:
+
+1.  **Combine Results in a Single Query:** Avoid using the subquery in the SELECT clause in the way that is done. Instead, perform the selection of `T2.label` jointly using the `molecule` and `bond` tables.
+2.  **Use a Common Table Expression (CTE) to Determine Most Frequent Bond Type:** Define a CTE that groups bonds by type for the given molecule, orders them by count in descending order, and selects only the top bond type. This will clarify the logic and avoid issues if the subquery returns an empty result when there are no bonds.
+3.  **Join with the Molecule Table:** Join the CTE with the `molecule` table using the `molecule_id` to retrieve the 'label' associated with that molecule. This will correctly combine the most frequent bond type with the molecule's label.
+4.  **Select Both Bond Type and Label:** In the final SELECT statement, retrieve both the most frequent bond type (from the CTE) and the molecule's label (from the `molecule` table).
+
+Here's an example of the refined query:
+
+```sql
+WITH MostFrequentBond AS (
+  SELECT bond_type
+  FROM bond
+  WHERE molecule_id = 'TR018'
+  GROUP BY bond_type
+  ORDER BY COUNT(*) DESC
+  LIMIT 1
+)
+SELECT mfb.bond_type, m.label
+FROM MostFrequentBond mfb, molecule m
+WHERE m.molecule_id = 'TR018';
+```
+
+This revised query should accurately retrieve the most frequent bond type and the corresponding label for the specified molecule.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT T1.bond_type, T2.label FROM bond AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(T1.bond_type) DESC LIMIT 1", "SELECT (SELECT T1.bond_type FROM bond AS T1 WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(*) DESC LIMIT 1) AS most_frequent_bond_type,\n       T2.label\nFROM molecule AS T2\nWHERE T2.molecule_id = 'TR018';", "SELECT (SELECT T1.bond_type FROM bond AS T1 WHERE T1.molecule_id = 'TR018' GROUP BY T1.bond_type ORDER BY COUNT(*) DESC LIMIT 1) AS most_frequent_bond_type,\n       T2.label\nFROM molecule AS T2\nWHERE T2.molecule_id = 'TR018';"]
+
+Question: 
+Which bond type accounted for the majority of the bonds found in molecule TR018 and state whether or not this molecule is carcinogenic? 
+
+Hint:
+TR018 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type)); label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the most frequent bond type in molecule 'TR018' and whether it is carcinogenic. The 'bond' table stores bond types and the 'molecule' table contains carcinogenicity information in the 'label' column ('+' for carcinogenic, '-' otherwise). I should use a CTE to find the most frequent bond type for molecule 'TR018' and then join this with the 'molecule' table to retrieve its label. Then, select both bond type and label from the CTE and molecule table respectively.",
+    "SQL": "WITH MostFrequentBond AS (\n  SELECT bond_type\n  FROM bond\n  WHERE molecule_id = 'TR018'\n  GROUP BY bond_type\n  ORDER BY COUNT(*) DESC\n  LIMIT 1\n)\nSELECT mfb.bond_type, m.label\nFROM MostFrequentBond mfb, molecule m\nWHERE m.molecule_id = 'TR018';"
+}
+

@@ -1,0 +1,82 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "chemical compounds",
+            "database",
+            "percent",
+            "triple-bond",
+            "triple bond",
+            "bond_type",
+            "#"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "atom": [
+                "atom_id",
+                "molecule_id",
+                "element"
+            ],
+            "bond": [
+                "bond_id",
+                "molecule_id",
+                "bond_type",
+                "bondtype"
+            ],
+            "connected": [
+                "atom_id",
+                "atom_id2",
+                "bond_id"
+            ],
+            "molecule": [
+                "molecule_id",
+                "label"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "bond": [
+                "bond_id",
+                "bond_type"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "The question asks for the percentage of chemical compounds that form a triple bond. This requires counting the total number of molecules and the number of molecules with triple bonds, and then calculating the percentage. First, identify all molecules with triple bonds by filtering the bond table based on 'bond_type'. Next, count the distinct number of 'molecule_id' from the molecules with triple bonds. Finally, calculate the percentage by dividing the number of molecules with triple bonds by the total number of distinct molecules and multiplying by 100. I will use COUNT(DISTINCT) and CAST to ensure that the division results in a float value for accurate percentage calculation.",
+        "SQL": "SELECT CAST(SUM(CASE WHEN T1.bond_type = '#' THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.bond_type) FROM bond AS T1",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT CAST(SUM(CASE WHEN T1.bond_type = '#' THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.bond_type) FROM bond AS T1",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Among all chemical compounds identified in the database, what percent of compounds form a triple-bond.",
+            "Evidence": "triple bond refers to bond_type = '#';",
+            "pred_sql": "SELECT CAST(SUM(CASE WHEN T1.bond_type = '#' THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.bond_type) FROM bond AS T1",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T.bond_type = '#' THEN T.bond_id ELSE NULL END) AS REAL) * 100 / COUNT(T.bond_id) FROM bond AS T"
+        },
+        "self_reflexion": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "Among all chemical compounds identified in the database, what percent of compounds form a triple-bond.",
+            "Evidence": "triple bond refers to bond_type = '#';",
+            "pred_sql": "SELECT CAST(SUM(CASE WHEN T1.bond_type = '#' THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.bond_type) FROM bond AS T1",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T.bond_type = '#' THEN T.bond_id ELSE NULL END) AS REAL) * 100 / COUNT(T.bond_id) FROM bond AS T"
+        },
+        "status": "success"
+    }
+]

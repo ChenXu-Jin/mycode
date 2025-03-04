@@ -23,6 +23,7 @@ class RunManager:
 
         self.result_directory = self.get_result_directory()
         self.statistics_manager = StatisticsManager(self.result_directory)
+        self.memory = Memory(max_memory_count=10)
         
     def get_result_directory(self) -> str:
         data_mode = self.args.data_mode
@@ -57,7 +58,6 @@ class RunManager:
             self.task_done(log)
     
     def worker(self, task: Task) -> Tuple[Any, str, int]:
-        memory_instance = Memory(max_memory_count=10)
         database_manager = DatabaseManager(db_mode=self.args.data_mode, db_id=task.db_id)
         logger = Logger(db_id=task.db_id, question_id=task.question_id, result_directory=self.result_directory)
         logger.set_log_level(self.args.log_level)
@@ -65,8 +65,7 @@ class RunManager:
         pipeline_manager = PipelineManager(json.loads(self.args.pipeline_setup))
         try:
             tentative_schema, execution_history = self.load_checkpoint(task.db_id, task.question_id)
-            initial_state = {"keys": {"task": task, 
-                                      "tentative_schema": tentative_schema, "execution_history": execution_history}}
+            initial_state = {"keys": {"task": task, "tentative_schema": tentative_schema, "execution_history": execution_history}}
             self.compile = build_pipeline(self.args.pipeline_nodes)
             for state in self.compile.stream(initial_state):
                 continue

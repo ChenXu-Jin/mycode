@@ -1,0 +1,191 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "percentage",
+            "Story Spotlight cards",
+            "text box",
+            "ID",
+            "isStorylight",
+            "isTextless",
+            "DIVIDE(SUM(count(id) where isStorylight = 1), SUM(count(id))) * 100"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "cards": [
+                "id",
+                "artist",
+                "asciiName",
+                "availability",
+                "borderColor",
+                "cardKingdomFoilId",
+                "cardKingdomId",
+                "colorIdentity",
+                "colorIndicator",
+                "colors",
+                "convertedManaCost",
+                "duelDeck",
+                "edhrecRank",
+                "faceConvertedManaCost",
+                "faceName",
+                "flavorName",
+                "flavorText",
+                "frameEffects",
+                "frameVersion",
+                "hand",
+                "hasAlternativeDeckLimit",
+                "hasContentWarning",
+                "hasFoil",
+                "hasNonFoil",
+                "isAlternative",
+                "isFullArt",
+                "isOnlineOnly",
+                "isOversized",
+                "isPromo",
+                "isReprint",
+                "isReserved",
+                "isStarter",
+                "isStorySpotlight",
+                "isTextless",
+                "isTimeshifted",
+                "keywords",
+                "layout",
+                "leadershipSkills",
+                "life",
+                "loyalty",
+                "manaCost",
+                "mcmId",
+                "mcmMetaId",
+                "mtgArenaId",
+                "mtgjsonV4Id",
+                "mtgoFoilId",
+                "mtgoId",
+                "multiverseId",
+                "name",
+                "number",
+                "originalReleaseDate",
+                "originalText",
+                "originalType",
+                "otherFaceIds",
+                "power",
+                "printings",
+                "promoTypes",
+                "purchaseUrls",
+                "rarity",
+                "scryfallId",
+                "scryfallIllustrationId",
+                "scryfallOracleId",
+                "setCode",
+                "side",
+                "subtypes",
+                "supertypes",
+                "tcgplayerProductId",
+                "text",
+                "toughness",
+                "type",
+                "types",
+                "uuid",
+                "variations",
+                "watermark",
+                "isTextle"
+            ],
+            "foreign_data": [
+                "id",
+                "flavorText",
+                "language",
+                "multiverseid",
+                "name",
+                "text",
+                "type",
+                "uuid"
+            ],
+            "legalities": [
+                "id",
+                "format",
+                "status",
+                "uuid"
+            ],
+            "sets": [
+                "id",
+                "baseSetSize",
+                "block",
+                "booster",
+                "code",
+                "isFoilOnly",
+                "isForeignOnly",
+                "isNonFoilOnly",
+                "isOnlineOnly",
+                "isPartialPreview",
+                "keyruneCode",
+                "mcmId",
+                "mcmIdExtras",
+                "mcmName",
+                "mtgoCode",
+                "name",
+                "parentCode",
+                "releaseDate",
+                "tcgplayerGroupId",
+                "totalSetSize",
+                "type"
+            ],
+            "set_translations": [
+                "id",
+                "language",
+                "setCode",
+                "translation"
+            ],
+            "rulings": [
+                "id",
+                "date",
+                "text",
+                "uuid"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "cards": [
+                "isstoryspotlight",
+                "id",
+                "istextless"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "The question asks for the percentage of Story Spotlight cards that also have a text box. This means we need to find cards where `isStorySpotlight` is true (1) and `text` is not null or empty, or alternatively `isTextless` is false (0). The question asks for a list of these cards by their ID, so the final query should select the ID and list percentage of story spotlight cards with text.",
+        "SQL": "SELECT CAST(SUM(CASE WHEN T1.isStorySpotlight = 1 AND T1.text IS NOT NULL THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.id) FROM cards AS T1",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT CAST(SUM(CASE WHEN T1.isStorySpotlight = 1 AND T1.text IS NOT NULL THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.id) FROM cards AS T1",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "What is the percentage of Story Spotlight cards that also have a text box? List them by their ID.",
+            "Evidence": "Story Spotlight cards that do not have a text box refers to isStorylight = 1 and isTextless = 1; Percentage refer to DIVIDE(SUM(count(id) where isStorylight = 1), SUM(count(id))) * 100\n\n",
+            "pred_sql": "SELECT CAST(SUM(CASE WHEN T1.isStorySpotlight = 1 AND T1.text IS NOT NULL THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.id) FROM cards AS T1",
+            "gold_sql": "SELECT CAST(SUM(CASE WHEN isTextless = 0 THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(id) FROM cards WHERE isStorySpotlight = 1"
+        },
+        "self_reflexion": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "What is the percentage of Story Spotlight cards that also have a text box? List them by their ID.",
+            "Evidence": "Story Spotlight cards that do not have a text box refers to isStorylight = 1 and isTextless = 1; Percentage refer to DIVIDE(SUM(count(id) where isStorylight = 1), SUM(count(id))) * 100\n\n",
+            "pred_sql": "SELECT CAST(SUM(CASE WHEN T1.isStorySpotlight = 1 AND T1.text IS NOT NULL THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.id) FROM cards AS T1",
+            "gold_sql": "SELECT CAST(SUM(CASE WHEN isTextless = 0 THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(id) FROM cards WHERE isStorySpotlight = 1"
+        },
+        "status": "success"
+    }
+]

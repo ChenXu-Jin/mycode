@@ -1,0 +1,1599 @@
+############################## Human at step keyword_extraction ##############################
+
+Objective: Analyze the given question and hint to identify and extract keywords, keyphrases, and named entities. These elements are crucial for understanding the core components of the inquiry and the guidance provided. This process involves recognizing and isolating significant terms and phrases that could be instrumental in formulating searches or queries related to the posed question.
+
+Instructions:
+
+Read the Question Carefully: Understand the primary focus and specific details of the question. Look for any named entities (such as organizations, locations, etc.), technical terms, and other phrases that encapsulate important aspects of the inquiry.
+
+Analyze the Hint: The hint is designed to direct attention toward certain elements relevant to answering the question. Extract any keywords, phrases, or named entities that could provide further clarity or direction in formulating an answer.
+
+List Keyphrases and Entities: Combine your findings from both the question and the hint into a single Python list. This list should contain:
+
+Keywords: Single words that capture essential aspects of the question or hint.
+Keyphrases: Short phrases or named entities that represent specific concepts, locations, organizations, or other significant details.
+Ensure to maintain the original phrasing or terminology used in the question and hint.
+
+Example 1:
+Question: "What is the annual revenue of Acme Corp in the United States for 2022?"
+Hint: "Focus on financial reports and U.S. market performance for the fiscal year 2022."
+
+["annual revenue", "Acme Corp", "United States", "2022", "financial reports", "U.S. market performance", "fiscal year"]
+
+Example 2:
+Question: "In the Winter and Summer Olympics of 1988, which game has the most number of competitors? Find the difference of the number of competitors between the two games."
+Hint: "the most number of competitors refer to MAX(COUNT(person_id)); SUBTRACT(COUNT(person_id where games_name = '1988 Summer'), COUNT(person_id where games_name = '1988 Winter'));"
+
+["Winter Olympics", "Summer Olympics", "1988", "1988 Summer", "Summer", "1988 Winter", "Winter", "number of competitors", "difference", "MAX(COUNT(person_id))", "games_name", "person_id"]
+
+Example 3:
+Question: "How many Men's 200 Metres Freestyle events did Ian James Thorpe compete in?"
+Hint: "Men's 200 Metres Freestyle events refer to event_name = 'Swimming Men''s 200 metres Freestyle'; events compete in refers to event_id;"
+
+["Swimming Men's 200 metres Freestyle", "Ian James Thorpe", "Ian", "James", "Thorpe", "compete in", "event_name", "event_id"]
+
+Task:
+Given the following question and hint, identify and list all relevant keywords, keyphrases, and named entities.
+
+Question: For the driver who had the Q2 time as 0:01:40 in the qualifying race No. 355, what is his nationality?
+Hint: race number refers to raceId;
+
+Please provide your findings as a Python list, capturing the essence of both the question and hint through the identified terms and phrases. 
+Only output the Python list, no explanations needed. 
+
+############################## AI at step keyword_extraction ##############################
+
+[
+    "driver",
+    "Q2 time",
+    "0:01:40",
+    "qualifying race",
+    "No. 355",
+    "nationality",
+    "race number",
+    "raceId"
+]
+
+############################## Human at step sql_generate ##############################
+
+You are a data science expert.
+Below, you are presented with a database schema and a question.
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query think step by step on how to write the query.
+
+Database Schema
+###
+CREATE TABLE circuits (
+  circuitId  INTEGER
+        primary key autoincrement,
+  circuitRef TEXT default '' not null,
+  name       TEXT default '' not null,
+  location   TEXT,
+  country    TEXT,
+  lat        REAL,
+  lng        REAL,
+  alt        INTEGER,
+  url        TEXT default '' not null
+        unique
+);
+
+CREATE TABLE constructors (
+  constructorId  INTEGER
+        primary key autoincrement,
+  constructorRef TEXT default '' not null,
+  name           TEXT default '' not null
+        unique,
+  nationality    TEXT,
+  url            TEXT default '' not null
+);
+
+CREATE TABLE drivers (
+  driverId    INTEGER
+        primary key autoincrement,
+  driverRef   TEXT default '' not null,
+  number      INTEGER,
+  code        TEXT,
+  forename    TEXT default '' not null,
+  surname     TEXT default '' not null,
+  dob         DATE,
+  nationality TEXT,
+  url         TEXT default '' not null
+        unique
+);
+
+CREATE TABLE seasons (
+  year INTEGER default 0  not null
+        primary key,
+  url  TEXT    default '' not null
+        unique
+);
+
+CREATE TABLE races (
+  raceId    INTEGER
+        primary key autoincrement,
+  year      INTEGER default 0            not null,
+  round     INTEGER default 0            not null,
+  circuitId INTEGER default 0            not null,
+  name      TEXT    default ''           not null,
+  date      DATE    default '0000-00-00' not null,
+  time      TEXT,
+  url       TEXT unique,
+  foreign key (year) references seasons(year),
+  foreign key (circuitId) references circuits(circuitId)
+);
+
+CREATE TABLE constructorResults (
+  constructorResultsId INTEGER
+        primary key autoincrement,
+  raceId               INTEGER default 0 not null,
+  constructorId        INTEGER default 0 not null,
+  points               REAL,
+  status               TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE constructorStandings (
+  constructorStandingsId INTEGER
+        primary key autoincrement,
+  raceId                 INTEGER default 0 not null,
+  constructorId          INTEGER default 0 not null,
+  points                 REAL   default 0 not null,
+  position               INTEGER,
+  positionText           TEXT,
+  wins                   INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE driverStandings (
+  driverStandingsId INTEGER
+        primary key autoincrement,
+  raceId            INTEGER default 0 not null,
+  driverId          INTEGER default 0 not null,
+  points            REAL   default 0 not null,
+  position          INTEGER,
+  positionText      TEXT,
+  wins              INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE lapTimes (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  lap          INTEGER not null,
+  position     INTEGER,
+  time         TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, lap),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE pitStops (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  stop         INTEGER not null,
+  lap          INTEGER not null,
+  time         TEXT    not null,
+  duration     TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, stop),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE qualifying (
+  qualifyId     INTEGER
+        primary key autoincrement,
+  raceId        INTEGER default 0 not null,
+  driverId      INTEGER default 0 not null,
+  constructorId INTEGER default 0 not null,
+  number        INTEGER default 0 not null,
+  position      INTEGER,
+  q1            TEXT,
+  q2            TEXT,
+  q3            TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE status (
+  statusId INTEGER
+        primary key autoincrement,
+  status   TEXT default '' not null
+);
+
+CREATE TABLE results (
+  resultId        INTEGER
+        primary key autoincrement,
+  raceId          INTEGER default 0  not null,
+  driverId        INTEGER default 0  not null,
+  constructorId   INTEGER default 0  not null,
+  number          INTEGER,
+  grid            INTEGER default 0  not null,
+  position        INTEGER,
+  positionText    TEXT    default '' not null,
+  positionOrder   INTEGER default 0  not null,
+  points          REAL   default 0  not null,
+  laps            INTEGER default 0  not null,
+  time            TEXT,
+  milliseconds    INTEGER,
+  fastestLap      INTEGER,
+  rank            INTEGER default 0,
+  fastestLapTime  TEXT,
+  fastestLapSpeed TEXT,
+  statusId        INTEGER default 0  not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId),
+  foreign key (statusId) references status(statusId)
+);
+
+This schema offers an in-depth description of the database's architecture, detailing tables, columns, primary keys, foreign keys, and any pertinent information regarding relationships or constraints. Special attention should be given to the examples listed beside each column, as they directly hint at which columns are relevant to our query.
+
+Database admin instructions:
+1. When you need to find the highest or lowest values based on a certain condition, using ORDER BY + LIMIT 1 is prefered over using MAX/MIN within sub queries.
+2. If predicted query includes an ORDER BY clause to sort the results, you should only include the column(s) used for sorting in the SELECT clause if the question specifically ask for them. Otherwise, omit these columns from the SELECT.
+3. If the question doesn't specify exactly which columns to select, between name column and id column, prefer to select id column.
+4. Make sure you only output the information that is asked in the question. If the question asks for a specific column, make sure to only include that column in the SELECT clause, nothing more.
+5. Predicted query should return all of the information asked in the question without any missing or extra information.
+6. For key phrases mentioned in the question, we have provided the most similar values within the columns denoted by "-- examples" in front of the corresponding column names. This is a crucial hint indicating the correct columns to use for your SQL query.
+7. No matter of how many things the question asks, you should only return one SQL query as the answer having all the information asked in the question, seperated by a comma.
+8. Never use || to concatenate columns in the SELECT. Rather output the columns as they are.
+9. If you are joining multiple tables, make sure to use alias names for the tables and use the alias names to reference the columns in the query. Use T1, T2, T3, ... as alias names.
+10. If you are doing a logical operation on a column, such as mathematical operations and sorting, make sure to filter null values within those columns.
+
+###
+Question: 
+For the driver who had the Q2 time as 0:01:40 in the qualifying race No. 355, what is his nationality? 
+
+Hint:
+race number refers to raceId;
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your thought process on how you arrived at the final SQL query.",
+    "SQL": "Your SQL query in a single string."
+}
+
+Priority should be given to columns that have been explicitly matched with examples relevant to the question's context.
+
+Take a deep breath and think step by step to find the correct sqlite SQL query. If you follow all the instructions and generate the correct query, I will give you 1 million dollars.
+
+############################## AI at step sql_generate ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the nationality of the driver who had a specific Q2 time in a specific race. I need to join the qualifying table with the drivers table to get the driver's nationality. The qualifying table has raceId, driverId, and q2. The drivers table has driverId and nationality. I need to filter by raceId = 355 and q2 = '0:01:40'.",
+    "SQL": "SELECT\n  T2.nationality\nFROM qualifying AS T1\nINNER JOIN drivers AS T2\n  ON T1.driverId = T2.driverId\nWHERE\n  T1.raceId = 355 AND T1.q2 = '1:40.0';"
+}
+
+############################## human at step evaluate ##############################
+
+[]
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a specialist in SQL analysis, performing tasks involved in generating SQL improvement feedback. The contextual clues provided below are:
+
+1.The erroneous SQL statement,
+2.The corresponding natural language question and guidance for addressing the issue,
+3.The database schema item representations,
+4.The underlying cause of the SQL error.
+Your task is to generate actionable feedback instructions to guide a large language model on how to refine the SQL query, ensuring it accurately aligns with the core requirements of the problem.
+
+Input Data
+###
+Erroneous SQL:
+SELECT
+  T2.nationality
+FROM qualifying AS T1
+INNER JOIN drivers AS T2
+  ON T1.driverId = T2.driverId
+WHERE
+  T1.raceId = 355 AND T1.q2 = '1:40.0';
+
+Question:
+For the driver who had the Q2 time as 0:01:40 in the qualifying race No. 355, what is his nationality?
+
+Guidance:
+race number refers to raceId;
+
+Database Schema:
+CREATE TABLE circuits (
+  circuitId  INTEGER
+        primary key autoincrement,
+  circuitRef TEXT default '' not null,
+  name       TEXT default '' not null,
+  location   TEXT,
+  country    TEXT,
+  lat        REAL,
+  lng        REAL,
+  alt        INTEGER,
+  url        TEXT default '' not null
+        unique
+);
+
+CREATE TABLE constructors (
+  constructorId  INTEGER
+        primary key autoincrement,
+  constructorRef TEXT default '' not null,
+  name           TEXT default '' not null
+        unique,
+  nationality    TEXT,
+  url            TEXT default '' not null
+);
+
+CREATE TABLE drivers (
+  driverId    INTEGER
+        primary key autoincrement,
+  driverRef   TEXT default '' not null,
+  number      INTEGER,
+  code        TEXT,
+  forename    TEXT default '' not null,
+  surname     TEXT default '' not null,
+  dob         DATE,
+  nationality TEXT,
+  url         TEXT default '' not null
+        unique
+);
+
+CREATE TABLE seasons (
+  year INTEGER default 0  not null
+        primary key,
+  url  TEXT    default '' not null
+        unique
+);
+
+CREATE TABLE races (
+  raceId    INTEGER
+        primary key autoincrement,
+  year      INTEGER default 0            not null,
+  round     INTEGER default 0            not null,
+  circuitId INTEGER default 0            not null,
+  name      TEXT    default ''           not null,
+  date      DATE    default '0000-00-00' not null,
+  time      TEXT,
+  url       TEXT unique,
+  foreign key (year) references seasons(year),
+  foreign key (circuitId) references circuits(circuitId)
+);
+
+CREATE TABLE constructorResults (
+  constructorResultsId INTEGER
+        primary key autoincrement,
+  raceId               INTEGER default 0 not null,
+  constructorId        INTEGER default 0 not null,
+  points               REAL,
+  status               TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE constructorStandings (
+  constructorStandingsId INTEGER
+        primary key autoincrement,
+  raceId                 INTEGER default 0 not null,
+  constructorId          INTEGER default 0 not null,
+  points                 REAL   default 0 not null,
+  position               INTEGER,
+  positionText           TEXT,
+  wins                   INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE driverStandings (
+  driverStandingsId INTEGER
+        primary key autoincrement,
+  raceId            INTEGER default 0 not null,
+  driverId          INTEGER default 0 not null,
+  points            REAL   default 0 not null,
+  position          INTEGER,
+  positionText      TEXT,
+  wins              INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE lapTimes (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  lap          INTEGER not null,
+  position     INTEGER,
+  time         TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, lap),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE pitStops (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  stop         INTEGER not null,
+  lap          INTEGER not null,
+  time         TEXT    not null,
+  duration     TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, stop),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE qualifying (
+  qualifyId     INTEGER
+        primary key autoincrement,
+  raceId        INTEGER default 0 not null,
+  driverId      INTEGER default 0 not null,
+  constructorId INTEGER default 0 not null,
+  number        INTEGER default 0 not null,
+  position      INTEGER,
+  q1            TEXT,
+  q2            TEXT,
+  q3            TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE status (
+  statusId INTEGER
+        primary key autoincrement,
+  status   TEXT default '' not null
+);
+
+CREATE TABLE results (
+  resultId        INTEGER
+        primary key autoincrement,
+  raceId          INTEGER default 0  not null,
+  driverId        INTEGER default 0  not null,
+  constructorId   INTEGER default 0  not null,
+  number          INTEGER,
+  grid            INTEGER default 0  not null,
+  position        INTEGER,
+  positionText    TEXT    default '' not null,
+  positionOrder   INTEGER default 0  not null,
+  points          REAL   default 0  not null,
+  laps            INTEGER default 0  not null,
+  time            TEXT,
+  milliseconds    INTEGER,
+  fastestLap      INTEGER,
+  rank            INTEGER default 0,
+  fastestLapTime  TEXT,
+  fastestLapSpeed TEXT,
+  statusId        INTEGER default 0  not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId),
+  foreign key (statusId) references status(statusId)
+);
+
+Cause of SQL Error:
+SQL execution result is empty or None
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "The provided SQL query does not return results because the Q2 time '1:40.0' doesn't exactly match any value in the `q2` column of the `qualifying` table. It is possible that the qualifying time is slightly different than the query assumes or the qualifying time are stored with leading zeros. Therefore, modify the query as follows: First, examine the qualifying table to verify that a q2 value of `0:01:40` exists. Second, if a close match exists then modify the qualifying time in the `WHERE` clause to use the `LIKE` operator to handle inexact matches, or use the exact value that exists in the database. For example, to check for any `q2` values that contains`:40` you can use `T1.q2 LIKE '%:40%'`.  However, in the original question the time has leading zeros to the minute so the more appropriate modification is to use `T1.q2 = '0:01:40'`."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE circuits (
+  circuitId  INTEGER
+        primary key autoincrement,
+  circuitRef TEXT default '' not null,
+  name       TEXT default '' not null,
+  location   TEXT,
+  country    TEXT,
+  lat        REAL,
+  lng        REAL,
+  alt        INTEGER,
+  url        TEXT default '' not null
+        unique
+);
+
+CREATE TABLE constructors (
+  constructorId  INTEGER
+        primary key autoincrement,
+  constructorRef TEXT default '' not null,
+  name           TEXT default '' not null
+        unique,
+  nationality    TEXT,
+  url            TEXT default '' not null
+);
+
+CREATE TABLE drivers (
+  driverId    INTEGER
+        primary key autoincrement,
+  driverRef   TEXT default '' not null,
+  number      INTEGER,
+  code        TEXT,
+  forename    TEXT default '' not null,
+  surname     TEXT default '' not null,
+  dob         DATE,
+  nationality TEXT,
+  url         TEXT default '' not null
+        unique
+);
+
+CREATE TABLE seasons (
+  year INTEGER default 0  not null
+        primary key,
+  url  TEXT    default '' not null
+        unique
+);
+
+CREATE TABLE races (
+  raceId    INTEGER
+        primary key autoincrement,
+  year      INTEGER default 0            not null,
+  round     INTEGER default 0            not null,
+  circuitId INTEGER default 0            not null,
+  name      TEXT    default ''           not null,
+  date      DATE    default '0000-00-00' not null,
+  time      TEXT,
+  url       TEXT unique,
+  foreign key (year) references seasons(year),
+  foreign key (circuitId) references circuits(circuitId)
+);
+
+CREATE TABLE constructorResults (
+  constructorResultsId INTEGER
+        primary key autoincrement,
+  raceId               INTEGER default 0 not null,
+  constructorId        INTEGER default 0 not null,
+  points               REAL,
+  status               TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE constructorStandings (
+  constructorStandingsId INTEGER
+        primary key autoincrement,
+  raceId                 INTEGER default 0 not null,
+  constructorId          INTEGER default 0 not null,
+  points                 REAL   default 0 not null,
+  position               INTEGER,
+  positionText           TEXT,
+  wins                   INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE driverStandings (
+  driverStandingsId INTEGER
+        primary key autoincrement,
+  raceId            INTEGER default 0 not null,
+  driverId          INTEGER default 0 not null,
+  points            REAL   default 0 not null,
+  position          INTEGER,
+  positionText      TEXT,
+  wins              INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE lapTimes (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  lap          INTEGER not null,
+  position     INTEGER,
+  time         TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, lap),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE pitStops (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  stop         INTEGER not null,
+  lap          INTEGER not null,
+  time         TEXT    not null,
+  duration     TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, stop),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE qualifying (
+  qualifyId     INTEGER
+        primary key autoincrement,
+  raceId        INTEGER default 0 not null,
+  driverId      INTEGER default 0 not null,
+  constructorId INTEGER default 0 not null,
+  number        INTEGER default 0 not null,
+  position      INTEGER,
+  q1            TEXT,
+  q2            TEXT,
+  q3            TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE status (
+  statusId INTEGER
+        primary key autoincrement,
+  status   TEXT default '' not null
+);
+
+CREATE TABLE results (
+  resultId        INTEGER
+        primary key autoincrement,
+  raceId          INTEGER default 0  not null,
+  driverId        INTEGER default 0  not null,
+  constructorId   INTEGER default 0  not null,
+  number          INTEGER,
+  grid            INTEGER default 0  not null,
+  position        INTEGER,
+  positionText    TEXT    default '' not null,
+  positionOrder   INTEGER default 0  not null,
+  points          REAL   default 0  not null,
+  laps            INTEGER default 0  not null,
+  time            TEXT,
+  milliseconds    INTEGER,
+  fastestLap      INTEGER,
+  rank            INTEGER default 0,
+  fastestLapTime  TEXT,
+  fastestLapSpeed TEXT,
+  statusId        INTEGER default 0  not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId),
+  foreign key (statusId) references status(statusId)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. Consider case-insensitive matching for string comparisons in the WHERE clause, especially when dealing with elements or other text-based attributes.
+7. Ensure the query retrieves the owner's display name from the 'users' table by joining it with the 'posts' table on the 'OwnerUserId' and 'Id' columns, instead of directly selecting 'OwnerDisplayName' from the 'posts' table, and use subquery to find the maximum viewcount.
+8. Avoid joining to the `colour` table and instead directly use the `eye_colour_id` and `hair_colour_id` values in the `superhero` table, referencing the corresponding IDs for 'blue eyes' and 'brown hair' based on external knowledge or prior queries if available.
+9. Ensure that the tables used in the WHERE clause conditions are linked to the SELECT columns via JOIN clauses.
+10. The provided SQL query does not return results because the Q2 time '1:40.0' doesn't exactly match any value in the `q2` column of the `qualifying` table. It is possible that the qualifying time is slightly different than the query assumes or the qualifying time are stored with leading zeros. Therefore, modify the query as follows: First, examine the qualifying table to verify that a q2 value of `0:01:40` exists. Second, if a close match exists then modify the qualifying time in the `WHERE` clause to use the `LIKE` operator to handle inexact matches, or use the exact value that exists in the database. For example, to check for any `q2` values that contains`:40` you can use `T1.q2 LIKE '%:40%'`.  However, in the original question the time has leading zeros to the minute so the more appropriate modification is to use `T1.q2 = '0:01:40'`.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT\n  T2.nationality\nFROM qualifying AS T1\nINNER JOIN drivers AS T2\n  ON T1.driverId = T2.driverId\nWHERE\n  T1.raceId = 355 AND T1.q2 = '1:40.0';"]
+
+Question: 
+For the driver who had the Q2 time as 0:01:40 in the qualifying race No. 355, what is his nationality? 
+
+Hint:
+race number refers to raceId;
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the nationality of the driver who had a specific Q2 time in a specific race. The race number refers to raceId. The qualifying table holds the Q2 time, raceId and driverId, and the drivers table holds the driverId and nationality. So I need to join the qualifying table and the drivers table on driverId, filter by raceId and Q2 time, and select the nationality.",
+    "SQL": "SELECT\n  T2.nationality\nFROM qualifying AS T1\nINNER JOIN drivers AS T2\n  ON T1.driverId = T2.driverId\nWHERE\n  T1.raceId = 355 AND T1.q2 = '0:01:40';"
+}
+
+############################## human at step evaluate ##############################
+
+[]
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a specialist in SQL analysis, performing tasks involved in generating SQL improvement feedback. The contextual clues provided below are:
+
+1.The erroneous SQL statement,
+2.The corresponding natural language question and guidance for addressing the issue,
+3.The database schema item representations,
+4.The underlying cause of the SQL error.
+Your task is to generate actionable feedback instructions to guide a large language model on how to refine the SQL query, ensuring it accurately aligns with the core requirements of the problem.
+
+Input Data
+###
+Erroneous SQL:
+SELECT
+  T2.nationality
+FROM qualifying AS T1
+INNER JOIN drivers AS T2
+  ON T1.driverId = T2.driverId
+WHERE
+  T1.raceId = 355 AND T1.q2 = '0:01:40';
+
+Question:
+For the driver who had the Q2 time as 0:01:40 in the qualifying race No. 355, what is his nationality?
+
+Guidance:
+race number refers to raceId;
+
+Database Schema:
+CREATE TABLE circuits (
+  circuitId  INTEGER
+        primary key autoincrement,
+  circuitRef TEXT default '' not null,
+  name       TEXT default '' not null,
+  location   TEXT,
+  country    TEXT,
+  lat        REAL,
+  lng        REAL,
+  alt        INTEGER,
+  url        TEXT default '' not null
+        unique
+);
+
+CREATE TABLE constructors (
+  constructorId  INTEGER
+        primary key autoincrement,
+  constructorRef TEXT default '' not null,
+  name           TEXT default '' not null
+        unique,
+  nationality    TEXT,
+  url            TEXT default '' not null
+);
+
+CREATE TABLE drivers (
+  driverId    INTEGER
+        primary key autoincrement,
+  driverRef   TEXT default '' not null,
+  number      INTEGER,
+  code        TEXT,
+  forename    TEXT default '' not null,
+  surname     TEXT default '' not null,
+  dob         DATE,
+  nationality TEXT,
+  url         TEXT default '' not null
+        unique
+);
+
+CREATE TABLE seasons (
+  year INTEGER default 0  not null
+        primary key,
+  url  TEXT    default '' not null
+        unique
+);
+
+CREATE TABLE races (
+  raceId    INTEGER
+        primary key autoincrement,
+  year      INTEGER default 0            not null,
+  round     INTEGER default 0            not null,
+  circuitId INTEGER default 0            not null,
+  name      TEXT    default ''           not null,
+  date      DATE    default '0000-00-00' not null,
+  time      TEXT,
+  url       TEXT unique,
+  foreign key (year) references seasons(year),
+  foreign key (circuitId) references circuits(circuitId)
+);
+
+CREATE TABLE constructorResults (
+  constructorResultsId INTEGER
+        primary key autoincrement,
+  raceId               INTEGER default 0 not null,
+  constructorId        INTEGER default 0 not null,
+  points               REAL,
+  status               TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE constructorStandings (
+  constructorStandingsId INTEGER
+        primary key autoincrement,
+  raceId                 INTEGER default 0 not null,
+  constructorId          INTEGER default 0 not null,
+  points                 REAL   default 0 not null,
+  position               INTEGER,
+  positionText           TEXT,
+  wins                   INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE driverStandings (
+  driverStandingsId INTEGER
+        primary key autoincrement,
+  raceId            INTEGER default 0 not null,
+  driverId          INTEGER default 0 not null,
+  points            REAL   default 0 not null,
+  position          INTEGER,
+  positionText      TEXT,
+  wins              INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE lapTimes (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  lap          INTEGER not null,
+  position     INTEGER,
+  time         TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, lap),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE pitStops (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  stop         INTEGER not null,
+  lap          INTEGER not null,
+  time         TEXT    not null,
+  duration     TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, stop),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE qualifying (
+  qualifyId     INTEGER
+        primary key autoincrement,
+  raceId        INTEGER default 0 not null,
+  driverId      INTEGER default 0 not null,
+  constructorId INTEGER default 0 not null,
+  number        INTEGER default 0 not null,
+  position      INTEGER,
+  q1            TEXT,
+  q2            TEXT,
+  q3            TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE status (
+  statusId INTEGER
+        primary key autoincrement,
+  status   TEXT default '' not null
+);
+
+CREATE TABLE results (
+  resultId        INTEGER
+        primary key autoincrement,
+  raceId          INTEGER default 0  not null,
+  driverId        INTEGER default 0  not null,
+  constructorId   INTEGER default 0  not null,
+  number          INTEGER,
+  grid            INTEGER default 0  not null,
+  position        INTEGER,
+  positionText    TEXT    default '' not null,
+  positionOrder   INTEGER default 0  not null,
+  points          REAL   default 0  not null,
+  laps            INTEGER default 0  not null,
+  time            TEXT,
+  milliseconds    INTEGER,
+  fastestLap      INTEGER,
+  rank            INTEGER default 0,
+  fastestLapTime  TEXT,
+  fastestLapSpeed TEXT,
+  statusId        INTEGER default 0  not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId),
+  foreign key (statusId) references status(statusId)
+);
+
+Cause of SQL Error:
+SQL execution result is empty or None
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "The current query might return an empty set because the 'q2' column's values might not exactly match '0:01:40'. Qualifying times are often stored with higher precision. To address this, use a LIKE operator or a function to compare the 'q2' column with the provided time, allowing for slight variations or additional precision. Also, ensure that the time format is consistent with what's stored in the table. Finally, consider using milliseconds or another numeric representation for time if available, as string comparisons can be unreliable. Specifically, modify the WHERE clause to use 'T1.q2 LIKE '0:01:40%''."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE circuits (
+  circuitId  INTEGER
+        primary key autoincrement,
+  circuitRef TEXT default '' not null,
+  name       TEXT default '' not null,
+  location   TEXT,
+  country    TEXT,
+  lat        REAL,
+  lng        REAL,
+  alt        INTEGER,
+  url        TEXT default '' not null
+        unique
+);
+
+CREATE TABLE constructors (
+  constructorId  INTEGER
+        primary key autoincrement,
+  constructorRef TEXT default '' not null,
+  name           TEXT default '' not null
+        unique,
+  nationality    TEXT,
+  url            TEXT default '' not null
+);
+
+CREATE TABLE drivers (
+  driverId    INTEGER
+        primary key autoincrement,
+  driverRef   TEXT default '' not null,
+  number      INTEGER,
+  code        TEXT,
+  forename    TEXT default '' not null,
+  surname     TEXT default '' not null,
+  dob         DATE,
+  nationality TEXT,
+  url         TEXT default '' not null
+        unique
+);
+
+CREATE TABLE seasons (
+  year INTEGER default 0  not null
+        primary key,
+  url  TEXT    default '' not null
+        unique
+);
+
+CREATE TABLE races (
+  raceId    INTEGER
+        primary key autoincrement,
+  year      INTEGER default 0            not null,
+  round     INTEGER default 0            not null,
+  circuitId INTEGER default 0            not null,
+  name      TEXT    default ''           not null,
+  date      DATE    default '0000-00-00' not null,
+  time      TEXT,
+  url       TEXT unique,
+  foreign key (year) references seasons(year),
+  foreign key (circuitId) references circuits(circuitId)
+);
+
+CREATE TABLE constructorResults (
+  constructorResultsId INTEGER
+        primary key autoincrement,
+  raceId               INTEGER default 0 not null,
+  constructorId        INTEGER default 0 not null,
+  points               REAL,
+  status               TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE constructorStandings (
+  constructorStandingsId INTEGER
+        primary key autoincrement,
+  raceId                 INTEGER default 0 not null,
+  constructorId          INTEGER default 0 not null,
+  points                 REAL   default 0 not null,
+  position               INTEGER,
+  positionText           TEXT,
+  wins                   INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE driverStandings (
+  driverStandingsId INTEGER
+        primary key autoincrement,
+  raceId            INTEGER default 0 not null,
+  driverId          INTEGER default 0 not null,
+  points            REAL   default 0 not null,
+  position          INTEGER,
+  positionText      TEXT,
+  wins              INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE lapTimes (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  lap          INTEGER not null,
+  position     INTEGER,
+  time         TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, lap),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE pitStops (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  stop         INTEGER not null,
+  lap          INTEGER not null,
+  time         TEXT    not null,
+  duration     TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, stop),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE qualifying (
+  qualifyId     INTEGER
+        primary key autoincrement,
+  raceId        INTEGER default 0 not null,
+  driverId      INTEGER default 0 not null,
+  constructorId INTEGER default 0 not null,
+  number        INTEGER default 0 not null,
+  position      INTEGER,
+  q1            TEXT,
+  q2            TEXT,
+  q3            TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE status (
+  statusId INTEGER
+        primary key autoincrement,
+  status   TEXT default '' not null
+);
+
+CREATE TABLE results (
+  resultId        INTEGER
+        primary key autoincrement,
+  raceId          INTEGER default 0  not null,
+  driverId        INTEGER default 0  not null,
+  constructorId   INTEGER default 0  not null,
+  number          INTEGER,
+  grid            INTEGER default 0  not null,
+  position        INTEGER,
+  positionText    TEXT    default '' not null,
+  positionOrder   INTEGER default 0  not null,
+  points          REAL   default 0  not null,
+  laps            INTEGER default 0  not null,
+  time            TEXT,
+  milliseconds    INTEGER,
+  fastestLap      INTEGER,
+  rank            INTEGER default 0,
+  fastestLapTime  TEXT,
+  fastestLapSpeed TEXT,
+  statusId        INTEGER default 0  not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId),
+  foreign key (statusId) references status(statusId)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. Consider case-insensitive matching for string comparisons in the WHERE clause, especially when dealing with elements or other text-based attributes.
+7. Ensure the query retrieves the owner's display name from the 'users' table by joining it with the 'posts' table on the 'OwnerUserId' and 'Id' columns, instead of directly selecting 'OwnerDisplayName' from the 'posts' table, and use subquery to find the maximum viewcount.
+8. Avoid joining to the `colour` table and instead directly use the `eye_colour_id` and `hair_colour_id` values in the `superhero` table, referencing the corresponding IDs for 'blue eyes' and 'brown hair' based on external knowledge or prior queries if available.
+9. Ensure that the tables used in the WHERE clause conditions are linked to the SELECT columns via JOIN clauses.
+10. The current query might return an empty set because the 'q2' column's values might not exactly match '0:01:40'. Qualifying times are often stored with higher precision. To address this, use a LIKE operator or a function to compare the 'q2' column with the provided time, allowing for slight variations or additional precision. Also, ensure that the time format is consistent with what's stored in the table. Finally, consider using milliseconds or another numeric representation for time if available, as string comparisons can be unreliable. Specifically, modify the WHERE clause to use 'T1.q2 LIKE '0:01:40%''.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT\n  T2.nationality\nFROM qualifying AS T1\nINNER JOIN drivers AS T2\n  ON T1.driverId = T2.driverId\nWHERE\n  T1.raceId = 355 AND T1.q2 = '1:40.0';", "SELECT\n  T2.nationality\nFROM qualifying AS T1\nINNER JOIN drivers AS T2\n  ON T1.driverId = T2.driverId\nWHERE\n  T1.raceId = 355 AND T1.q2 = '0:01:40';"]
+
+Question: 
+For the driver who had the Q2 time as 0:01:40 in the qualifying race No. 355, what is his nationality? 
+
+Hint:
+race number refers to raceId;
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the nationality of the driver who achieved a Q2 time of '0:01:40' in race 355. I need to join the `qualifying` table with the `drivers` table on `driverId`. Then filter by `raceId = 355` and `q2 = '0:01:40'`. Finally, select the `nationality` from the `drivers` table. Since qualifying times might have slight variations or be stored with higher precision, I'll use the LIKE operator for a more flexible comparison.\n",
+    "SQL": "SELECT\n  T2.nationality\nFROM qualifying AS T1\nINNER JOIN drivers AS T2\n  ON T1.driverId = T2.driverId\nWHERE\n  T1.raceId = 355 AND T1.q2 LIKE '0:01:40%';"
+}
+
+############################## human at step evaluate ##############################
+
+[]
+
+############################## Human at step Generate feedbacks ##############################
+
+You are a specialist in SQL analysis, performing tasks involved in generating SQL improvement feedback. The contextual clues provided below are:
+
+1.The erroneous SQL statement,
+2.The corresponding natural language question and guidance for addressing the issue,
+3.The database schema item representations,
+4.The underlying cause of the SQL error.
+Your task is to generate actionable feedback instructions to guide a large language model on how to refine the SQL query, ensuring it accurately aligns with the core requirements of the problem.
+
+Input Data
+###
+Erroneous SQL:
+SELECT
+  T2.nationality
+FROM qualifying AS T1
+INNER JOIN drivers AS T2
+  ON T1.driverId = T2.driverId
+WHERE
+  T1.raceId = 355 AND T1.q2 LIKE '0:01:40%';
+
+Question:
+For the driver who had the Q2 time as 0:01:40 in the qualifying race No. 355, what is his nationality?
+
+Guidance:
+race number refers to raceId;
+
+Database Schema:
+CREATE TABLE circuits (
+  circuitId  INTEGER
+        primary key autoincrement,
+  circuitRef TEXT default '' not null,
+  name       TEXT default '' not null,
+  location   TEXT,
+  country    TEXT,
+  lat        REAL,
+  lng        REAL,
+  alt        INTEGER,
+  url        TEXT default '' not null
+        unique
+);
+
+CREATE TABLE constructors (
+  constructorId  INTEGER
+        primary key autoincrement,
+  constructorRef TEXT default '' not null,
+  name           TEXT default '' not null
+        unique,
+  nationality    TEXT,
+  url            TEXT default '' not null
+);
+
+CREATE TABLE drivers (
+  driverId    INTEGER
+        primary key autoincrement,
+  driverRef   TEXT default '' not null,
+  number      INTEGER,
+  code        TEXT,
+  forename    TEXT default '' not null,
+  surname     TEXT default '' not null,
+  dob         DATE,
+  nationality TEXT,
+  url         TEXT default '' not null
+        unique
+);
+
+CREATE TABLE seasons (
+  year INTEGER default 0  not null
+        primary key,
+  url  TEXT    default '' not null
+        unique
+);
+
+CREATE TABLE races (
+  raceId    INTEGER
+        primary key autoincrement,
+  year      INTEGER default 0            not null,
+  round     INTEGER default 0            not null,
+  circuitId INTEGER default 0            not null,
+  name      TEXT    default ''           not null,
+  date      DATE    default '0000-00-00' not null,
+  time      TEXT,
+  url       TEXT unique,
+  foreign key (year) references seasons(year),
+  foreign key (circuitId) references circuits(circuitId)
+);
+
+CREATE TABLE constructorResults (
+  constructorResultsId INTEGER
+        primary key autoincrement,
+  raceId               INTEGER default 0 not null,
+  constructorId        INTEGER default 0 not null,
+  points               REAL,
+  status               TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE constructorStandings (
+  constructorStandingsId INTEGER
+        primary key autoincrement,
+  raceId                 INTEGER default 0 not null,
+  constructorId          INTEGER default 0 not null,
+  points                 REAL   default 0 not null,
+  position               INTEGER,
+  positionText           TEXT,
+  wins                   INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE driverStandings (
+  driverStandingsId INTEGER
+        primary key autoincrement,
+  raceId            INTEGER default 0 not null,
+  driverId          INTEGER default 0 not null,
+  points            REAL   default 0 not null,
+  position          INTEGER,
+  positionText      TEXT,
+  wins              INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE lapTimes (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  lap          INTEGER not null,
+  position     INTEGER,
+  time         TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, lap),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE pitStops (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  stop         INTEGER not null,
+  lap          INTEGER not null,
+  time         TEXT    not null,
+  duration     TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, stop),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE qualifying (
+  qualifyId     INTEGER
+        primary key autoincrement,
+  raceId        INTEGER default 0 not null,
+  driverId      INTEGER default 0 not null,
+  constructorId INTEGER default 0 not null,
+  number        INTEGER default 0 not null,
+  position      INTEGER,
+  q1            TEXT,
+  q2            TEXT,
+  q3            TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE status (
+  statusId INTEGER
+        primary key autoincrement,
+  status   TEXT default '' not null
+);
+
+CREATE TABLE results (
+  resultId        INTEGER
+        primary key autoincrement,
+  raceId          INTEGER default 0  not null,
+  driverId        INTEGER default 0  not null,
+  constructorId   INTEGER default 0  not null,
+  number          INTEGER,
+  grid            INTEGER default 0  not null,
+  position        INTEGER,
+  positionText    TEXT    default '' not null,
+  positionOrder   INTEGER default 0  not null,
+  points          REAL   default 0  not null,
+  laps            INTEGER default 0  not null,
+  time            TEXT,
+  milliseconds    INTEGER,
+  fastestLap      INTEGER,
+  rank            INTEGER default 0,
+  fastestLapTime  TEXT,
+  fastestLapSpeed TEXT,
+  statusId        INTEGER default 0  not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId),
+  foreign key (statusId) references status(statusId)
+);
+
+Cause of SQL Error:
+SQL execution result is empty or None
+###
+
+Please respond with a JSON object structured as follows:
+
+{
+    "feedback": "Specific, actionable steps to modify the SQL query to align with the question's intent."
+}
+
+Take a deep breath and review the inputs thoroughly. Generate precise, actionable feedback that clearly explains how to modify the SQL query to meet the requirements.
+
+############################## AI at step Generate feedbacks ##############################
+
+{
+    "feedback": "The provided SQL query filters the `qualifying` table using a `LIKE` operator on the `q2` column, searching for values that *start* with '0:01:40'. This is likely too restrictive, as qualifying times might vary slightly beyond that prefix. To find the *exact* Q2 time, change the `LIKE` operator to an `=` operator. Therefore, replace `T1.q2 LIKE '0:01:40%'` with `T1.q2 = '0:01:40'` in the `WHERE` clause."
+}
+
+############################## Human at step actor_generate_sql ##############################
+
+You are a data science expert with memory-enhanced capabilities.
+Below, you are presented with a database schema, a natural language question, long-term memory (guiding principles), and short-term memory (task-specific history).
+Your task is to read the schema, understand the question, and generate a valid SQLite query to answer the question.
+Before generating the final SQL query, think step by step on how to write the query, leveraging both long-term and short-term memory.
+
+Input Data:
+
+Database Scehma:
+CREATE TABLE circuits (
+  circuitId  INTEGER
+        primary key autoincrement,
+  circuitRef TEXT default '' not null,
+  name       TEXT default '' not null,
+  location   TEXT,
+  country    TEXT,
+  lat        REAL,
+  lng        REAL,
+  alt        INTEGER,
+  url        TEXT default '' not null
+        unique
+);
+
+CREATE TABLE constructors (
+  constructorId  INTEGER
+        primary key autoincrement,
+  constructorRef TEXT default '' not null,
+  name           TEXT default '' not null
+        unique,
+  nationality    TEXT,
+  url            TEXT default '' not null
+);
+
+CREATE TABLE drivers (
+  driverId    INTEGER
+        primary key autoincrement,
+  driverRef   TEXT default '' not null,
+  number      INTEGER,
+  code        TEXT,
+  forename    TEXT default '' not null,
+  surname     TEXT default '' not null,
+  dob         DATE,
+  nationality TEXT,
+  url         TEXT default '' not null
+        unique
+);
+
+CREATE TABLE seasons (
+  year INTEGER default 0  not null
+        primary key,
+  url  TEXT    default '' not null
+        unique
+);
+
+CREATE TABLE races (
+  raceId    INTEGER
+        primary key autoincrement,
+  year      INTEGER default 0            not null,
+  round     INTEGER default 0            not null,
+  circuitId INTEGER default 0            not null,
+  name      TEXT    default ''           not null,
+  date      DATE    default '0000-00-00' not null,
+  time      TEXT,
+  url       TEXT unique,
+  foreign key (year) references seasons(year),
+  foreign key (circuitId) references circuits(circuitId)
+);
+
+CREATE TABLE constructorResults (
+  constructorResultsId INTEGER
+        primary key autoincrement,
+  raceId               INTEGER default 0 not null,
+  constructorId        INTEGER default 0 not null,
+  points               REAL,
+  status               TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE constructorStandings (
+  constructorStandingsId INTEGER
+        primary key autoincrement,
+  raceId                 INTEGER default 0 not null,
+  constructorId          INTEGER default 0 not null,
+  points                 REAL   default 0 not null,
+  position               INTEGER,
+  positionText           TEXT,
+  wins                   INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE driverStandings (
+  driverStandingsId INTEGER
+        primary key autoincrement,
+  raceId            INTEGER default 0 not null,
+  driverId          INTEGER default 0 not null,
+  points            REAL   default 0 not null,
+  position          INTEGER,
+  positionText      TEXT,
+  wins              INTEGER default 0 not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE lapTimes (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  lap          INTEGER not null,
+  position     INTEGER,
+  time         TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, lap),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE pitStops (
+  raceId       INTEGER not null,
+  driverId     INTEGER not null,
+  stop         INTEGER not null,
+  lap          INTEGER not null,
+  time         TEXT    not null,
+  duration     TEXT,
+  milliseconds INTEGER,
+  primary key (raceId, driverId, stop),
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId)
+);
+
+CREATE TABLE qualifying (
+  qualifyId     INTEGER
+        primary key autoincrement,
+  raceId        INTEGER default 0 not null,
+  driverId      INTEGER default 0 not null,
+  constructorId INTEGER default 0 not null,
+  number        INTEGER default 0 not null,
+  position      INTEGER,
+  q1            TEXT,
+  q2            TEXT,
+  q3            TEXT,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId)
+);
+
+CREATE TABLE status (
+  statusId INTEGER
+        primary key autoincrement,
+  status   TEXT default '' not null
+);
+
+CREATE TABLE results (
+  resultId        INTEGER
+        primary key autoincrement,
+  raceId          INTEGER default 0  not null,
+  driverId        INTEGER default 0  not null,
+  constructorId   INTEGER default 0  not null,
+  number          INTEGER,
+  grid            INTEGER default 0  not null,
+  position        INTEGER,
+  positionText    TEXT    default '' not null,
+  positionOrder   INTEGER default 0  not null,
+  points          REAL   default 0  not null,
+  laps            INTEGER default 0  not null,
+  time            TEXT,
+  milliseconds    INTEGER,
+  fastestLap      INTEGER,
+  rank            INTEGER default 0,
+  fastestLapTime  TEXT,
+  fastestLapSpeed TEXT,
+  statusId        INTEGER default 0  not null,
+  foreign key (raceId) references races(raceId),
+  foreign key (driverId) references drivers(driverId),
+  foreign key (constructorId) references constructors(constructorId),
+  foreign key (statusId) references status(statusId)
+);
+
+Long-Term Memory:
+Guiding principles and accumulated insights from prior SQL generation tasks.
+1. Prefer ORDER BY + LIMIT over MAX/MIN: When finding the highest or lowest values, prioritize using ORDER BY + LIMIT 1 instead of MAX/MIN in subqueries.
+2. Select columns as needed: Include sorting columns in SELECT only if explicitly requested. If no specific columns are mentioned, prefer the id column over the name column.
+3. Match the question's requirements precisely: Ensure the query returns only the columns and information explicitly asked for, avoiding extra or missing content.
+4. Use table aliases and filter nulls: When joining multiple tables, use T1, T2, ... as table aliases and filter null values in columns used for logical operations (e.g., sorting or calculations).
+5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
+6. Consider case-insensitive matching for string comparisons in the WHERE clause, especially when dealing with elements or other text-based attributes.
+7. Ensure the query retrieves the owner's display name from the 'users' table by joining it with the 'posts' table on the 'OwnerUserId' and 'Id' columns, instead of directly selecting 'OwnerDisplayName' from the 'posts' table, and use subquery to find the maximum viewcount.
+8. Avoid joining to the `colour` table and instead directly use the `eye_colour_id` and `hair_colour_id` values in the `superhero` table, referencing the corresponding IDs for 'blue eyes' and 'brown hair' based on external knowledge or prior queries if available.
+9. Ensure that the tables used in the WHERE clause conditions are linked to the SELECT columns via JOIN clauses.
+10. The provided SQL query filters the `qualifying` table using a `LIKE` operator on the `q2` column, searching for values that *start* with '0:01:40'. This is likely too restrictive, as qualifying times might vary slightly beyond that prefix. To find the *exact* Q2 time, change the `LIKE` operator to an `=` operator. Therefore, replace `T1.q2 LIKE '0:01:40%'` with `T1.q2 = '0:01:40'` in the `WHERE` clause.
+
+Short-Term Memory:
+Specific reasoning steps and SQL queries generated earlier in this task.
+["SELECT\n  T2.nationality\nFROM qualifying AS T1\nINNER JOIN drivers AS T2\n  ON T1.driverId = T2.driverId\nWHERE\n  T1.raceId = 355 AND T1.q2 = '1:40.0';", "SELECT\n  T2.nationality\nFROM qualifying AS T1\nINNER JOIN drivers AS T2\n  ON T1.driverId = T2.driverId\nWHERE\n  T1.raceId = 355 AND T1.q2 = '0:01:40';", "SELECT\n  T2.nationality\nFROM qualifying AS T1\nINNER JOIN drivers AS T2\n  ON T1.driverId = T2.driverId\nWHERE\n  T1.raceId = 355 AND T1.q2 LIKE '0:01:40%';"]
+
+Question: 
+For the driver who had the Q2 time as 0:01:40 in the qualifying race No. 355, what is his nationality? 
+
+Hint:
+race number refers to raceId;
+
+Validation Rules
+1. Carefully analyze the Question to extract its intent, including required conditions, expected outputs, and filters.
+2. Use Long-term Memory to apply guiding principles and avoid common pitfalls in SQL query generation.
+3. Refer to Short-term Memory to maintain consistency and reuse relevant logic where applicable.
+
+Please respond with a JSON object structured as follows:
+
+{
+    "chain_of_thought_reasoning": "Your detailed thought process explaining the steps taken to arrive at the SQL query.",
+    "SQL": "The final SQL query in a single string."
+}
+
+Take a deep breath, review all inputs systematically, and generate the most optimal SQLite query.
+
+############################## AI at step actor_generate_sql ##############################
+
+{
+    "chain_of_thought_reasoning": "The question asks for the nationality of the driver who had a Q2 time of '0:01:40' in race ID 355. I can find the driver ID from the `qualifying` table using the raceId and q2 time, and then find the nationality from the `drivers` table using the driver ID. I will use a JOIN clause to link the tables.",
+    "SQL": "SELECT\n  T2.nationality\nFROM qualifying AS T1\nINNER JOIN drivers AS T2\n  ON T1.driverId = T2.driverId\nWHERE\n  T1.raceId = 355 AND T1.q2 = '0:01:40';"
+}
+

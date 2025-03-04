@@ -1,0 +1,149 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "users",
+            "supporter badge",
+            "year 2011",
+            "Supporter",
+            "badge",
+            "year(Date) = 2011"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "badges": [
+                "Id",
+                "UserId",
+                "Name",
+                "Date"
+            ],
+            "comments": [
+                "Id",
+                "PostId",
+                "Score",
+                "Text",
+                "CreationDate",
+                "UserId",
+                "UserDisplayName"
+            ],
+            "postHistory": [
+                "Id",
+                "PostHistoryTypeId",
+                "PostId",
+                "RevisionGUID",
+                "CreationDate",
+                "UserId",
+                "Text",
+                "Comment",
+                "UserDisplayName"
+            ],
+            "postLinks": [
+                "Id",
+                "CreationDate",
+                "PostId",
+                "RelatedPostId",
+                "LinkTypeId"
+            ],
+            "posts": [
+                "Id",
+                "PostTypeId",
+                "AcceptedAnswerId",
+                "CreaionDate",
+                "Score",
+                "ViewCount",
+                "Body",
+                "OwnerUserId",
+                "LasActivityDate",
+                "Title",
+                "Tags",
+                "AnswerCount",
+                "CommentCount",
+                "FavoriteCount",
+                "LastEditorUserId",
+                "LastEditDate",
+                "CommunityOwnedDate",
+                "ParentId",
+                "ClosedDate",
+                "OwnerDisplayName",
+                "LastEditorDisplayName"
+            ],
+            "tags": [
+                "Id",
+                "TagName",
+                "Count",
+                "ExcerptPostId",
+                "WikiPostId"
+            ],
+            "users": [
+                "Id",
+                "Reputation",
+                "CreationDate",
+                "DisplayName",
+                "LastAccessDate",
+                "WebsiteUrl",
+                "Location",
+                "AboutMe",
+                "Views",
+                "UpVotes",
+                "DownVotes",
+                "AccountId",
+                "Age",
+                "ProfileImageUrl"
+            ],
+            "votes": [
+                "Id",
+                "PostId",
+                "VoteTypeId",
+                "CreationDate",
+                "UserId",
+                "BountyAmount"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "badges": [
+                "id",
+                "name",
+                "date"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "The question asks for the number of users who have been awarded a 'Supporter' badge in the year 2011. \n1. I need to access the 'badges' table because it contains information about badges, users, and the date the badge was awarded.\n2. I need to filter the table for badges where the 'Name' is 'Supporter'.\n3. I need to further filter the table to include only the badges awarded in the year 2011. This can be done by using the strftime('%Y', Date) function to extract the year from the 'Date' column.\n4. I need to count the number of distinct UserIds that satisfy the above conditions. Distinct is needed to make sure the same user is not counted twice.",
+        "SQL": "SELECT\n  COUNT(DISTINCT UserId)\nFROM badges\nWHERE\n  Name = 'Supporter' AND STRFTIME('%Y', Date) = '2011';",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT\n  COUNT(DISTINCT UserId)\nFROM badges\nWHERE\n  Name = 'Supporter' AND STRFTIME('%Y', Date) = '2011';",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 1,
+            "error": "--",
+            "Question": "How many users are awarded with supporter badge during year 2011?",
+            "Evidence": "\"Supporter\" is the Name of badge; in year 2011 refers to year(Date) = 2011",
+            "pred_sql": "SELECT\n  COUNT(DISTINCT UserId)\nFROM badges\nWHERE\n  Name = 'Supporter' AND STRFTIME('%Y', Date) = '2011';",
+            "gold_sql": "SELECT COUNT(Id) FROM badges WHERE STRFTIME('%Y', Date) = '2011' AND Name = 'Supporter'"
+        },
+        "self_reflexion": {
+            "result": 1,
+            "error": "--",
+            "Question": "How many users are awarded with supporter badge during year 2011?",
+            "Evidence": "\"Supporter\" is the Name of badge; in year 2011 refers to year(Date) = 2011",
+            "pred_sql": "SELECT\n  COUNT(DISTINCT UserId)\nFROM badges\nWHERE\n  Name = 'Supporter' AND STRFTIME('%Y', Date) = '2011';",
+            "gold_sql": "SELECT COUNT(Id) FROM badges WHERE STRFTIME('%Y', Date) = '2011' AND Name = 'Supporter'"
+        },
+        "status": "success"
+    }
+]

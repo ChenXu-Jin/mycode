@@ -1,0 +1,127 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "superheroes",
+            "height between 150 to 180",
+            "percentage",
+            "heroes",
+            "published by Marvel Comics",
+            "Marvel Comics",
+            "height_cm BETWEEN 150 AND 180",
+            "publisher_id = 13",
+            "calculation",
+            "MULTIPLY",
+            "DIVIDE",
+            "SUM",
+            "COUNT",
+            "100"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "alignment": [
+                "id",
+                "alignment"
+            ],
+            "attribute": [
+                "id",
+                "attribute_name"
+            ],
+            "colour": [
+                "id",
+                "colour"
+            ],
+            "gender": [
+                "id",
+                "gender"
+            ],
+            "publisher": [
+                "id",
+                "publisher_name"
+            ],
+            "race": [
+                "id",
+                "race"
+            ],
+            "superhero": [
+                "id",
+                "superhero_name",
+                "full_name",
+                "gender_id",
+                "eye_colour_id",
+                "hair_colour_id",
+                "skin_colour_id",
+                "race_id",
+                "publisher_id",
+                "alignment_id",
+                "height_cm",
+                "weight_kg",
+                "heightcm",
+                "publisherid"
+            ],
+            "hero_attribute": [
+                "hero_id",
+                "attribute_id",
+                "attribute_value"
+            ],
+            "superpower": [
+                "id",
+                "power_name"
+            ],
+            "hero_power": [
+                "hero_id",
+                "power_id"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "superhero": [
+                "publisher_id",
+                "height_cm",
+                "id"
+            ],
+            "publisher": [
+                "id",
+                "publisher_name"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "The question asks for the percentage of superheroes with height between 150cm and 180cm that are published by Marvel Comics. I need to join the superhero table with the publisher table on publisher_id. I will filter for superheroes with height between 150 and 180. I will calculate the total number of superheroes within the specified height range and the number of those published by Marvel.  Then, compute the percentage and express it as a decimal.",
+        "SQL": "SELECT CAST(SUM(CASE WHEN T1.publisher_id = (SELECT id FROM publisher WHERE publisher_name = 'Marvel Comics') THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.id) FROM superhero AS T1 WHERE T1.height_cm BETWEEN 150 AND 180",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT CAST(SUM(CASE WHEN T1.publisher_id = (SELECT id FROM publisher WHERE publisher_name = 'Marvel Comics') THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.id) FROM superhero AS T1 WHERE T1.height_cm BETWEEN 150 AND 180",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 1,
+            "error": "--",
+            "Question": "In superheroes with height between 150 to 180, what is the percentage of heroes published by Marvel Comics?",
+            "Evidence": "height between 150 to 180 refers to height_cm BETWEEN 150 AND 180; heroes published by Marvel Comics refers to publisher_id = 13; calculation = MULTIPLY(DIVIDE(SUM(publisher.id = 13)), COUNT(publisher.id), 100)",
+            "pred_sql": "SELECT CAST(SUM(CASE WHEN T1.publisher_id = (SELECT id FROM publisher WHERE publisher_name = 'Marvel Comics') THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.id) FROM superhero AS T1 WHERE T1.height_cm BETWEEN 150 AND 180",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T2.publisher_name = 'Marvel Comics' THEN 1 ELSE NULL END) AS REAL) * 100 / COUNT(T1.id) FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id WHERE T1.height_cm BETWEEN 150 AND 180"
+        },
+        "self_reflexion": {
+            "result": 1,
+            "error": "--",
+            "Question": "In superheroes with height between 150 to 180, what is the percentage of heroes published by Marvel Comics?",
+            "Evidence": "height between 150 to 180 refers to height_cm BETWEEN 150 AND 180; heroes published by Marvel Comics refers to publisher_id = 13; calculation = MULTIPLY(DIVIDE(SUM(publisher.id = 13)), COUNT(publisher.id), 100)",
+            "pred_sql": "SELECT CAST(SUM(CASE WHEN T1.publisher_id = (SELECT id FROM publisher WHERE publisher_name = 'Marvel Comics') THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.id) FROM superhero AS T1 WHERE T1.height_cm BETWEEN 150 AND 180",
+            "gold_sql": "SELECT CAST(COUNT(CASE WHEN T2.publisher_name = 'Marvel Comics' THEN 1 ELSE NULL END) AS REAL) * 100 / COUNT(T1.id) FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id WHERE T1.height_cm BETWEEN 150 AND 180"
+        },
+        "status": "success"
+    }
+]

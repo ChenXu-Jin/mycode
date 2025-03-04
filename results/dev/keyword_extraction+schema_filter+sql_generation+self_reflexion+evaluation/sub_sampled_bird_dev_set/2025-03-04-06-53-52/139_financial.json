@@ -1,0 +1,135 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "high-level credit cards",
+            "disponent",
+            "type of disposition",
+            "gold type"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "account": [
+                "account_id",
+                "district_id",
+                "frequency",
+                "date"
+            ],
+            "card": [
+                "card_id",
+                "disp_id",
+                "type",
+                "issued"
+            ],
+            "client": [
+                "client_id",
+                "gender",
+                "birth_date",
+                "district_id"
+            ],
+            "disp": [
+                "disp_id",
+                "client_id",
+                "account_id",
+                "type"
+            ],
+            "district": [
+                "district_id",
+                "A2",
+                "A3",
+                "A4",
+                "A5",
+                "A6",
+                "A7",
+                "A8",
+                "A9",
+                "A10",
+                "A11",
+                "A12",
+                "A13",
+                "A14",
+                "A15",
+                "A16"
+            ],
+            "loan": [
+                "loan_id",
+                "account_id",
+                "date",
+                "amount",
+                "duration",
+                "payments",
+                "status"
+            ],
+            "order": [
+                "order_id",
+                "account_id",
+                "bank_to",
+                "account_to",
+                "amount",
+                "k_symbol"
+            ],
+            "trans": [
+                "trans_id",
+                "account_id",
+                "date",
+                "type",
+                "operation",
+                "amount",
+                "balance",
+                "k_symbol",
+                "bank",
+                "account"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "card": [
+                "card_id",
+                "disp_id",
+                "type"
+            ],
+            "disp": [
+                "disp_id",
+                "type"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "The question asks for the number of high-level credit cards (gold type) that have 'disponent' type of disposition. \n\nWe need to join the `card` table and the `disp` table on `disp_id`. Filter the `card` table by `type` = 'gold' and the `disp` table by `type` = 'disponent'. Then count the distinct `card_id` to avoid counting duplicates. Also, I will use table aliases to make the query easier to read.",
+        "SQL": "SELECT count(DISTINCT T1.card_id) FROM card AS T1 INNER JOIN disp AS T2 ON T1.disp_id = T2.disp_id WHERE T1.type = 'gold' AND T2.type = 'disponent'",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT count(DISTINCT T1.card_id) FROM card AS T1 INNER JOIN disp AS T2 ON T1.disp_id = T2.disp_id WHERE T1.type = 'gold' AND T2.type = 'disponent'",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 1,
+            "error": "--",
+            "Question": "How many high-level credit cards have \"disponent\" type of disposition?",
+            "Evidence": "High-level credit cards refers to the cards with the gold type.",
+            "pred_sql": "SELECT count(DISTINCT T1.card_id) FROM card AS T1 INNER JOIN disp AS T2 ON T1.disp_id = T2.disp_id WHERE T1.type = 'gold' AND T2.type = 'disponent'",
+            "gold_sql": "SELECT COUNT(T1.card_id) FROM card AS T1 INNER JOIN disp AS T2 ON T1.disp_id = T2.disp_id WHERE T1.type = 'gold' AND T2.type = 'DISPONENT'"
+        },
+        "self_reflexion": {
+            "result": 1,
+            "error": "--",
+            "Question": "How many high-level credit cards have \"disponent\" type of disposition?",
+            "Evidence": "High-level credit cards refers to the cards with the gold type.",
+            "pred_sql": "SELECT count(DISTINCT T1.card_id) FROM card AS T1 INNER JOIN disp AS T2 ON T1.disp_id = T2.disp_id WHERE T1.type = 'gold' AND T2.type = 'disponent'",
+            "gold_sql": "SELECT COUNT(T1.card_id) FROM card AS T1 INNER JOIN disp AS T2 ON T1.disp_id = T2.disp_id WHERE T1.type = 'gold' AND T2.type = 'DISPONENT'"
+        },
+        "status": "success"
+    }
+]

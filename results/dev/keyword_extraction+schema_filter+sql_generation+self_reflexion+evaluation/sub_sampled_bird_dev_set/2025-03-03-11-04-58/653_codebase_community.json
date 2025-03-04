@@ -1,0 +1,152 @@
+[
+    {
+        "node_type": "keyword_extraction",
+        "keywords": [
+            "owner's display name",
+            "most popular post",
+            "ViewCount",
+            "higher view count",
+            "popularity",
+            "MAX(ViewCount)"
+        ],
+        "status": "success"
+    },
+    {
+        "node_type": "schema_filter",
+        "tentative_schema": {
+            "badges": [
+                "Id",
+                "UserId",
+                "Name",
+                "Date"
+            ],
+            "comments": [
+                "Id",
+                "PostId",
+                "Score",
+                "Text",
+                "CreationDate",
+                "UserId",
+                "UserDisplayName"
+            ],
+            "postHistory": [
+                "Id",
+                "PostHistoryTypeId",
+                "PostId",
+                "RevisionGUID",
+                "CreationDate",
+                "UserId",
+                "Text",
+                "Comment",
+                "UserDisplayName"
+            ],
+            "postLinks": [
+                "Id",
+                "CreationDate",
+                "PostId",
+                "RelatedPostId",
+                "LinkTypeId"
+            ],
+            "posts": [
+                "Id",
+                "PostTypeId",
+                "AcceptedAnswerId",
+                "CreaionDate",
+                "Score",
+                "ViewCount",
+                "Body",
+                "OwnerUserId",
+                "LasActivityDate",
+                "Title",
+                "Tags",
+                "AnswerCount",
+                "CommentCount",
+                "FavoriteCount",
+                "LastEditorUserId",
+                "LastEditDate",
+                "CommunityOwnedDate",
+                "ParentId",
+                "ClosedDate",
+                "OwnerDisplayName",
+                "LastEditorDisplayName"
+            ],
+            "tags": [
+                "Id",
+                "TagName",
+                "Count",
+                "ExcerptPostId",
+                "WikiPostId"
+            ],
+            "users": [
+                "Id",
+                "Reputation",
+                "CreationDate",
+                "DisplayName",
+                "LastAccessDate",
+                "WebsiteUrl",
+                "Location",
+                "AboutMe",
+                "Views",
+                "UpVotes",
+                "DownVotes",
+                "AccountId",
+                "Age",
+                "ProfileImageUrl"
+            ],
+            "votes": [
+                "Id",
+                "PostId",
+                "VoteTypeId",
+                "CreationDate",
+                "UserId",
+                "BountyAmount"
+            ]
+        },
+        "missing_table_status": "success",
+        "missing_tables": [],
+        "missing_column_status": "success",
+        "missing_columns": [],
+        "correct_columns": {
+            "posts": [
+                "owneruserid",
+                "viewcount"
+            ],
+            "users": [
+                "displayname",
+                "id"
+            ]
+        },
+        "status": "success"
+    },
+    {
+        "node_type": "sql_generation",
+        "chain_of_thought_reasoning": "The question asks for the owner display name of the most popular post. Popularity is defined by view count. Thus, I need to find the maximum view count and then find the corresponding owner display name. I will first select the OwnerDisplayName from the Posts table and order it by the ViewCount in descending order, selecting the first row using LIMIT 1.",
+        "SQL": "SELECT\n  T1.OwnerDisplayName\nFROM posts AS T1\nORDER BY\n  T1.ViewCount DESC\nLIMIT 1;",
+        "status": "success"
+    },
+    {
+        "node_type": "self_reflexion",
+        "SQL": "SELECT\n  T2.DisplayName\nFROM posts AS T1\nINNER JOIN users AS T2\n  ON T1.OwnerUserId = T2.Id\nORDER BY\n  T1.ViewCount DESC\nLIMIT 1;",
+        "status": "success"
+    },
+    {
+        "node_type": "evaluation",
+        "sql_generation": {
+            "result": 0,
+            "error": "incorrect answer",
+            "Question": "What is the owner's display name of the most popular post?",
+            "Evidence": "Higher view count means the post has higher popularity; the most popular post refers to MAX(ViewCount);",
+            "pred_sql": "SELECT\n  T1.OwnerDisplayName\nFROM posts AS T1\nORDER BY\n  T1.ViewCount DESC\nLIMIT 1;",
+            "gold_sql": "SELECT DisplayName FROM users WHERE Id = ( SELECT OwnerUserId FROM posts ORDER BY ViewCount DESC LIMIT 1 )"
+        },
+        "self_reflexion": {
+            "result": 1,
+            "error": "--",
+            "Question": "What is the owner's display name of the most popular post?",
+            "Evidence": "Higher view count means the post has higher popularity; the most popular post refers to MAX(ViewCount);",
+            "pred_sql": "SELECT\n  T2.DisplayName\nFROM posts AS T1\nINNER JOIN users AS T2\n  ON T1.OwnerUserId = T2.Id\nORDER BY\n  T1.ViewCount DESC\nLIMIT 1;",
+            "gold_sql": "SELECT DisplayName FROM users WHERE Id = ( SELECT OwnerUserId FROM posts ORDER BY ViewCount DESC LIMIT 1 )"
+        },
+        "status": "success"
+    }
+]
