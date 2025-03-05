@@ -11,6 +11,7 @@ engine2='gpt-3.5-turbo'
 engine3='gpt-4o-mini'
 engine4='gpt-4-turbo'
 engine5='gemini-2.0-flash'
+engine6='gemini-2.0-pro-exp-02-05'
 
 schema_filter_mode="ask_model"
 ### pipeline nodes setup ###
@@ -24,19 +25,19 @@ pipeline_setup='{
         "mode": "'${schema_filter_mode}'"
     },
     "sql_generation": {
-        "engine": "'${engine5}'",
+        "engine": "'${engine6}'",
         "temperature": 0,
         "sampling_count": 1,
         "base_uri": ""
     },
     "self_reflexion": {
-        "engine": "'${engine5}'",
+        "engine": "'${engine6}'",
         "temperature": 0,
         "sampling_count": 1,
         "base_uri": ""
     },
     "feedback_summarize": {
-        "engine": "'${engine5}'",
+        "engine": "'${engine6}'",
         "temperature": 0,
         "base_uri": ""
     }
