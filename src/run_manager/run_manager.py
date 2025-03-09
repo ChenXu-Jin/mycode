@@ -13,7 +13,7 @@ from pipeline.workflow_builder import build_pipeline
 from typing import Dict, List, Any, Tuple
 
 class RunManager:
-    RESULT_ROOT_PATH = "results"
+    RESULT_ROOT_PATH = "/opt/data/private/results"
     
     def __init__(self, args: Any):
         self.args = args

@@ -1,5 +1,5 @@
 data_mode='dev'
-data_path='/root/data/dev/dev.json'
+data_path='/root/data/dev/small_dev_set.json'
 
 #all nodes: keyword_extraction schema_filter sql_generation self_reflexion evaluation
 pipeline_nodes='keyword_extraction+schema_filter+sql_generation+self_reflexion+evaluation'
@@ -40,7 +40,7 @@ pipeline_setup='{
         "engine": "'${engine6}'",
         "temperature": 0,
         "base_uri": ""
-    }
+    }d
 }'
 
 echo "run start"

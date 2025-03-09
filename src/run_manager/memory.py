@@ -12,6 +12,19 @@ NORMAL_MEMORY = '''
 5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
 '''
 
+DYNAMIC_MEMORY = '''
+6. Check if the requested column exists in the initially selected table; if not, identify the correct table containing the column and perform a JOIN operation accordingly.
+7. Ensure correct subquery usage for finding MIN/MAX values, using a separate JOINed subquery instead of a WHERE clause comparison with a potentially misordered subquery.
+8. Verify the correctness of the WHERE clause conditions, especially when referencing lookup tables (like 'alignment'). Ensure you're filtering on the intended ID and not comparing the descriptive text, unless that's the explicit goal.
+9. Verify the join conditions and the direct mapping of conditions in the WHERE clause to the corresponding IDs instead of joining entire tables unnecessarily, especially when dealing with simple categorical relationships.
+10. Handle potential NULL values in aggregate functions like AVG() using COALESCE() or similar functions to return a default value (e.g., 0) instead of NULL when no rows match the criteria or all aggregated values are NULL.
+11. Verify table relationships and necessary joins, and confirm the correct fields and data types for comparisons (especially time/duration formats) and confirm whether wildcard characters are needed.
+12. Verify join conditions and result filtering, especially when finding min/max values (like last place) within a group, considering using subqueries or CTEs for clarity and correctness instead of self-joins with potentially ambiguous filtering in the WHERE clause. Ensure proper handling of 'finished' status using the status table.
+13. Verify join conditions and subquery logic to ensure they accurately reflect the relationships between tables and correctly filter for the desired data (e.g., the champion is determined by the final race's standings, not just any race in the year).
+14. Verify the correct table containing the target data (e.g., lap times) and the appropriate column name for filtering.
+15. Ensure the query correctly handles finding minimum or maximum values by using a subquery in the WHERE clause instead of relying solely on ORDER BY and LIMIT, especially when needing to filter based on the extreme value within the same table.
+'''
+
 class Memory:
     _instance = None
     _lock = Lock()
@@ -41,6 +54,11 @@ class Memory:
         for line in lines:
             content = line.split(' ', 1)[1]
             init_memory['static'].append(content)
+        
+        lines1 = DYNAMIC_MEMORY.strip().split('\n')
+        for line in lines1:
+            content = line.split(' ', 1)[1]
+            init_memory['dynamic'].append(content)
         
         return init_memory
 
