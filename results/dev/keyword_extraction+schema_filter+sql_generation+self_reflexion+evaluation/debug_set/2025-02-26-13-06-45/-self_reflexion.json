@@ -1,3 +1,0 @@
-{
-    "657": "WITH MaxBounty AS (SELECT UserId, MAX(BountyAmount) AS MaxBountyAmount FROM votes WHERE VoteTypeId = 8 GROUP BY UserId) SELECT U.DisplayName, U.WebsiteUrl FROM users AS U JOIN MaxBounty MB ON U.Id = MB.UserId;"
-}

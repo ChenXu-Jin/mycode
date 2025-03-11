@@ -13,16 +13,16 @@ NORMAL_MEMORY = '''
 '''
 
 DYNAMIC_MEMORY = '''
-6. Check if the requested column exists in the initially selected table; if not, identify the correct table containing the column and perform a JOIN operation accordingly.
-7. Ensure correct subquery usage for finding MIN/MAX values, using a separate JOINed subquery instead of a WHERE clause comparison with a potentially misordered subquery.
-8. Verify the correctness of the WHERE clause conditions, especially when referencing lookup tables (like 'alignment'). Ensure you're filtering on the intended ID and not comparing the descriptive text, unless that's the explicit goal.
-9. Verify the join conditions and the direct mapping of conditions in the WHERE clause to the corresponding IDs instead of joining entire tables unnecessarily, especially when dealing with simple categorical relationships.
-10. Handle potential NULL values in aggregate functions like AVG() using COALESCE() or similar functions to return a default value (e.g., 0) instead of NULL when no rows match the criteria or all aggregated values are NULL.
-11. Verify table relationships and necessary joins, and confirm the correct fields and data types for comparisons (especially time/duration formats) and confirm whether wildcard characters are needed.
-12. Verify join conditions and result filtering, especially when finding min/max values (like last place) within a group, considering using subqueries or CTEs for clarity and correctness instead of self-joins with potentially ambiguous filtering in the WHERE clause. Ensure proper handling of 'finished' status using the status table.
-13. Verify join conditions and subquery logic to ensure they accurately reflect the relationships between tables and correctly filter for the desired data (e.g., the champion is determined by the final race's standings, not just any race in the year).
-14. Verify the correct table containing the target data (e.g., lap times) and the appropriate column name for filtering.
-15. Ensure the query correctly handles finding minimum or maximum values by using a subquery in the WHERE clause instead of relying solely on ORDER BY and LIMIT, especially when needing to filter based on the extreme value within the same table.
+6. Verify string literals and operators in the WHERE clause, especially when dealing with specific values like bond types or labels. Ensure the correct operators (e.g., '=') and string values (e.g., '=' instead of ' =') are used.
+7. Verify join conditions and table relationships to avoid unnecessary or incorrect joins. Specifically, check if all joined tables are essential for filtering or retrieving the required data and ensure join conditions accurately reflect the intended relationships between tables.
+8. Verify the case-sensitivity of string comparisons, especially for column values (e.g., 'O' vs. 'o'), by reviewing database and table schema definitions or documentation.
+9. Ensure case-insensitive comparisons for string literals in WHERE clauses, especially for column values like 'format' that might have variations in capitalization.
+10. Ensure all requested columns (including those related to conditions like 'missing or degraded properties') are included in the SELECT statement, not just in the WHERE clause.
+11. Verify the correct table and column names that store the requested information, especially when joining tables. Ensure the join condition and selected columns align with the question's intent.
+12. Verify the join type (INNER vs. LEFT) needed based on whether all rows from the primary table (sets) are required, even if there's no matching row in the related table (set_translations).
+13. Verify the appropriate JOIN type (INNER, LEFT, RIGHT, FULL) based on whether all rows from the primary table ('sets' in this case) need to be returned regardless of matching rows in the related table ('set_translations').
+14. Verify the table and column used in the WHERE clause and JOIN conditions match the actual filtering criteria of the question, paying close attention to avoid mistakenly using set name when card name, or joining an unnecessary table.
+15. Verify that all requested columns in the question are included in the SELECT statement, not just the ones used for filtering or joining.
 '''
 
 class Memory:

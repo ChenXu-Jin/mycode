@@ -17,7 +17,7 @@ schema_filter_mode="ask_model"
 ### pipeline nodes setup ###
 pipeline_setup='{
     "keyword_extraction": {
-        "engine": "'${engine2}'",
+        "engine": "'${engine3}'",
         "temperature": 0.2,
         "base_uri": ""
     },
@@ -40,7 +40,7 @@ pipeline_setup='{
         "engine": "'${engine6}'",
         "temperature": 0,
         "base_uri": ""
-    }d
+    }
 }'
 
 echo "run start"
