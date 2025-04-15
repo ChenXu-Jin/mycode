@@ -25,7 +25,11 @@ def self_reflexion(task: Any, tentative_schema: Dict[str, Any], execution_histor
     """
     logging.info(f"LLM self reflexion start for question: {task.question_id}")
 
-    first_time_sql = get_last_node_result(execution_history, "sql_generation")["SQL"]
+    if task.previous_sql is not None:
+        first_time_sql = task.previous_sql
+    else:
+        first_time_sql = get_last_node_result(execution_history, "sql_generation")["SQL"]
+
     if first_time_sql is None:
         raise ValueError(f"Initial SQL generation is incomplete for task {task.question_id}. Self-reflexion cannot begin.")
 
@@ -118,6 +122,13 @@ class Evaluator:
     def evaluate(self, time_out: int = 30) -> Dict[str, Any]:
         logging.info(f"Evaluator start working for task: {self.task.question_id}")
         evaluate_result = {}
+
+        if self.task.previous_sql is not None and self.sql == self.task.previous_sql:
+            sql = self.task.previous_sql
+            if sql == "SELECT * FROM table" or sql == "error":
+                evaluate_result["judgment"] = "error"
+                evaluate_result["message"] = "Previous experiments were unable to generate valid SQL statements"
+            return evaluate_result
 
         try:
             execute_result = func_timeout(time_out, self.execute_current_sql)

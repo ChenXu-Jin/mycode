@@ -8,10 +8,16 @@ from typing import Dict, List, Any
 def evaluation(task: Any, tentative_schema: Dict[str, Any], execution_history: Dict[str, Any]) -> Dict[str, Any]:
     logging.info("Starting evaluation") 
     gold_sql = task.SQL
-    pred_and_revision_sql = {
-        "sql_generation": get_last_node_result(execution_history, "sql_generation"),
-        "self_reflexion": get_last_node_result(execution_history, "self_reflexion")
-    }
+    if task.previous_sql is not None:
+        pred_and_revision_sql = {
+            "previous_result": {"node_type": "previous_result", "SQL": task.previous_sql, "status": "success"},
+            "self_reflexion": get_last_node_result(execution_history, "self_reflexion")
+        }
+    else:
+        pred_and_revision_sql = {
+            "sql_generation": get_last_node_result(execution_history, "sql_generation"),
+            "self_reflexion": get_last_node_result(execution_history, "self_reflexion")
+        }
     result = {}
 
     for node_name, node_result in pred_and_revision_sql.items():
@@ -21,7 +27,19 @@ def evaluation(task: Any, tentative_schema: Dict[str, Any], execution_history: D
         try:
             if node_result["status"] == "success":
                 pred_sql = node_result["SQL"]
-                response = DatabaseManager().evaluate_sql(pred_sql, gold_sql)
+                if node_name == "previous_result":
+                    if pred_sql == "SELECT * FROM table":
+                        response = {
+                            "result": 0,
+                            "error": "incorrect SQL"
+                        }
+                    elif pred_sql == "error":
+                        response = {
+                            "result": 0,
+                            "error": "Previous expreiment error"
+                        }
+                else:
+                    response = DatabaseManager().evaluate_sql(pred_sql, gold_sql)
 
                 evaluation_result.update({
                     "result": response["result"],

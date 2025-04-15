@@ -47,7 +47,7 @@ class RunManager:
         for i, data in enumerate(dataset):
             if "question_id" not in data:
                 data = {"question_id": i, **data}
-            task = Task(data)
+            task = Task(data, self.args.is_experiments)
             self.tasks.append(task)
         self.total_number_of_tasks = len(self.tasks)
         print(f"Total number of tasks: {self.total_number_of_tasks}")

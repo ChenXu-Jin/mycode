@@ -1,8 +1,9 @@
 data_mode='dev'
 data_path='/root/data/dev/small_dev_set.json'
+is_experiments='True'
 
 #all nodes: keyword_extraction schema_filter sql_generation self_reflexion evaluation
-pipeline_nodes='keyword_extraction+schema_filter+sql_generation+self_reflexion+evaluation'
+pipeline_nodes='keyword_extraction+schema_filter+self_reflexion+evaluation'
 max_memory_count=10
 
 ########## engines ##########
@@ -44,12 +45,19 @@ pipeline_setup='{
 }'
 
 echo "run start"
-# source ~/miniconda3/etc/profile.d/conda.sh
-# conda activate mycode
-# python3 -m debugpy --listen 5678 --wait-for-client ./src/main.py \
-#   --data_mode ${data_mode} \
-#   --data_path ${data_path} \
-#   --pipeline_nodes ${pipeline_nodes} \
-#   --pipeline_setup "$pipeline_setup" \
-#   --max_memory_count ${max_memory_count}
-python -u ./src/main.py --data_mode ${data_mode} --data_path ${data_path} --pipeline_nodes ${pipeline_nodes} --pipeline_setup "$pipeline_setup" --max_memory_count ${max_memory_count}
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate mycode
+python3 -m debugpy --listen 5678 --wait-for-client ./src/main.py \
+  --data_mode ${data_mode} \
+  --data_path ${data_path} \
+  --pipeline_nodes ${pipeline_nodes} \
+  --pipeline_setup "$pipeline_setup" \
+  --max_memory_count ${max_memory_count} \
+  --is_experiments ${is_experiments}
+# python -u ./src/main.py \
+#     --data_mode ${data_mode} \
+#     --data_path ${data_path} \
+#     --pipeline_nodes ${pipeline_nodes} \
+#     --pipeline_setup "$pipeline_setup" \
+#     --max_memory_count ${max_memory_count} \
+#     --is_experiments ${is_experiments}

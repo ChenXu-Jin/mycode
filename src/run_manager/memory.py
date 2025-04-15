@@ -44,7 +44,7 @@ class Memory:
             content = line.split(' ', 1)[1]
             init_memory['static'].append(content)
         
-        if DYNAMIC_MEMORY is not None:
+        if DYNAMIC_MEMORY != '''''':
             lines1 = DYNAMIC_MEMORY.strip().split('\n')
             for line in lines1:
                 content = line.split(' ', 1)[1]
