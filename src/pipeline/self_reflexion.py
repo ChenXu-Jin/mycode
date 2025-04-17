@@ -128,7 +128,7 @@ class Evaluator:
             if sql == "SELECT * FROM table" or sql == "error":
                 evaluate_result["judgment"] = "error"
                 evaluate_result["message"] = "Previous experiments were unable to generate valid SQL statements"
-            return evaluate_result
+                return evaluate_result
 
         try:
             execute_result = func_timeout(time_out, self.execute_current_sql)

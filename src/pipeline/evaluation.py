@@ -38,6 +38,8 @@ def evaluation(task: Any, tentative_schema: Dict[str, Any], execution_history: D
                             "result": 0,
                             "error": "Previous expreiment error"
                         }
+                    else:
+                        response = DatabaseManager().evaluate_sql(pred_sql, gold_sql)
                 else:
                     response = DatabaseManager().evaluate_sql(pred_sql, gold_sql)
 
