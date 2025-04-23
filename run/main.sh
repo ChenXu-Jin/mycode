@@ -1,9 +1,9 @@
 data_mode='dev'
-data_path='/root/data/dev/DIN_SQL.json'
+data_path='/root/data/dev/dev.json'
 is_experiments='True'
 
 #all nodes: keyword_extraction schema_filter sql_generation self_reflexion evaluation
-pipeline_nodes='keyword_extraction+schema_filter+self_reflexion+evaluation'
+pipeline_nodes='keyword_extraction+schema_filter+sql_generation+self_reflexion+evaluation'
 max_memory_count=10
 
 ########## engines ##########
