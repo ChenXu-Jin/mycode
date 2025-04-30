@@ -12,7 +12,18 @@ NORMAL_MEMORY = '''
 5. Avoid column concatenation: Do not use || to concatenate columns in SELECT; output the columns as they are.
 '''
 
-DYNAMIC_MEMORY = ''''''
+DYNAMIC_MEMORY = '''
+1. Verify if the query requires both aggregate calculations (e.g., AVG, SUM, COUNT) across a set of rows and details from individual rows within that set. If so, calculate the aggregate value independently (e.g., using a subquery or window function) rather than mixing it directly with the selection of individual row columns in the main SELECT clause.
+2. Confirm if conditions involving MIN/MAX require all tied records; use aggregate functions (MIN/MAX) for comparison instead of `ORDER BY ... LIMIT 1` to include all ties.
+3. Confirm that table joins and filter conditions accurately map the entities (e.g., posts, users, votes) and constraints (e.g., owner name, vote count) described in the question.
+4. Verify the database schema to confirm how entities (e.g., posts, users, tags, comments) are related and which specific columns store the required information before constructing joins and selecting columns.
+5. When performing arithmetic operations on aggregate function results (e.g., SUM, AVG), check if the aggregate function could return NULL (e.g., if no rows match the condition). If so, use COALESCE or a similar function to replace potential NULLs with a default value (like 0) to ensure the arithmetic operation yields a numerical result.
+6. Verify how conditions like 'no value' or specific categories (e.g., 'no eye color') are represented in the database schema or data (e.g., check if it's represented by NULL or a specific ID/placeholder value).
+7. Ensure string comparisons in WHERE clauses are case-insensitive, using functions like LOWER() or UPPER() when comparing against literal values or potentially mixed-case data.
+8. Verify if the condition in the question should filter rows before aggregation (WHERE clause) or define the value/group within the aggregation function (e.g., CASE inside AVG/COUNT).
+9. Verify that the column specified in the `WHERE` clause condition exists in the correct table, and use `JOIN` if the condition column and the selected columns are in different tables.
+10. Ensure that values extracted from the question (e.g., names, locations) are correctly mapped to the actual data values present in the relevant database columns.
+'''
 
 class Memory:
     _instance = None
