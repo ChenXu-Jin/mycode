@@ -27,7 +27,7 @@ pipeline_setup='{
         "mode": "'${schema_filter_mode}'"
     },
     "sql_generation": {
-        "engine": "'${engine6}'",
+        "engine": "'${engine7}'",
         "temperature": 0,
         "sampling_count": 1,
         "base_uri": ""
