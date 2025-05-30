@@ -1,5 +1,5 @@
 data_mode='dev'
-data_path='/root/data/dev/ablation.json'
+data_path='/root/data/dev/TA_SQL.json'
 is_experiments='True'
 
 #all nodes: keyword_extraction schema_filter sql_generation self_reflexion evaluation

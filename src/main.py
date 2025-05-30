@@ -25,7 +25,7 @@ def load_dataset(data_path: str) -> List[Dict[str, Any]]:
     return dataset
 
 def load_experiments_dataset(data_path: str) -> List[Dict[str, Any]]:
-    experiments_data_path = './results/ablation.json'
+    experiments_data_path = './results/previous_results_TASQL.json'
 
     with open(data_path, 'r') as file:
         dataset = json.load(file)
